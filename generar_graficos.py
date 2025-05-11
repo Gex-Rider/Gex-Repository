@@ -92,30 +92,125 @@ for carpeta in carpetas:
             plot_bgcolor="black",
             paper_bgcolor="black",
             font=dict(color="white"),
-            height=800,
+            autosize=True
         )
 
-        fig.write_html(nombre_html, include_plotlyjs="cdn")
+        fig.write_html(nombre_html, 
+              include_plotlyjs="cdn",
+              full_html=True,
+              auto_open=False)
         total_generados += 1
 
-# Generar índice HTML
+# Generar índice HTML con estructura tabular
 html_index = """<html>
-<head><title>GEX Dashboard - Índice</title></head>
-<body style="background-color: black; color: white; font-family: Arial">
+<head>
+    <title>GEX Dashboard - Índice</title>
+    <style>
+        body {
+            background-color: black; 
+            color: white; 
+            font-family: Arial;
+            margin: 20px;
+        }
+        h1 {
+            color: cyan;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            text-align: left;
+        }
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #444;
+            vertical-align: top;
+        }
+        tr:hover {
+            background-color: #222;
+        }
+        a {
+            color: cyan;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .file-list {
+            list-style-type: none;
+            padding-left: 5px;
+        }
+        .file-list li {
+            margin-bottom: 5px;
+        }
+        .date-header {
+            color: orange;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
 <h1>GEX Dashboards por Día</h1>
-<ul>
+<table>
+    <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>GEX History</th>
+            <th>Data Flow</th>
+        </tr>
+    </thead>
+    <tbody>
 """
 
 for carpeta in reversed(carpetas):
-    archivos_html = sorted(glob.glob(f"{carpeta}/*_gex_history.html"))
-    for archivo in archivos_html:
+    # Archivos GEX History
+    archivos_gex = sorted(glob.glob(f"{carpeta}/*gex_history.html"))
+    # Archivos Data Flow
+    archivos_flow = sorted(glob.glob(f"{carpeta}/*_data_flow.html"))
+    
+    html_index += f"""
+    <tr>
+        <td class="date-header">{carpeta}</td>
+        <td>
+            <ul class="file-list">"""
+    
+    for archivo in archivos_gex:
         nombre = os.path.basename(archivo).replace("_gex_history.html", "").upper()
-        html_index += f'<li><a href="{archivo}" style="color: cyan;">{carpeta} - {nombre}</a></li>\n'
+        html_index += f'<li><a href="{archivo}">{nombre}</a></li>'
+    
+    html_index += """
+            </ul>
+        </td>
+        <td>
+            <ul class="file-list">"""
+    
+    for archivo in archivos_flow:
+        nombre = os.path.basename(archivo).replace("_data_flow.html", "").upper()
+        html_index += f'<li><a href="{archivo}">{nombre}</a></li>'
+    
+    html_index += """
+            </ul>
+        </td>
+    </tr>"""
 
-html_index += "</ul></body></html>"
+html_index += """
+    </tbody>
+</table>
+<p style="color: gray; font-size: 12px; margin-top: 20px;">
+Nota: Los gráficos incluyen un botón para alternar entre vista acumulada y directa<br>
+GEX_BY_OI y GEX_BY_VOLUME solo disponibles en modo acumulado
+</p>
+</body></html>"""
 
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(html_index)
 
-print(f"? {total_generados} nuevos gráficos generados.")
-print("? Índice actualizado: index.html")
+print(f"\n✔ {total_generados} nuevos gráficos generados")
+print(f"✔ Índice actualizado: index_dataflow.html")
