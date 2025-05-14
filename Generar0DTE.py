@@ -141,14 +141,21 @@ def graficar_archivo(ruta_csv):
     with open(nombre_html, "w", encoding="utf-8") as f:
         f.write(html_temp)
  
-    # Agrega archivos específicos
+        # Datos de autenticación
+    usuario = "Gex-Rider"
+    token = "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"
+    repositorio = "Gex-Repository"
+
+        # URL remota con token embebido
+    remote_url = f"https://{usuario}:{token}@github.com/{usuario}/{repositorio}.git"
+
+        # Configurar remoto con token
+    subprocess.run(["git", "remote", "set-url", "origin", remote_url])
+               # Agregar cambios y hacer push
     subprocess.run("git add Generar0DTE.py *.html", shell=True)
-
-    # Commit con mensaje
     subprocess.run('git commit -m "Actualizar script y archivos HTML generados"', shell=True)
+    subprocess.run("git push origin main", shell=True)
 
-    # Push al repositorio
-    subprocess.run("git push", shell=True)
 
 class CSVHandler(FileSystemEventHandler):
     def on_modified(self, event):
