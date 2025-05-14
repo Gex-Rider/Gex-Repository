@@ -2,6 +2,9 @@
 import os
 import time
 import pandas as pd
+import matplotlib.pyplot as plt
+from datetime import datetime
+
 import plotly.graph_objects as go
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
@@ -23,7 +26,7 @@ estilos = {
     'MINVEX':      {'color': 'green',    'symbol': 'x',            'mode': 'markers'},
     'MAXDEX':      {'color': 'red',      'symbol': 'diamond',      'mode': 'markers'},
     'MINDEX':      {'color': 'green',    'symbol': 'diamond',      'mode': 'markers'},
-    'ZERO':        {'color': 'white',    'symbol': 'circle-open',  'mode': 'markers'},
+    'ZERO':        {'color': 'yellow',    'symbol': 'circle-open',  'mode': 'markers'},
     'MAXCP':       {'color': 'red',      'symbol': 'circle',       'mode': 'markers'},
     'MINCP':       {'color': 'green',    'symbol': 'circle',       'mode': 'markers'},
     'BAC':         {'color': 'cyan',     'symbol': 'triangle-down','mode': 'markers', 'size': 14},
@@ -45,8 +48,21 @@ def graficar_archivo(ruta_csv):
     nombre_html = os.path.join(carpeta_salida, f"{base}.html")
 
     try:
+        # Leer CSV usando un parser de fechas más flexible
         df = pd.read_csv(ruta_csv, header=None, names=columnas)
-        df['Time'] = pd.to_datetime(df['Time'], format="%Y-%m-%d %H:%M:%S")
+        
+        # Intentar convertir la columna Time a datetime con manejo de errores
+        try:
+            # Intentar el formato específico primero
+            df['Time'] = pd.to_datetime(df['Time'], format='%Y-%m-%d %H:%M:%S')
+        except ValueError:
+            # Si falla, intentar con formato inferido
+            try:
+                df['Time'] = pd.to_datetime(df['Time'], format='%Y-%m-%d')
+            except ValueError:
+                # Si todo falla, intentar con el formato más flexible
+                df['Time'] = pd.to_datetime(df['Time'], format='mixed')
+                
         df.set_index('Time', inplace=True)
 
         # df = df.between_time("08:30", "15:15")  # opcional
@@ -82,6 +98,7 @@ def graficar_archivo(ruta_csv):
         yaxis_title="Valor",
         plot_bgcolor="black",
         paper_bgcolor="black",
+        font=dict(color="white"),
         autosize=True,
         margin=dict(l=20, r=20, t=40, b=20),
         height=None,
@@ -140,16 +157,9 @@ def graficar_archivo(ruta_csv):
 
     with open(nombre_html, "w", encoding="utf-8") as f:
         f.write(html_temp)
- 
-   
-    # Agrega archivos específicos
-    subprocess.run("git add Generar0DTE.py *.html", shell=True)
 
-    # Commit con mensaje
-    subprocess.run('git commit -m "Actualizar script y archivos HTML generados"', shell=True)
+    print(f"✅ Gráfico generado: {nombre_html}")
 
-    # Push al repositorio
-    subprocess.run("git push", shell=True)
 
 class CSVHandler(FileSystemEventHandler):
     def on_modified(self, event):
@@ -157,9 +167,20 @@ class CSVHandler(FileSystemEventHandler):
             return
         nombre = os.path.basename(event.src_path).lower()
         if any(nombre.startswith(activo) and nombre.endswith("_gex_history.csv") for activo in activos):
+            print(f"📊 Procesando archivo: {event.src_path}")
             graficar_archivo(event.src_path)
 
+
 if __name__ == "__main__":
+    # Procesar archivos existentes al inicio
+    print(f"🔍 Buscando archivos existentes en: {carpeta_csv}")
+    for activo in activos:
+        csv_file = os.path.join(carpeta_csv, f"{activo}_gex_history.csv")
+        if os.path.exists(csv_file):
+            print(f"📊 Procesando archivo existente: {csv_file}")
+            graficar_archivo(csv_file)
+
+    # Configurar observador para cambios en archivos
     event_handler = CSVHandler()
     observer = Observer()
     observer.schedule(event_handler, path=carpeta_csv, recursive=False)
