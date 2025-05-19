@@ -94,11 +94,61 @@ for carpeta in carpetas:
             font=dict(color="white"),
             autosize=True
         )
+        html_temp = """<!DOCTYPE html>
+        <html>
+        <head>
+            <meta http-equiv="refresh" content="30">
+            <style>
+                html, body {
+                    margin: 0;
+                    padding: 0;
+                    height: 100%;
+                    background-color: black;
+                    overflow: hidden;
+                }
+                #chart {
+                    width: 100vw;
+                    height: 100vh;
+                }
+            </style>
+        </head>
+        <body>
+        <div id="chart">
+        """
+        html_temp += fig.to_html(full_html=False, include_plotlyjs='cdn', div_id='chart')
+        html_temp += "</div>"
 
-        fig.write_html(nombre_html, 
-              include_plotlyjs="cdn",
-              full_html=True,
-              auto_open=False)
+        html_temp += """
+        <script>
+            const STORAGE_KEY = 'plotly_visibility';
+
+            window.addEventListener('load', () => {
+                const gd = document.querySelector('.js-plotly-plot');
+                const visibility = JSON.parse(localStorage.getItem(STORAGE_KEY));
+                if (visibility && gd && gd.data) {
+                    Plotly.restyle(gd, 'visible', visibility);
+                }
+            });
+
+            window.addEventListener('DOMContentLoaded', () => {
+                const gd = document.querySelector('.js-plotly-plot');
+                if (!gd) return;
+
+                gd.on('plotly_legendclick', function(eventData) {
+                    const visibilities = gd.data.map(trace => trace.visible || true);
+                    const i = eventData.curveNumber;
+                    visibilities[i] = visibilities[i] === 'legendonly' ? true : 'legendonly';
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(visibilities));
+                });
+            });
+        </script>
+        </body></html>
+        """
+
+
+
+        with open(nombre_html, "w", encoding="utf-8") as f:f.write(html_temp)
+
         total_generados += 1
 
 # Generar índice HTML con estructura tabular
