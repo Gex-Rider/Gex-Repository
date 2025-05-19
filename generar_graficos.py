@@ -118,32 +118,56 @@ for carpeta in carpetas:
         html_temp += fig.to_html(full_html=False, include_plotlyjs='cdn', div_id='chart')
         html_temp += "</div>"
 
-        html_temp += """
+        html_temp += f"""
         <script>
             const STORAGE_KEY = 'plotly_visibility';
+            const RANGE_STORAGE_KEY = 'plotly_axis_ranges_{base}';
 
-            window.addEventListener('load', () => {
+            window.addEventListener('load', () => {{
                 const gd = document.querySelector('.js-plotly-plot');
                 const visibility = JSON.parse(localStorage.getItem(STORAGE_KEY));
-                if (visibility && gd && gd.data) {
-                    Plotly.restyle(gd, 'visible', visibility);
-                }
-            });
+                const savedLayout = JSON.parse(localStorage.getItem(RANGE_STORAGE_KEY));
 
-            window.addEventListener('DOMContentLoaded', () => {
+                // Restaurar visibilidad común
+                if (visibility && gd && gd.data) {{
+                    Plotly.restyle(gd, 'visible', visibility);
+                }}
+
+                // Restaurar rango de ejes específico de este activo
+                if (savedLayout && gd) {{
+                    Plotly.relayout(gd, savedLayout);
+                }}
+            }});
+
+            window.addEventListener('DOMContentLoaded', () => {{
                 const gd = document.querySelector('.js-plotly-plot');
                 if (!gd) return;
 
-                gd.on('plotly_legendclick', function(eventData) {
+                // Guardar visibilidad común
+                gd.on('plotly_legendclick', function(eventData) {{
                     const visibilities = gd.data.map(trace => trace.visible || true);
                     const i = eventData.curveNumber;
                     visibilities[i] = visibilities[i] === 'legendonly' ? true : 'legendonly';
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(visibilities));
-                });
-            });
+                }});
+
+                // Guardar rango de ejes específico de este activo
+                gd.on('plotly_relayout', function(eventData) {{
+                    const ranges = {{}};
+                    for (const key in eventData) {{
+                        if (key.includes('range')) {{
+                            ranges[key] = eventData[key];
+                        }}
+                    }}
+                    if (Object.keys(ranges).length > 0) {{
+                        localStorage.setItem(RANGE_STORAGE_KEY, JSON.stringify(ranges));
+                    }}
+                }});
+            }});
         </script>
         </body></html>
         """
+       
 
 
 
