@@ -41,7 +41,7 @@ estilos = {
 carpeta_csv = r"E:\GEX\Sync"
 
 # Ruta donde guardar los HTML (puede ser diferente si quieres)
-carpeta_salida = r"E:\GEX\Sync" #os.getcwd()
+carpeta_salida = r"E:\GEX\GitHub\Gex-Repository" #os.getcwd()
 
 def graficar_archivo(ruta_csv):
     base = os.path.splitext(os.path.basename(ruta_csv))[0]
