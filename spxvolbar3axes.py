@@ -11,6 +11,7 @@ import matplotlib.ticker as ticker
 import numpy as np
 from matplotlib.ticker import FuncFormatter
 from datetime import datetime
+from scipy.interpolate import UnivariateSpline
 
 # Configure logging
 logging.basicConfig(
@@ -65,16 +66,41 @@ def process_data():
         # Calculate total volume
         df["TotalVol"] = df["Vol0DTE"] + df["Vol1DTE"] + df["OtherVol"]
         
+        rounded_spot = round(spotSPX / 50) * 50
+
         # Filter strikes (±2% from spot)
-        min_strike = spotSPX * 0.985  # Cambiado a ±2%
-        max_strike = spotSPX * 1.015
+        min_strike = rounded_spot * 0.98  # Cambiado a ±2%
+        max_strike = rounded_spot * 1.02
         logger.info(f"Filtering strikes between {min_strike:.2f} and {max_strike:.2f}")
         df_filtered = df[(df["Strike"] >= min_strike) & (df["Strike"] <= max_strike)].copy()
         
         if len(df_filtered) == 0:
             logger.warning("No data available after filtering")
             return None
-            
+        
+        
+        strikes = df_filtered['Strike'].values
+        net_vol = df_filtered['TotalVol'].values  # antes era NetVol, ahora usamos TotalVol
+
+        # Ordenar los strikes y el volumen neto por strike
+        sorted_indices = np.argsort(strikes)
+        sorted_strikes = strikes[sorted_indices]
+        sorted_vol = net_vol[sorted_indices]  # puede ser TotalVol o NetVol
+
+        # Crear spline con los datos ordenados
+        spline = UnivariateSpline(sorted_strikes, sorted_vol, s=5)
+
+        # Encontrar raíces donde el spline cruza cero
+        roots = spline.roots()
+
+        # Escoger el root más cercano al spot
+        zero_cross_strike = np.nan
+        if len(roots) > 0:
+            zero_cross_strike = min(roots, key=lambda x: abs(x - spotSPX))
+
+        df_filtered["ZeroCrossStrike"] = zero_cross_strike
+
+
         # Calculate ES equivalent values
         df_filtered["ES_Equivalent"] = (df_filtered["Strike"] * (spotES / spotSPX)).round(2)
         
@@ -83,9 +109,9 @@ def process_data():
         
         # Create figure
         plt.style.use('dark_background')
-        width_inches = 8   # Ancho deseado en pulgadas
-        height_inches = 12  # Alto deseado en pulgadas
-        dpi = 100           # Resolución
+        width_inches = 6   # Ancho deseado en pulgadas
+        height_inches = 10  # Alto deseado en pulgadas
+        dpi = 150           # Resolución
 
         fig, ax = plt.subplots(figsize=(width_inches, height_inches))
         
@@ -93,6 +119,11 @@ def process_data():
         positive_colors = ["#006400", "#32CD32", "#90EE90"]  # Dark green, Lime green, Light green
         negative_colors = ["#8B0000", "#FF0000", "#FFC0CB"]  # Dark red, Red, Pink
         
+        # Aumentar tamaño de fuentes para mejor legibilidad en pantallas pequeñas
+        title_size = 12
+        label_size = 8
+        tick_size = 8
+
         # Get the full strike range for plotting
         strikes = df_filtered["Strike"].values
         es_equiv = df_filtered["ES_Equivalent"].values
@@ -124,7 +155,7 @@ def process_data():
             bottom_neg += neg_data
         
         # Add spot price line
-        ax.axhline(spotSPX, color='yellow', linestyle='--', alpha=0.7)
+        ax.axhline(spotSPX, color='white', linestyle='--', linewidth=1.5, alpha=0.7)
         
         # Set x-axis symmetric
         max_vol = max(bottom_pos.max(), abs(bottom_neg.min()) if len(bottom_neg) > 0 else 0)
@@ -138,9 +169,14 @@ def process_data():
             max_pos_strike = df_filtered.loc[max_pos_idx, "Strike"]
             max_neg_strike = df_filtered.loc[max_neg_idx, "Strike"]
             
-            ax.axhline(max_pos_strike, color='lightgreen', linestyle=':', alpha=0.7)
-            ax.axhline(max_neg_strike, color='pink', linestyle=':', alpha=0.7)
+            ax.axhline(max_pos_strike, color='green', linestyle='--', linewidth=2, alpha=0.7)
+            ax.axhline(max_neg_strike, color='red', linestyle='--', linewidth=2, alpha=0.7)
         
+
+        if not np.isnan(zero_cross_strike):
+            ax.axhline(y=zero_cross_strike, color='yellow', linestyle=':', linewidth=1.5, alpha=0.7)
+            ax.fill_betweenx([min(strikes), zero_cross_strike], -max_vol*1.1, max_vol*1.1, color='darkred', alpha=0.2, zorder=0)
+
         # Configurar el eje principal para mostrar strikes en incrementos de 5
         min_strike_rounded = int(min_strike - (min_strike % 5))
         max_strike_rounded = int(max_strike + (5 - max_strike % 5))
@@ -188,9 +224,9 @@ def process_data():
         # Formatting
         ax.set_title(
             f"SPX Volume by Strike - Spot: {spotSPX:.2f}  ({datetime.now().strftime('%Y-%m-%d %H:%M')})", 
-            pad=20, fontsize=14
+            pad=20, fontsize=title_size
         )
-        ax.set_xlabel("Volume", fontsize=12)
+        ax.set_xlabel("Volume", fontsize=label_size)
 
         # Ocultar el eje X superior (si existe)
         # ax.xaxis.set_visible(False)
@@ -202,13 +238,17 @@ def process_data():
         ax.xaxis.set_major_formatter(FuncFormatter(format_vol))
 
 
+        ax.set_xlabel("Volume", fontsize=label_size)
+        ax.tick_params(axis='both', labelsize=tick_size)
+        ax2.set_ylabel("/ES Equivalent", color='cyan', fontsize=label_size)
+        ax2.tick_params(axis='y', colors='cyan', labelsize=tick_size)
+        par1.set_ylabel("SPY Equivalent", color='orange', fontsize=label_size)
+        par1.tick_params(axis='y', colors='orange', labelsize=tick_size)
+
+
 
         #ax.set_ylabel("SPX Strike Price", fontsize=12)
-        ax.tick_params(axis='both', labelsize=12)
-        ax2.set_ylabel("/ES Equivalent", color='cyan', fontsize=12)
-        ax2.tick_params(axis='y', colors='cyan', labelsize=12)
-        par1.set_ylabel("SPY Equivalent", color='orange', fontsize=12)
-
+        
        
         # Grid con incrementos de 5
         #ax.grid(True, axis='y', alpha=0.3)
@@ -219,7 +259,7 @@ def process_data():
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         output_path = f"output/spx_volume_{timestamp}.png"
         os.makedirs("output", exist_ok=True)
-        plt.tight_layout(rect=[0.05, 0, 1, 1])  # Ajustar para dejar espacio para el eje SPY
+        plt.tight_layout(rect=[0.08, 0.02, 0.95, 0.98])  # Ajustar para dejar espacio para el eje SPY
 
 
 
