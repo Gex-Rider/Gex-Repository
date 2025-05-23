@@ -20,7 +20,7 @@ estilos = {
     'MINVEX':      {'color': 'green',    'symbol': 'x',            'mode': 'markers'},
     'MAXDEX':      {'color': 'red',      'symbol': 'diamond',      'mode': 'markers'},
     'MINDEX':      {'color': 'green',    'symbol': 'diamond',      'mode': 'markers'},
-    'ZERO':        {'color': 'white',    'symbol': 'circle-open',  'mode': 'markers'},
+    'ZERO':        {'color': 'Yellow',    'symbol': 'circle-open',  'mode': 'markers'},
     'MAXCP':       {'color': 'red',      'symbol': 'circle',       'mode': 'markers'},
     'MINCP':       {'color': 'green',    'symbol': 'circle',       'mode': 'markers'},
     'BAC':         {'color': 'cyan',     'symbol': 'triangle-down','mode': 'markers', 'size': 14},
