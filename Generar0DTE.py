@@ -65,7 +65,7 @@ def graficar_archivo(ruta_csv):
                 
         df.set_index('Time', inplace=True)
 
-        #df = df.between_time("08:30", "15:15")  # opcional
+        df = df.between_time("08:30", "15:15")  # opcional
 
     except Exception as e:
         print(f"❌ Error leyendo {ruta_csv}: {e}")
