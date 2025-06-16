@@ -175,10 +175,10 @@ for carpeta in carpetas:
 
         total_generados += 1
 
-# Generar índice HTML con estructura tabular
+# Generar índice HTML actualizado con columna de heatmaps
 html_index = """<html>
 <head>
-    <title>GEX Dashboard - Índice</title>
+    <title>GEX Dashboard - Índice Completo</title>
     <style>
         body {
             background-color: black; 
@@ -228,16 +228,20 @@ html_index = """<html>
             font-weight: bold;
             margin-top: 15px;
         }
+        .heatmap-link {
+            color: #ff6b6b;
+        }
     </style>
 </head>
 <body>
-<h1>GEX Dashboards por Día</h1>
+<h1>GEX Dashboards Completo</h1>
 <table>
     <thead>
         <tr>
             <th>Fecha</th>
             <th>GEX History</th>
             <th>Data Flow</th>
+            <th>Heatmaps</th>
         </tr>
     </thead>
     <tbody>
@@ -248,6 +252,8 @@ for carpeta in reversed(carpetas):
     archivos_gex = sorted(glob.glob(f"{carpeta}/*gex_history.html"))
     # Archivos Data Flow
     archivos_flow = sorted(glob.glob(f"{carpeta}/*_data_flow.html"))
+    # Archivos Heatmap
+    archivos_heatmap = sorted(glob.glob(f"{carpeta}/*_heatmap*.html"))
     
     html_index += f"""
     <tr>
@@ -272,19 +278,34 @@ for carpeta in reversed(carpetas):
     html_index += """
             </ul>
         </td>
+        <td>
+            <ul class="file-list">"""
+    
+    for archivo in archivos_heatmap:
+        nombre = os.path.basename(archivo).replace(".html", "").upper().replace("_HEATMAP", " HEATMAP")
+        html_index += f'<li><a href="{archivo}" class="heatmap-link">🔥 {nombre}</a></li>'
+    
+    html_index += """
+            </ul>
+        </td>
     </tr>"""
 
 html_index += """
     </tbody>
 </table>
 <p style="color: gray; font-size: 12px; margin-top: 20px;">
-Nota: Los gráficos incluyen un botón para alternar entre vista acumulada y directa<br>
-GEX_BY_OI y GEX_BY_VOLUME solo disponibles en modo acumulado
+<strong>Nota:</strong><br>
+• Los gráficos GEX incluyen un botón para alternar entre vista acumulada y directa<br>
+• GEX_BY_OI y GEX_BY_VOLUME solo disponibles en modo acumulado<br>
+• Los Heatmaps muestran correlaciones de datos en tiempo real con escala de colores<br>
+• Todos los gráficos se actualizan automáticamente cada 30 segundos<br>
+• El zoom y configuración se mantienen usando localStorage del navegador
 </p>
 </body></html>"""
 
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(html_index)
 
-print(f"\n✔ {total_generados} nuevos gráficos generados")
-print(f"✔ Índice actualizado: index_dataflow.html")
+print(f"\n✔ {total_generados} nuevos heatmaps generados")
+print(f"✔ Índice completo actualizado: index_completo.html")
+print(f"📊 Dashboard completo con GEX History, Data Flow y Heatmaps disponible")
