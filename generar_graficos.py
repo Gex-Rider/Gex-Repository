@@ -8,7 +8,7 @@ import glob
 columnas = [
     "Time", "MAXGEX", "MINGEX", "MAXVEX", "MINVEX",
     "MAXDEX", "MINDEX", "ZERO", "BAC", "SAC", "BAP", "SAP",
-    "MAXCP", "MINCP", "LONGGAMMA", "SHORTGAMMA", "SPOT"
+    "MAXCP", "MINCP", "LONGGAMMA", "SHORTGAMMA", "LONGCALLS", "SHORTCALLS","LONGPUTS", "SHORTPUTS","SPOT"
 ]
 
 # Estilos para cada señal
@@ -29,6 +29,10 @@ estilos = {
     'SAP':         {'color': 'magenta',  'symbol': 'triangle-up',  'mode': 'markers', 'size': 14},
     'LONGGAMMA':   {'color': 'cyan',     'symbol': 'cross',        'mode': 'markers'},
     'SHORTGAMMA':  {'color': 'magenta',  'symbol': 'cross',        'mode': 'markers'},
+    'LONGCALLS':   {'color': 'cyan',     'symbol': 'cross',        'mode': 'markers'},
+    'SHORTCALLS':  {'color': 'magenta',  'symbol': 'cross',        'mode': 'markers'},
+    'LONGPUTS':   {'color': 'cyan',     'symbol': 'cross',        'mode': 'markers'},
+    'SHORTPUTS':  {'color': 'magenta',  'symbol': 'cross',        'mode': 'markers'},
 }
 
 # Buscar carpetas con nombre de fecha
