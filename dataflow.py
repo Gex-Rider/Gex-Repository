@@ -124,7 +124,7 @@ for carpeta in carpetas:
             df = pd.read_csv(ruta_csv, header=None, names=columnas)
             df['TIME_STAMP'] = pd.to_datetime(df['TIME_STAMP'])
             df.set_index('TIME_STAMP', inplace=True)
-            df = df.between_time("08:30", "15:15").dropna(how='all')
+            df = df.between_time("08:30", "16:15").dropna(how='all')
 
             # Crear gráfico
             fig = crear_grafico(df, base, carpeta)
