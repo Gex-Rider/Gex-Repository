@@ -15,9 +15,10 @@ activos = ['spy', 'spx', 'qqq', 'ndx']
 columnas = [
     "Time", "MAXGEX", "MINGEX", "MAXVEX", "MINVEX",
     "MAXDEX", "MINDEX", "ZERO", "BAC", "SAC", "BAP", "SAP",
-    "MAXCP", "MINCP", "LONGGAMMA", "SHORTGAMMA", "SPOT"
+    "MAXCP", "MINCP", "LONGGAMMA", "SHORTGAMMA", "LONGCALLS", "SHORTCALLS","LONGPUTS", "SHORTPUTS","SPOT"
 ]
 
+# Estilos para cada señal
 estilos = {
     'SPOT':        {'color': 'blue',     'symbol': None,           'mode': 'lines'},
     'MAXGEX':      {'color': 'red',      'symbol': 'square-open',  'mode': 'markers'},
@@ -26,7 +27,7 @@ estilos = {
     'MINVEX':      {'color': 'green',    'symbol': 'x',            'mode': 'markers'},
     'MAXDEX':      {'color': 'red',      'symbol': 'diamond',      'mode': 'markers'},
     'MINDEX':      {'color': 'green',    'symbol': 'diamond',      'mode': 'markers'},
-    'ZERO':        {'color': 'yellow',    'symbol': 'circle-open',  'mode': 'markers'},
+    'ZERO':        {'color': 'Yellow',    'symbol': 'circle-open',  'mode': 'markers'},
     'MAXCP':       {'color': 'red',      'symbol': 'circle',       'mode': 'markers'},
     'MINCP':       {'color': 'green',    'symbol': 'circle',       'mode': 'markers'},
     'BAC':         {'color': 'cyan',     'symbol': 'triangle-down','mode': 'markers', 'size': 14},
@@ -35,7 +36,12 @@ estilos = {
     'SAP':         {'color': 'magenta',  'symbol': 'triangle-up',  'mode': 'markers', 'size': 14},
     'LONGGAMMA':   {'color': 'cyan',     'symbol': 'cross',        'mode': 'markers'},
     'SHORTGAMMA':  {'color': 'magenta',  'symbol': 'cross',        'mode': 'markers'},
+    'LONGCALLS':   {'color': 'cyan',     'symbol': 'cross',        'mode': 'markers'},
+    'SHORTCALLS':  {'color': 'magenta',  'symbol': 'cross',        'mode': 'markers'},
+    'LONGPUTS':   {'color': 'cyan',     'symbol': 'cross',        'mode': 'markers'},
+    'SHORTPUTS':  {'color': 'magenta',  'symbol': 'cross',        'mode': 'markers'},
 }
+
 
 # Ruta personalizada para archivos CSV
 carpeta_csv = r"E:\GEX\Sync"
