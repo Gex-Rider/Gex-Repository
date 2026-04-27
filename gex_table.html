@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GEX Table</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:       #06090d;
+  --bg2:      #0b0f14;
+  --bg3:      #0f1419;
+  --border:   #1a2332;
+  --border2:  #243040;
+  --text:     #d0d8e4;
+  --text2:    #7a8fa8;
+  --text3:    #3d5068;
+  --accent:   #4a9eff;
+  --green:    #22c55e;
+  --green2:   #16a34a;
+  --red:      #ef4444;
+  --red2:     #dc2626;
+  --yellow:   #eab308;
+  --mono:     'JetBrains Mono', monospace;
+
+  /* heatmap palette */
+  --hm-pos5:  rgba(34,197,94,0.55);
+  --hm-pos4:  rgba(34,197,94,0.38);
+  --hm-pos3:  rgba(34,197,94,0.22);
+  --hm-pos2:  rgba(34,197,94,0.10);
+  --hm-pos1:  rgba(34,197,94,0.03);
+  --hm-zero:  transparent;
+  --hm-neg1:  rgba(239,68,68,0.04);
+  --hm-neg2:  rgba(239,68,68,0.12);
+  --hm-neg3:  rgba(239,68,68,0.24);
+  --hm-neg4:  rgba(239,68,68,0.40);
+  --hm-neg5:  rgba(239,68,68,0.58);
+}
+
+* { box-sizing:border-box; margin:0; padding:0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 16px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top:0; z-index:200;
+}
+.logo { font-size:13px; font-weight:700; letter-spacing:.12em; color:var(--accent); }
+.logo em { color:var(--text2); font-style:normal; font-weight:300; }
+.hdr-right { display:flex; align-items:center; gap:12px; }
+.live-dot {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--green); box-shadow:0 0 6px var(--green);
+  animation: blink 2s infinite;
+}
+.live-dot.dead { background:var(--red); box-shadow:0 0 6px var(--red); animation:none; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+#ts { color:var(--text2); font-size:10px; }
+#next-badge {
+  font-size:9px; color:var(--text3);
+  border:1px solid var(--border); border-radius:2px;
+  padding:2px 6px; letter-spacing:.06em;
+}
+#next-badge.flash { color:var(--accent); border-color:var(--accent); }
+
+/* ── TABS ── */
+nav {
+  display:flex; gap:1px; overflow-x:auto;
+  background:var(--bg2); border-bottom:1px solid var(--border);
+  padding: 0 16px;
+}
+.tab {
+  padding:7px 14px; cursor:pointer;
+  font-family:var(--mono); font-size:10px; font-weight:600;
+  letter-spacing:.1em; color:var(--text2);
+  background:transparent; border:none;
+  border-bottom:2px solid transparent;
+  white-space:nowrap;
+  transition:color .15s, border-color .15s;
+}
+.tab:hover { color:var(--text); }
+.tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+.tab .stag { color:var(--text3); font-weight:300; margin-left:5px; font-size:9px; }
+.tab.active .stag { color:var(--text2); }
+
+/* ── PANEL ── */
+main { padding: 10px 16px 30px; }
+.panel { display:none; }
+.panel.active { display:block; }
+
+/* ── META BAR ── */
+.meta-bar {
+  display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+  padding: 6px 10px;
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:3px;
+  margin-bottom:10px;
+}
+.meta-spot { font-size:18px; font-weight:700; color:var(--accent); letter-spacing:.02em; }
+.meta-lbl  { font-size:9px; color:var(--text3); text-transform:uppercase; letter-spacing:.1em; margin-bottom:1px; }
+.meta-chips { display:flex; gap:8px; flex-wrap:wrap; margin-left:auto; }
+.chip {
+  display:flex; flex-direction:column; align-items:center;
+  gap:1px; padding:3px 8px;
+  border-radius:2px; border:1px solid var(--border);
+}
+.chip-lbl { font-size:8px; color:var(--text3); letter-spacing:.08em; }
+.chip-val { font-size:11px; font-weight:600; }
+.chip.zero .chip-val  { color:var(--yellow); }
+.chip.long .chip-val  { color:var(--green);  }
+.chip.short .chip-val { color:var(--red);    }
+.chip.call .chip-val  { color:#38bdf8;       }
+.chip.put .chip-val   { color:#fb923c;       }
+
+/* ── TABLE WRAPPER ── */
+.tbl-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+}
+
+/* ── TABLE ── */
+table {
+  width:100%; border-collapse:collapse;
+  table-layout: fixed;
+}
+
+/* Column widths */
+col.c-strike { width: 72px; }
+col.c-data   { width: 90px; }
+col.c-inv    { width: 100px; }
+
+thead tr th {
+  background: var(--bg3);
+  border-bottom: 2px solid var(--border2);
+  padding: 5px 6px;
+  text-align: right;
+  font-size: 9px; font-weight:600; letter-spacing:.1em;
+  color: var(--text2); text-transform:uppercase;
+  white-space: nowrap;
+  position: sticky; top: 0; z-index: 10;
+}
+thead tr th.c-strike { text-align:center; }
+thead tr.sub-head th {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  font-size: 8px; font-weight:400;
+  color: var(--text3); letter-spacing:.06em;
+  padding: 3px 6px;
+}
+
+tbody tr { border-bottom: 1px solid var(--border); }
+tbody tr:last-child { border-bottom:none; }
+tbody tr:hover { background: rgba(74,158,255,.04) !important; }
+
+td {
+  padding: 3px 6px;
+  text-align: right;
+  font-size: 10px;
+  color: var(--text);
+  white-space: nowrap;
+  transition: background .3s;
+}
+td.c-strike {
+  text-align: center;
+  font-weight: 600;
+  font-size: 11px;
+  color: var(--text2);
+  background: var(--bg3) !important;
+  border-right: 1px solid var(--border2);
+  letter-spacing: .02em;
+}
+
+/* SPOT row */
+tr.spot-row td.c-strike {
+  color: var(--accent) !important;
+  background: #4a9eff14 !important;
+  border-top: 1px solid #4a9eff44;
+  border-bottom: 1px solid #4a9eff44;
+}
+tr.spot-row td { border-top: 1px solid #4a9eff22; border-bottom: 1px solid #4a9eff22; }
+
+/* ZERO cell */
+td.is-zero { background: rgba(234,179,8,.22) !important; color: var(--yellow) !important; font-weight:700; }
+
+/* TOP cell badges */
+td.is-max { outline: 1px solid var(--green); outline-offset:-1px; }
+td.is-min { outline: 1px solid var(--red);   outline-offset:-1px; }
+
+/* divider column */
+td.divider, th.divider {
+  width: 4px; padding:0; background: var(--border) !important;
+}
+
+/* ── HEATMAP TIERS ── */
+.hm-p5 { background: var(--hm-pos5); }
+.hm-p4 { background: var(--hm-pos4); }
+.hm-p3 { background: var(--hm-pos3); }
+.hm-p2 { background: var(--hm-pos2); }
+.hm-p1 { background: var(--hm-pos1); }
+.hm-0  { background: var(--hm-zero); }
+.hm-n1 { background: var(--hm-neg1); }
+.hm-n2 { background: var(--hm-neg2); }
+.hm-n3 { background: var(--hm-neg3); }
+.hm-n4 { background: var(--hm-neg4); }
+.hm-n5 { background: var(--hm-neg5); }
+
+/* text color per value sign */
+td.pos-val { color: var(--green); }
+td.neg-val { color: var(--red);   }
+td.zer-val { color: var(--text3); }
+
+/* ── LOADING / ERROR ── */
+#loading {
+  display:flex; flex-direction:column; align-items:center;
+  justify-content:center; height:60vh; gap:12px; color:var(--text2);
+}
+.spinner { width:24px; height:24px; border:2px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .7s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+#err { display:none; margin:20px; padding:10px 14px; border:1px solid var(--red2); background:#ef444410; color:var(--red); border-radius:3px; font-size:11px; white-space:pre-wrap; }
+
+/* ── LEGEND ── */
+.legend {
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  padding:6px 0; margin-bottom:6px;
+}
+.legend-item { display:flex; align-items:center; gap:4px; font-size:9px; color:var(--text3); }
+.legend-swatch { width:12px; height:12px; border-radius:1px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="live-dot" id="ldot"></div>
+    <div class="logo">GEX <em>TABLE</em></div>
+  </div>
+  <div class="hdr-right">
+    <span id="ts">--:--:--</span>
+    <span id="next-badge">NEXT --s</span>
+  </div>
+</header>
+
+<nav id="tabs"></nav>
+
+<main>
+  <div id="loading"><div class="spinner"></div><span>Leyendo dashboard_strikes.json…</span></div>
+  <div id="err"></div>
+  <div id="panels"></div>
+</main>
+
+<script>
+const JSON_PATH  = 'dashboard_strikes.json';
+const REFRESH_MS = 60000;
+const MAX_ROWS   = 50;   // max strikes visible
+
+let currentTab = null;
+
+// ── COLUMNS definition ─────────────────────────────────────────────────
+const COLS = [
+  { key: 'vol_net',      label: 'VOL',      sub: 'NETO',    fmt: fmtK  },
+  { key: 'oi_net',       label: 'OI',       sub: 'NETO',    fmt: fmtK  },
+  { key: 'vex',          label: 'VEX',      sub: 'NET',     fmt: fmt2M },
+  { key: 'gex',          label: 'GEX',      sub: 'NET',     fmt: fmt2M },
+  { key: 'dex',          label: 'DEX',      sub: 'NET',     fmt: fmt2M },
+  { key: 'inv_gex',      label: 'GEX',      sub: 'INV',     fmt: fmt2M, accent:true },
+];
+
+// ── FETCH ──────────────────────────────────────────────────────────────
+async function fetchData() {
+  try {
+    const r = await fetch(JSON_PATH + '?_=' + Date.now());
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('err').style.display = 'none';
+    document.getElementById('ldot').className = 'live-dot';
+    render(d);
+    flashBadge();
+  } catch(e) {
+    document.getElementById('ldot').className = 'live-dot dead';
+    const el = document.getElementById('err');
+    el.style.display = 'block';
+    el.textContent = '⚠  No se pudo leer dashboard_strikes.json\n' + e.message +
+      '\n\nVerifica que este HTML esté en la misma carpeta que el JSON (E:\\GEX\\Sync\\)';
+  }
+}
+
+// ── RENDER ─────────────────────────────────────────────────────────────
+function render(d) {
+  const activos = Object.keys(d);
+  if (!activos.length) return;
+  if (!currentTab || !activos.includes(currentTab)) currentTab = activos[0];
+
+  // tabs
+  const nav = document.getElementById('tabs');
+  nav.innerHTML = '';
+  activos.forEach(a => {
+    const spot = d[a]?.spot || 0;
+    const btn = document.createElement('button');
+    btn.className = 'tab' + (a === currentTab ? ' active' : '');
+    btn.innerHTML = a + `<span class="stag">${fmtSpot(spot)}</span>`;
+    btn.onclick = () => { currentTab = a; switchTab(a, activos); };
+    nav.appendChild(btn);
+  });
+
+  // panels
+  const container = document.getElementById('panels');
+  container.innerHTML = '';
+  activos.forEach(a => {
+    const div = document.createElement('div');
+    div.className = 'panel' + (a === currentTab ? ' active' : '');
+    div.id = 'panel-' + a;
+    div.innerHTML = buildPanel(a, d[a]);
+    container.appendChild(div);
+  });
+}
+
+function switchTab(a, activos) {
+  document.querySelectorAll('.tab').forEach((t,i) =>
+    t.classList.toggle('active', activos[i] === a));
+  document.querySelectorAll('.panel').forEach(p =>
+    p.classList.toggle('active', p.id === 'panel-' + a));
+}
+
+// ── BUILD PANEL ─────────────────────────────────────────────────────────
+function buildPanel(activo, payload) {
+  if (!payload?.data?.length)
+    return `<div style="padding:40px;color:var(--text3);text-align:center">Sin datos · ${activo}</div>`;
+
+  const spot = payload.spot || 0;
+  const rows = trimAroundSpot(
+    [...payload.data].sort((a,b) => b.strike - a.strike),
+    spot, MAX_ROWS
+  );
+
+  // per-column stats for heatmap + top/min
+  const stats = {};
+  COLS.forEach(col => {
+    const vals = rows.map(r => +r[col.key] || 0).filter(v => v !== 0);
+    stats[col.key] = {
+      max:    Math.max(...vals, 0),
+      min:    Math.min(...vals, 0),
+      absMax: Math.max(...vals.map(Math.abs), 1),
+    };
+  });
+
+  // zero cross on cumulative GEX
+  const zero = computeZero(rows, spot);
+
+  // summary chips
+  const chips = computeChips(rows);
+
+  // ── META BAR
+  let metaHtml = `
+    <div class="meta-bar">
+      <div>
+        <div class="meta-lbl">SPOT · ${activo}</div>
+        <div class="meta-spot">${fmtSpot(spot)}</div>
+      </div>
+      <div class="meta-chips">
+        ${chipHtml('ZERO',    zero,           'zero')}
+        ${chipHtml('LONG γ',  chips.longGamma,'long')}
+        ${chipHtml('SHORT γ', chips.shortGamma,'short')}
+        ${chipHtml('LONG C',  chips.longCalls, 'call')}
+        ${chipHtml('SHORT C', chips.shortCalls,'short')}
+        ${chipHtml('LONG P',  chips.longPuts,  'put')}
+        ${chipHtml('SHORT P', chips.shortPuts, 'short')}
+      </div>
+    </div>`;
+
+  // ── LEGEND
+  let legendHtml = `
+    <div class="legend">
+      <span style="font-size:9px;color:var(--text3);letter-spacing:.06em">HEATMAP:</span>
+      <div class="legend-item"><div class="legend-swatch hm-p5"></div>MAX</div>
+      <div class="legend-item"><div class="legend-swatch hm-p3"></div>POS</div>
+      <div class="legend-item"><div class="legend-swatch hm-0" style="border:1px solid var(--border)"></div>CERO</div>
+      <div class="legend-item"><div class="legend-swatch hm-n3"></div>NEG</div>
+      <div class="legend-item"><div class="legend-swatch hm-n5"></div>MIN</div>
+      <span style="margin-left:10px;font-size:9px;color:var(--text3)">· SPOT: <span style="color:var(--accent)">▶</span> · ZERO: <span style="color:var(--yellow)">■</span></span>
+    </div>`;
+
+  // ── TABLE HEADER
+  let colgroups = `<col class="c-strike">`;
+  COLS.forEach((c,i) => {
+    colgroups += `<col class="c-data${c.accent?' c-inv':''}">`;
+    if (i < COLS.length - 1) colgroups += `<col class="c-div" style="width:3px">`;
+  });
+
+  let thead = `
+    <thead>
+      <tr>
+        <th class="c-strike" rowspan="2">STRIKE</th>
+        ${COLS.map((c,i) =>
+          `<th style="${c.accent?'color:var(--cyan)':''}">${c.label}${i < COLS.length-1 ? '</th><th class="divider">' : ''}</th>`
+        ).join('')}
+      </tr>
+      <tr class="sub-head">
+        ${COLS.map((c,i) =>
+          `<th>${c.sub}${i < COLS.length-1 ? '</th><th class="divider">' : ''}</th>`
+        ).join('')}
+      </tr>
+    </thead>`;
+
+  // ── TABLE BODY
+  let tbody = '<tbody>';
+  rows.forEach(row => {
+    const K        = row.strike;
+    const isSpot   = isNearSpot(K, spot, rows);
+    const isZeroRow = zero && Math.abs(K - zero) < 0.51;
+
+    let tr = `<tr class="${isSpot ? 'spot-row' : ''}">`;
+    tr += `<td class="c-strike">${isSpot ? '▶ ' : ''}${K}</td>`;
+
+    COLS.forEach((col, i) => {
+      const v = +row[col.key] || 0;
+      const s = stats[col.key];
+
+      // heatmap class
+      const hmClass = heatClass(v, s.max, s.min, s.absMax);
+      // top/min
+      const isMax = s.max > 0 && v === s.max;
+      const isMin = s.min < 0 && v === s.min;
+      // zero cell
+      const isCellZero = isZeroRow && col.key === 'gex';
+      // sign class
+      const signCls = v > 0 ? 'pos-val' : v < 0 ? 'neg-val' : 'zer-val';
+
+      const extraCls = [hmClass, signCls,
+        isMax ? 'is-max' : '', isMin ? 'is-min' : '',
+        isCellZero ? 'is-zero' : ''].filter(Boolean).join(' ');
+
+      tr += `<td class="${extraCls}">${v !== 0 ? col.fmt(v) : ''}</td>`;
+      if (i < COLS.length - 1) tr += `<td class="divider"></td>`;
+    });
+
+    tr += '</tr>';
+    tbody += tr;
+  });
+  tbody += '</tbody>';
+
+  return metaHtml + legendHtml + `
+    <div class="tbl-wrap">
+      <table>
+        <colgroup>${colgroups}</colgroup>
+        ${thead}
+        ${tbody}
+      </table>
+    </div>`;
+}
+
+// ── HEATMAP CLASS ──────────────────────────────────────────────────────
+function heatClass(v, max, min, absMax) {
+  if (v === 0 || absMax === 0) return 'hm-0';
+  const ratio = v / absMax;  // -1 to +1
+  if      (ratio >=  0.80) return 'hm-p5';
+  else if (ratio >=  0.50) return 'hm-p4';
+  else if (ratio >=  0.25) return 'hm-p3';
+  else if (ratio >=  0.08) return 'hm-p2';
+  else if (ratio >   0.00) return 'hm-p1';
+  else if (ratio <= -0.80) return 'hm-n5';
+  else if (ratio <= -0.50) return 'hm-n4';
+  else if (ratio <= -0.25) return 'hm-n3';
+  else if (ratio <= -0.08) return 'hm-n2';
+  else                     return 'hm-n1';
+}
+
+// ── CHIPS ──────────────────────────────────────────────────────────────
+function computeChips(rows) {
+  let lgK=0, lgV=0, sgK=0, sgV=Infinity, lcK=0, lcV=0, scK=0, scV=0, lpK=0, lpV=0, spK=0, spV=0;
+  rows.forEach(r => {
+    const ig = +r.inv_gex || 0;
+    const lc = +r.long_calls || 0, sc = +r.short_calls || 0;
+    const lp = +r.long_puts  || 0, sp = +r.short_puts  || 0;
+    if (ig > lgV) { lgV = ig; lgK = r.strike; }
+    if (ig < sgV) { sgV = ig; sgK = r.strike; }
+    if (lc > lcV) { lcV = lc; lcK = r.strike; }
+    if (sc > scV) { scV = sc; scK = r.strike; }
+    if (lp > lpV) { lpV = lp; lpK = r.strike; }
+    if (sp > spV) { spV = sp; spK = r.strike; }
+  });
+  return { longGamma:lgK, shortGamma:sgK, longCalls:lcK, shortCalls:scK, longPuts:lpK, shortPuts:spK };
+}
+
+function chipHtml(label, val, cls) {
+  if (!val) return '';
+  return `<div class="chip ${cls}"><span class="chip-lbl">${label}</span><span class="chip-val">${fmtSpot(val)}</span></div>`;
+}
+
+// ── ZERO cross ─────────────────────────────────────────────────────────
+function computeZero(rows, spot) {
+  const sorted = [...rows].sort((a,b) => a.strike - b.strike);
+  let cum = 0;
+  for (let i = 0; i < sorted.length - 1; i++) {
+    const prev = cum;
+    cum += +sorted[i].gex || 0;
+    if (prev * cum <= 0 && prev !== cum) {
+      const s0 = sorted[i].strike, s1 = sorted[i+1].strike;
+      return Math.round((s0 + (0 - prev) * (s1 - s0) / (cum - prev)) * 10) / 10;
+    }
+  }
+  return spot;
+}
+
+// ── HELPERS ────────────────────────────────────────────────────────────
+function trimAroundSpot(sorted, spot, n) {
+  if (sorted.length <= n) return sorted;
+  const idx = sorted.reduce((b,r,i) =>
+    Math.abs(r.strike - spot) < Math.abs(sorted[b].strike - spot) ? i : b, 0);
+  const half = Math.floor(n / 2);
+  return sorted.slice(Math.max(0, idx - half), Math.max(0, idx - half) + n);
+}
+
+function isNearSpot(K, spot, rows) {
+  const closest = rows.reduce((b, r) =>
+    Math.abs(r.strike - spot) < Math.abs(b.strike - spot) ? r : b, rows[0]);
+  return K === closest.strike;
+}
+
+function fmt2M(v) {
+  const a = Math.abs(v);
+  if (a >= 1e9)  return (v/1e9).toFixed(1) + 'B';
+  if (a >= 1e6)  return (v/1e6).toFixed(1) + 'M';
+  if (a >= 1e3)  return (v/1e3).toFixed(1) + 'K';
+  return (+v).toFixed(1);
+}
+function fmtK(v) {
+  const a = Math.abs(v);
+  if (a >= 1e6) return (v/1e6).toFixed(1) + 'M';
+  if (a >= 1e3) return (v/1e3).toFixed(0) + 'K';
+  return (+v).toFixed(0);
+}
+function fmtSpot(v) {
+  return v == null ? '—' : (+v).toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:2});
+}
+
+// ── CLOCK + COUNTDOWN ─────────────────────────────────────────────────
+setInterval(() => {
+  document.getElementById('ts').textContent =
+    new Date().toLocaleTimeString('en-US',{hour12:false});
+}, 1000);
+
+let cd = REFRESH_MS / 1000;
+setInterval(() => {
+  cd--;
+  if (cd <= 0) cd = REFRESH_MS / 1000;
+  const b = document.getElementById('next-badge');
+  if (!b.classList.contains('flash')) b.textContent = `NEXT ${cd}s`;
+}, 1000);
+
+function flashBadge() {
+  const b = document.getElementById('next-badge');
+  b.textContent = '✓ UPDATED';
+  b.classList.add('flash');
+  setTimeout(() => { b.textContent = `NEXT ${REFRESH_MS/1000}s`; b.classList.remove('flash'); }, 900);
+}
+
+// ── START ──────────────────────────────────────────────────────────────
+fetchData();
+setInterval(fetchData, REFRESH_MS);
+</script>
+</body>
+</html>
