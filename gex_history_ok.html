@@ -74,8 +74,8 @@ nav {
 
 /* ── TOOLBAR ── */
 .toolbar {
-  display:flex; align-items:center; gap:6px; flex-wrap:wrap;
-  padding:5px 12px;
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  padding:8px 16px;
   background:var(--bg3); border-bottom:1px solid var(--border);
   flex-shrink:0;
 }
@@ -104,14 +104,14 @@ nav {
   letter-spacing:.06em;
 }
 .helper-btn:hover { border-color:var(--accent); color:var(--accent); }
-.active-btn { border-color:var(--accent) !important; color:var(--accent) !important; background:#4a9eff12 !important; }
 
 /* Refresh */
 .refresh-btn {
-  margin-left:auto; padding:3px 8px;
-  font-family:var(--mono); font-size:11px; font-weight:600;
+  margin-left:auto; padding:3px 10px;
+  font-family:var(--mono); font-size:9px; font-weight:600;
   background:transparent; border:1px solid var(--border2);
   color:var(--text2); border-radius:2px; cursor:pointer;
+  letter-spacing:.08em;
 }
 .refresh-btn:hover { border-color:var(--accent); color:var(--accent); }
 
@@ -192,7 +192,6 @@ const SIGNALS = {
   SHORTCALLS: { color:'#e879f9',  sym:'star',         group:'INV',     size:4 },
   LONGPUTS:   { color:'#22d3ee',  sym:'star-triangle-up',group:'INV',  size:4 },
   SHORTPUTS:  { color:'#e879f9',  sym:'star-triangle-up',group:'INV',  size:4 },
-  ZERO_OI:    { color:'#eab308',  sym:'circle',  group:'ZERO_OI',    size:4 },
 };
 
 // Group display names
@@ -202,7 +201,6 @@ const GROUPS = {
   VEX:   { label:'VEX',        color:'#a78bfa' },
   DEX:   { label:'DEX',        color:'#fb923c' },
   ZERO:  { label:'ZERO',       color:'#eab308' },
-  ZERO_OI:  { label:'ZERO',       color:'#eab308' },
   CP:    { label:'MAX/MIN CP', color:'#86efac' },
   FLOW:  { label:'FLOW B/S',   color:'#22d3ee' },
   GAMMA: { label:'GAMMA L/S',  color:'#e879f9' },
@@ -210,78 +208,53 @@ const GROUPS = {
 };
 
 // ── STATE ──────────────────────────────────────────────────────────────
-let currentTab   = null;
+let currentTab  = null;
 let hiddenGroups = new Set();  // groups toggled OFF
-let hiddenSigs   = new Set();  // individual signals toggled OFF
-let csvCache     = {};
-let hoverOn      = true;       // hover info box toggle
+let csvCache    = {};          // activo → parsed rows
 
 // ══════════════════════════════════════════════════════════════════════
-//  TOOLBAR — individual signal buttons + hover toggle
+//  TOOLBAR — build group toggle buttons
 // ══════════════════════════════════════════════════════════════════════
 function buildToolbar() {
   const tb = document.getElementById('toolbar');
-  tb.innerHTML = '';
+  tb.innerHTML = `<span class="toolbar-label">SEÑALES</span>`;
 
   // ALL / NONE
   const all = document.createElement('button');
   all.className = 'helper-btn'; all.textContent = 'ALL';
-  all.onclick = () => { hiddenSigs.clear(); syncButtons(); replot(); };
+  all.onclick = () => { hiddenGroups.clear(); syncButtons(); replot(); };
   tb.appendChild(all);
 
   const none = document.createElement('button');
   none.className = 'helper-btn'; none.textContent = 'NONE';
   none.onclick = () => {
-    Object.keys(SIGNALS).forEach(k => { if (k !== 'SPOT') hiddenSigs.add(k); });
+    Object.keys(GROUPS).forEach(g => hiddenGroups.add(g));
+    hiddenGroups.delete('SPOT');  // keep SPOT always
     syncButtons(); replot();
   };
   tb.appendChild(none);
 
-  // Divider
   tb.appendChild(mkDiv());
 
-  // One button per individual signal
-  Object.entries(SIGNALS).forEach(([key, def]) => {
+  Object.entries(GROUPS).forEach(([gid, gdef]) => {
     const btn = document.createElement('div');
     btn.className = 'sig-btn';
-    btn.dataset.sig = key;
-    btn.style.borderColor = def.color + '70';
-    btn.style.color = def.color;
-
-    // Symbol indicator
-    const dot = document.createElement('div');
-    dot.className = 'dot';
-    dot.style.background = def.line ? def.color : 'transparent';
-    dot.style.border = def.line ? 'none' : `1.5px solid ${def.color}`;
-    btn.appendChild(dot);
-    btn.appendChild(document.createTextNode(key));
-
-    if (key !== 'SPOT') {
-      btn.onclick = () => {
-        hiddenSigs.has(key) ? hiddenSigs.delete(key) : hiddenSigs.add(key);
-        syncButtons(); replot();
-      };
-    }
+    btn.dataset.group = gid;
+    btn.style.borderColor = gdef.color + '80';
+    btn.style.color = gdef.color;
+    btn.innerHTML = `<div class="dot" style="background:${gdef.color}"></div>${gdef.label}`;
+    btn.onclick = () => {
+      if (gid === 'SPOT') return; // SPOT always visible
+      if (hiddenGroups.has(gid)) hiddenGroups.delete(gid);
+      else hiddenGroups.add(gid);
+      syncButtons(); replot();
+    };
     tb.appendChild(btn);
   });
 
-  // Divider + HOVER toggle
-  tb.appendChild(mkDiv());
-  const hbtn = document.createElement('button');
-  hbtn.className = 'helper-btn hover-btn active-btn';
-  hbtn.id = 'btn-hover';
-  hbtn.textContent = 'HOVER ●';
-  hbtn.onclick = () => {
-    hoverOn = !hoverOn;
-    hbtn.textContent = hoverOn ? 'HOVER ●' : 'HOVER ○';
-    hbtn.classList.toggle('active-btn', hoverOn);
-    replot();
-  };
-  tb.appendChild(hbtn);
-
-  // Refresh
+  // Refresh button
   const rb = document.createElement('button');
-  rb.className = 'refresh-btn'; rb.textContent = '↺';
+  rb.className = 'refresh-btn'; rb.textContent = '↺ REFRESH';
   rb.onclick = loadAll;
   tb.appendChild(rb);
 }
@@ -293,8 +266,8 @@ function mkDiv() {
 
 function syncButtons() {
   document.querySelectorAll('.sig-btn').forEach(btn => {
-    const k = btn.dataset.sig;
-    btn.classList.toggle('off', hiddenSigs.has(k));
+    const g = btn.dataset.group;
+    btn.classList.toggle('off', hiddenGroups.has(g));
   });
 }
 
@@ -476,9 +449,11 @@ function buildTraces(rows) {
   const traces = [];
 
   Object.entries(SIGNALS).forEach(([key, def]) => {
-    const visible = !hiddenSigs.has(key);
+    const grp     = def.group;
+    const visible = !hiddenGroups.has(grp);
 
     if (def.line) {
+      // SPOT — line trace
       traces.push({
         x: times,
         y: rows.map(r => r[key]),
@@ -487,18 +462,21 @@ function buildTraces(rows) {
         mode: 'lines',
         line: { color: def.color, width: 2 },
         visible: visible ? true : 'legendonly',
-        legendgroup: def.group,
-        hovertemplate: `<b>${key}</b> %{y:.0f}<extra></extra>`,
+        legendgroup: grp,
+        hovertemplate: `<b>${key}</b>: %{y:.2f}<br>%{x}<extra></extra>`,
       });
     } else {
-      const xVals = [], yVals = [];
+      // Markers — only plot non-null/non-zero values
+      const xVals = [], yVals = [], txtVals = [];
       rows.forEach(r => {
         const v = r[key];
         if (v !== null && v !== 0) {
           xVals.push(r.Time);
           yVals.push(v);
+          txtVals.push(`${key}: ${v}`);
         }
       });
+
       if (xVals.length === 0) return;
 
       traces.push({
@@ -515,8 +493,8 @@ function buildTraces(rows) {
           opacity: 0.92,
         },
         visible: visible ? true : 'legendonly',
-        legendgroup: def.group,
-        hovertemplate: `<b>${key}</b> %{y:.0f}<extra></extra>`,
+        legendgroup: grp,
+        hovertemplate: `<b>${key}</b>: %{y:.2f}<br>%{x}<extra></extra>`,
       });
     }
   });
@@ -547,7 +525,7 @@ function buildLayout(activo, rows) {
       font: { color: '#d0d8e4', size: 14, weight: 600 },
       x: 0.02, xanchor: 'left',
     },
-    margin: { l:60, r:20, t:44, b:46 },
+    margin: { l:60, r:40, t:44, b:90 },
     xaxis: {
       type: 'date',
       color: '#3d5068',
@@ -565,8 +543,20 @@ function buildLayout(activo, rows) {
       zeroline: false,
       range: [yMin, yMax],
     },
-    showlegend: false,
-    hovermode: hoverOn ? 'closest' : false,
+    legend: {
+      orientation: 'h', // 🔥 horizontal
+      bgcolor: '#0b0f1490',
+      bordercolor: '#1a2332',
+      borderwidth: 1,
+      font: { size: 9, color: '#7a8fa8' },
+      x: 0,
+      y: -0.3, // 🔥 debajo del gráfico
+      xanchor: 'left',
+      yanchor: 'top',
+      itemwidth: 30,
+      tracegroupgap: 4,
+    },
+    hovermode: 'x unified',
     hoverlabel: {
       bgcolor: '#0f1419',
       bordercolor: '#243040',

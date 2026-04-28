@@ -175,12 +175,13 @@
   /* ── CHART GRID ── */
   .chart-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 10px;
     margin-bottom: 10px;
   }
-  @media (max-width: 1100px) { .chart-grid { grid-template-columns: repeat(2,1fr); } }
-  @media (max-width: 700px)  { .chart-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 1400px) { .chart-grid { grid-template-columns: repeat(4, 1fr); } }
+  @media (max-width: 1000px) { .chart-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px)  { .chart-grid { grid-template-columns: 1fr; } }
 
   .chart-box {
     background: var(--bg2);
@@ -200,6 +201,8 @@
   .chart-box.oi::before     { background: linear-gradient(90deg, var(--purple),transparent); }
   .chart-box.inv-c::before  { background: linear-gradient(90deg, var(--accent), transparent); }
   .chart-box.inv-p::before  { background: linear-gradient(90deg, var(--orange), transparent); }
+  .chart-box.inv-gex::before{ background: linear-gradient(90deg, var(--purple), transparent); }
+  .chart-box.inv-net::before{ background: linear-gradient(90deg, var(--cyan),   transparent); }
 
   .chart-title {
     font-size: 10px; font-weight: 500; letter-spacing:.1em;
@@ -266,10 +269,14 @@
   .vol  .bar-fill.neg  { background: var(--orange);   opacity:.80; }
   .oi   .bar-fill.pos  { background: var(--green); opacity:.80; }
   .oi   .bar-fill.neg  { background: var(--orange);   opacity:.80; }
-  .inv-c .bar-fill.pos { background: var(--cyan);  opacity:.80; }
-  .inv-c .bar-fill.neg { background: var(--purple); opacity:.80; }
-  .inv-p .bar-fill.pos { background: var(--cyan);  opacity:.80; }
-  .inv-p .bar-fill.neg { background: var(--purple); opacity:.80; }
+  .inv-c .bar-fill.pos { background: var(--cyan);   opacity:.80; }
+  .inv-c .bar-fill.neg { background: var(--purple);  opacity:.80; }
+  .inv-p .bar-fill.pos { background: var(--cyan);   opacity:.80; }
+  .inv-p .bar-fill.neg { background: var(--purple);  opacity:.80; }
+  .inv-gex .bar-fill.pos { background: var(--cyan);   opacity:.85; }
+  .inv-gex .bar-fill.neg { background: var(--purple);  opacity:.85; }
+  .inv-net .bar-fill.pos { background: var(--cyan);   opacity:.85; }
+  .inv-net .bar-fill.neg { background: var(--purple);  opacity:.85; }
 
   .spot-marker {
     position: absolute;
@@ -493,6 +500,8 @@ function buildPanel(activo, payload) {
       ${buildChart('OI NETO',     'oi',           trimmed, spot, r => r.oi_net,         fmtK)}
       ${buildChart('INV CALLS',   'inv-c',        trimmed, spot, r => r.inv_vex_call,  fmt2M)}
       ${buildChart('INV PUTS',    'inv-p',        trimmed, spot, r => r.inv_vex_put,   fmt2M)}
+      ${buildChart('INV GEX',     'inv-gex',      trimmed, spot, r => r.inv_gex,       fmt2M)}
+      ${buildChart('INV NET',     'inv-net',      trimmed, spot, r => r.inv_net || 0,  fmt2M)}
     </div>
   `;
 }
@@ -525,7 +534,8 @@ function buildChart(title, cls, rows, spot, accessor, fmtFn) {
       strike: r.strike,
       gex: r.gex, vex: r.vex,
       vol_net: r.vol_net, oi_net: r.oi_net,
-      inv_c: r.inv_vex_call, inv_p: r.inv_vex_put
+      inv_c: r.inv_vex_call, inv_p: r.inv_vex_put,
+      inv_gex: r.inv_gex, inv_net: r.inv_net || 0
     }).replace(/"/g,"'");
 
     return `
@@ -633,6 +643,8 @@ function showTip(e) {
     <div class="tt-row"><span>OI Neto</span><span>${fmtK(d.oi_net||0)}</span></div>
     <div class="tt-row"><span>Inv Calls</span><span>${fmt2M(d.inv_c||0)}</span></div>
     <div class="tt-row"><span>Inv Puts</span><span>${fmt2M(d.inv_p||0)}</span></div>
+    <div class="tt-row"><span>Inv GEX</span><span>${fmt2M(d.inv_gex||0)}</span></div>
+    <div class="tt-row"><span>Inv Net</span><span>${fmt2M(d.inv_net||0)}</span></div>
   `;
   tt.style.display = 'block';
   moveTip(e);
