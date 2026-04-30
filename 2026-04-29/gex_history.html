@@ -1,0 +1,1096 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GEX History</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.27.0/plotly.min.js"></script>
+<style>
+:root {
+  --bg:      #06090d;
+  --bg2:     #0b0f14;
+  --bg3:     #0f1419;
+  --border:  #1a2332;
+  --border2: #243040;
+  --text:    #d0d8e4;
+  --text2:   #7a8fa8;
+  --text3:   #3d5068;
+  --accent:  #4a9eff;
+  --green:   #22c55e;
+  --red:     #ef4444;
+  --yellow:  #eab308;
+  --cyan:    #22d3ee;
+  --magenta: #e879f9;
+  --mono:    'JetBrains Mono', monospace;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: var(--mono); font-size:11px;
+  min-height:100vh; display:flex; flex-direction:column;
+}
+
+/* ── HEADER ── */
+header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:8px 16px;
+  background:var(--bg2); border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.logo { font-size:13px; font-weight:700; letter-spacing:.12em; color:var(--accent); }
+.logo em { color:var(--text2); font-style:normal; font-weight:300; }
+.hdr-right { display:flex; align-items:center; gap:10px; }
+.live-dot {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--green); box-shadow:0 0 6px var(--green);
+  animation:blink 2s infinite;
+}
+.live-dot.dead { background:var(--red); box-shadow:0 0 6px var(--red); animation:none; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+#ts { color:var(--text2); font-size:10px; }
+#nbadge {
+  font-size:9px; color:var(--text3);
+  border:1px solid var(--border); border-radius:2px; padding:2px 6px;
+}
+#nbadge.flash { color:var(--accent); border-color:var(--accent); }
+
+/* ── TABS ── */
+nav {
+  display:flex; gap:1px; overflow-x:auto;
+  background:var(--bg2); border-bottom:1px solid var(--border);
+  padding:0 16px; flex-shrink:0;
+}
+.tab {
+  padding:7px 14px; cursor:pointer;
+  font-family:var(--mono); font-size:10px; font-weight:600;
+  letter-spacing:.1em; color:var(--text2);
+  background:transparent; border:none;
+  border-bottom:2px solid transparent; white-space:nowrap;
+  transition:color .15s, border-color .15s;
+}
+.tab:hover { color:var(--text); }
+.tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+
+/* ── TOOLBAR ── */
+.toolbar {
+  display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+  padding:5px 12px;
+  background:var(--bg3); border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.toolbar-label { color:var(--text3); font-size:9px; letter-spacing:.1em; margin-right:4px; }
+
+/* Signal toggle buttons */
+.sig-btn {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:3px 8px; border-radius:2px; cursor:pointer;
+  font-family:var(--mono); font-size:9px; font-weight:500;
+  letter-spacing:.06em; border:1px solid;
+  transition:opacity .15s, background .15s;
+  white-space:nowrap;
+  user-select:none;
+}
+.sig-btn.off { opacity:.28; }
+.sig-btn .dot { width:7px; height:7px; border-radius:1px; flex-shrink:0; }
+
+.divider-v { width:1px; height:20px; background:var(--border2); margin:0 4px; }
+
+/* ALL / NONE helpers */
+.helper-btn {
+  padding:3px 8px; font-family:var(--mono); font-size:9px;
+  background:transparent; border:1px solid var(--border2);
+  color:var(--text2); border-radius:2px; cursor:pointer;
+  letter-spacing:.06em;
+}
+.helper-btn:hover { border-color:var(--accent); color:var(--accent); }
+.active-btn { border-color:var(--accent) !important; color:var(--accent) !important; background:#4a9eff12 !important; }
+
+/* Refresh */
+.refresh-btn {
+  margin-left:auto; padding:3px 8px;
+  font-family:var(--mono); font-size:11px; font-weight:600;
+  background:transparent; border:1px solid var(--border2);
+  color:var(--text2); border-radius:2px; cursor:pointer;
+}
+.refresh-btn:hover { border-color:var(--accent); color:var(--accent); }
+
+/* ── HEATMAP TOOLBAR ROW ── */
+.toolbar-hm {
+  display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+  padding:4px 12px;
+  background:var(--bg2); border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.hm-btn {
+  padding:3px 9px; font-family:var(--mono); font-size:9px; font-weight:600;
+  letter-spacing:.08em; border-radius:2px; cursor:pointer;
+  border:1px solid var(--border2); color:var(--text2);
+  background:transparent; transition:all .15s;
+}
+.hm-btn:hover { border-color:var(--accent); color:var(--accent); }
+.hm-btn.hm-active { background:#4a9eff18; border-color:var(--accent); color:var(--accent); }
+.hm-btn.hm-off { opacity:.3; }
+
+/* surface type selector */
+.hm-type-btn {
+  padding:3px 9px; font-family:var(--mono); font-size:9px; font-weight:700;
+  letter-spacing:.08em; border-radius:2px; cursor:pointer;
+  border:1px solid; transition:all .15s;
+}
+.hm-type-btn[data-type="GEX"] { border-color:#ef444460; color:#ef4444; }
+.hm-type-btn[data-type="VEX"] { border-color:#a78bfa60; color:#a78bfa; }
+.hm-type-btn[data-type="DEX"] { border-color:#fb923c60; color:#fb923c; }
+.hm-type-btn[data-type="CEX"] { border-color:#22d3ee60; color:#22d3ee; }
+.hm-type-btn.hm-selected[data-type="GEX"] { background:#ef444420; border-color:#ef4444; }
+.hm-type-btn.hm-selected[data-type="VEX"] { background:#a78bfa20; border-color:#a78bfa; }
+.hm-type-btn.hm-selected[data-type="DEX"] { background:#fb923c20; border-color:#fb923c; }
+.hm-type-btn.hm-selected[data-type="CEX"] { background:#22d3ee20; border-color:#22d3ee; }
+
+/* opacity slider */
+.hm-slider-wrap { display:flex; align-items:center; gap:5px; }
+.hm-slider-label { font-family:var(--mono); font-size:9px; color:var(--text3); letter-spacing:.06em; }
+#hm-opacity-slider {
+  -webkit-appearance:none; appearance:none;
+  width:72px; height:3px; border-radius:2px;
+  background: linear-gradient(to right, var(--accent) 0%, var(--accent) 70%, var(--border2) 70%);
+  outline:none; cursor:pointer;
+}
+#hm-opacity-slider::-webkit-slider-thumb {
+  -webkit-appearance:none; width:10px; height:10px;
+  border-radius:50%; background:var(--accent); cursor:pointer;
+}
+.hm-opacity-val { font-family:var(--mono); font-size:9px; color:var(--accent); min-width:22px; }
+
+/* loading indicator for heatmap */
+.hm-status { font-family:var(--mono); font-size:9px; color:var(--text3); margin-left:4px; }
+.hm-time-wrap { display:flex; align-items:center; gap:5px; }
+.hm-time-input {
+  font-family:var(--mono); font-size:9px; font-weight:600;
+  background:#0b0f14; border:1px solid var(--border2);
+  color:var(--accent); border-radius:2px; padding:2px 6px;
+  width:52px; text-align:center; outline:none; cursor:text;
+  letter-spacing:.06em;
+}
+.hm-time-input:focus { border-color:var(--accent); }
+.hm-anchor-badge {
+  font-family:var(--mono); font-size:8px; color:var(--text3);
+  border:1px solid var(--border); border-radius:2px; padding:1px 5px;
+  white-space:nowrap; min-width:70px; text-align:center;
+}
+
+/* ── MAIN ── */
+html, body { height:100%; overflow:hidden; }
+main { flex:1; overflow:hidden; position:relative; }
+.panel { display:none; position:absolute; inset:0; }
+.panel.active { display:block; }
+.plotly-chart { width:100%; height:100%; }
+
+/* ── STATUS / ERROR ── */
+#status {
+  display:flex; align-items:center; justify-content:center;
+  height:100%; gap:12px; color:var(--text2); flex-direction:column;
+}
+.spinner { width:24px; height:24px; border:2px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .7s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+#err {
+  display:none; margin:20px; padding:10px 14px;
+  border:1px solid var(--red); background:#ef444410; color:var(--red);
+  border-radius:3px; font-size:11px; white-space:pre-wrap;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="live-dot" id="ldot"></div>
+    <div class="logo">GEX <em>HISTORY</em></div>
+  </div>
+  <div class="hdr-right">
+    <span id="ts">--:--:--</span>
+    <span id="nbadge">AUTO 60s</span>
+  </div>
+</header>
+
+<nav id="tabs-nav"></nav>
+
+<div class="toolbar" id="toolbar">
+  <span class="toolbar-label">SEÑALES</span>
+  <!-- buttons injected by JS -->
+</div>
+
+<!-- ── HEATMAP CONTROL BAR ── -->
+<div class="toolbar-hm" id="toolbar-hm">
+  <span class="toolbar-label">SURFACE</span>
+
+  <!-- ON/OFF toggle -->
+  <button class="hm-btn" id="hm-toggle" onclick="toggleHeatmap()">HM OFF</button>
+
+  <div class="divider-v"></div>
+
+  <!-- Surface type buttons -->
+  <button class="hm-type-btn" data-type="GEX" onclick="selectHmType('GEX')">GEX</button>
+  <button class="hm-type-btn" data-type="VEX" onclick="selectHmType('VEX')">VEX</button>
+  <button class="hm-type-btn" data-type="DEX" onclick="selectHmType('DEX')">DEX</button>
+  <button class="hm-type-btn" data-type="CEX" onclick="selectHmType('CEX')">CEX</button>
+
+  <div class="divider-v"></div>
+
+  <!-- Opacity slider -->
+  <div class="hm-slider-wrap">
+    <span class="hm-slider-label">OPAC</span>
+    <input type="range" id="hm-opacity-slider" min="5" max="100" value="70"
+           oninput="onHmOpacity(this.value)">
+    <span class="hm-opacity-val" id="hm-opacity-val">70%</span>
+  </div>
+
+  <div class="divider-v"></div>
+
+  <!-- Colorscale selector -->
+  <span class="hm-slider-label">COLOR</span>
+  <button class="hm-btn hm-active" id="cs-rdgr" onclick="selectColorscale('RdGr')">R/G</button>
+  <button class="hm-btn" id="cs-rdbu" onclick="selectColorscale('RdBu')">R/B</button>
+  <button class="hm-btn" id="cs-plasma" onclick="selectColorscale('Plasma')">PLASMA</button>
+
+  <div class="divider-v"></div>
+  <div class="hm-time-wrap">
+    <span class="hm-slider-label">CLOSE</span>
+    <input type="time" class="hm-time-input" id="hm-close-time"
+           value="15:00" onchange="onHmCloseTime(this.value)"
+           title="Hora LOCAL cuando el mercado cierra en tu pantalla">
+    <span class="hm-anchor-badge" id="hm-anchor-badge">──:──→──:──</span>
+  </div>
+  <span class="hm-status" id="hm-status"></span>
+</div>
+
+<main>
+  <div id="status"><div class="spinner"></div><span>Buscando archivos CSV…</span></div>
+  <div id="err"></div>
+  <div id="panels"></div>
+</main>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════════════════════════════════
+const ACTIVOS    = ['SPY','QQQ','SPX','NDX','ES','NQ','RTY'];
+const CSV_FOLDER = '';          // same folder; set to 'Sync/' if needed
+const REFRESH_MS = 60000;
+
+//'#4a9eff',
+// Signal definitions — color / symbol / group
+const SIGNALS = {
+  SPOT:       { color:'#f8f8f8',  sym:null,           group:'SPOT',    size:0,  line:true },
+  MAXGEX:     { color:'#ef4444',  sym:'square-open',  group:'GEX',     size:6  },
+  MINGEX:     { color:'#22c55e',  sym:'square-open',  group:'GEX',     size:6  },
+  MAXVEX:     { color:'#ef4444',  sym:'x',            group:'VEX',     size:4  },
+  MINVEX:     { color:'#22c55e',  sym:'x',            group:'VEX',     size:4  },
+  MAXDEX:     { color:'#ef4444',  sym:'diamond',      group:'DEX',     size:4  },
+  MINDEX:     { color:'#22c55e',  sym:'diamond',      group:'DEX',     size:4  },
+  ZERO:       { color:'#eab308',  sym:'circle-open',  group:'ZERO',    size:4 },
+  MAXCP:      { color:'#ef4444',  sym:'circle',       group:'CP',      size:2  },
+  MINCP:      { color:'#22c55e',  sym:'circle',       group:'CP',      size:2  },
+  BAC:        { color:'#22d3ee',  sym:'triangle-down',group:'FLOW',    size:2 },
+  SAC:        { color:'#e879f9',  sym:'triangle-down',group:'FLOW',    size:6 },
+  BAP:        { color:'#22d3ee',  sym:'triangle-up',  group:'FLOW',    size:6 },
+  SAP:        { color:'#e879f9',  sym:'triangle-up',  group:'FLOW',    size:6 },
+  LONGGAMMA:  { color:'#22d3ee',  sym:'cross',        group:'GAMMA',   size:4 },
+  SHORTGAMMA: { color:'#e879f9',  sym:'cross',        group:'GAMMA',   size:4 },
+  LONGCALLS:  { color:'#22d3ee',  sym:'star',         group:'INV',     size:4 },
+  SHORTCALLS: { color:'#e879f9',  sym:'star',         group:'INV',     size:4 },
+  LONGPUTS:   { color:'#22d3ee',  sym:'star-triangle-up',group:'INV',  size:4 },
+  SHORTPUTS:  { color:'#e879f9',  sym:'star-triangle-up',group:'INV',  size:4 },
+  ZERO_OI:    { color:'#eab308',  sym:'circle',  group:'ZERO_OI',    size:4 },
+};
+
+// Group display names
+const GROUPS = {
+  SPOT:  { label:'SPOT',       color:'#4a9eff' },
+  GEX:   { label:'GEX',        color:'#ef4444' },
+  VEX:   { label:'VEX',        color:'#a78bfa' },
+  DEX:   { label:'DEX',        color:'#fb923c' },
+  ZERO:  { label:'ZERO',       color:'#eab308' },
+  ZERO_OI:  { label:'ZERO',    color:'#eab308' },
+  CP:    { label:'MAX/MIN CP', color:'#86efac' },
+  FLOW:  { label:'FLOW B/S',   color:'#22d3ee' },
+  GAMMA: { label:'GAMMA L/S',  color:'#e879f9' },
+  INV:   { label:'INVENTORY',  color:'#6ee7b7' },
+};
+
+// ══════════════════════════════════════════════════════════════════════
+//  HEATMAP STATE
+// ══════════════════════════════════════════════════════════════════════
+
+// Surface type → CSV suffix mapping
+const HM_CSV_SUFFIX = {
+  GEX: '_heatmap.csv',
+  VEX: '_heatmap_vex.csv',
+  DEX: '_heatmap_dex.csv',
+  CEX: '_heatmap_charm.csv',
+};
+
+// Custom colorscales
+const COLORSCALES = {
+  RdGr: [
+    [0.0,  '#7f1d1d'],
+    [0.15, '#ef4444'],
+    [0.35, '#fca5a5'],
+    [0.5,  '#0b0f14'],   // dark zero point
+    [0.65, '#86efac'],
+    [0.85, '#22c55e'],
+    [1.0,  '#14532d'],
+  ],
+  RdBu: [
+    [0.0,  '#7f1d1d'],
+    [0.2,  '#ef4444'],
+    [0.45, '#fca5a5'],
+    [0.5,  '#0b0f14'],
+    [0.55, '#93c5fd'],
+    [0.8,  '#3b82f6'],
+    [1.0,  '#1e3a8a'],
+  ],
+  Plasma: 'Plasma',
+};
+
+let hmEnabled    = false;
+let hmType       = 'GEX';       // active surface type
+let hmOpacity    = 0.70;
+let hmColorscale = 'RdGr';
+
+// Cache: activo → { GEX: parsedData, VEX: ..., ... }
+const hmCache = {};
+// Track which loads are in flight
+const hmLoading = {};
+
+// ── STATE ──────────────────────────────────────────────────────────────
+let currentTab   = null;
+let hiddenGroups = new Set();
+let hiddenSigs   = new Set();
+let csvCache     = {};
+let hoverOn      = true;
+
+// ══════════════════════════════════════════════════════════════════════
+//  HEATMAP CONTROLS
+// ══════════════════════════════════════════════════════════════════════
+
+function toggleHeatmap() {
+  hmEnabled = !hmEnabled;
+  const btn = document.getElementById('hm-toggle');
+  btn.textContent = hmEnabled ? 'HM ON' : 'HM OFF';
+  btn.classList.toggle('hm-active', hmEnabled);
+
+  // Dim type/color buttons when off
+  document.querySelectorAll('.hm-type-btn, #cs-rdgr, #cs-rdbu, #cs-plasma')
+    .forEach(b => b.classList.toggle('hm-off', !hmEnabled));
+
+  if (hmEnabled) {
+    loadHeatmapData(currentTab, hmType).then(() => replot());
+  } else {
+    replot();
+  }
+}
+
+function selectHmType(type) {
+  if (!hmEnabled) return;
+  hmType = type;
+  document.querySelectorAll('.hm-type-btn')
+    .forEach(b => b.classList.toggle('hm-selected', b.dataset.type === type));
+  loadHeatmapData(currentTab, type).then(() => replot());
+}
+
+function onHmOpacity(val) {
+  hmOpacity = val / 100;
+  document.getElementById('hm-opacity-val').textContent = val + '%';
+  // Update slider gradient
+  const slider = document.getElementById('hm-opacity-slider');
+  slider.style.background = `linear-gradient(to right, var(--accent) 0%, var(--accent) ${val}%, var(--border2) ${val}%)`;
+  if (hmEnabled) replot();
+}
+
+function selectColorscale(cs) {
+  hmColorscale = cs;
+  ['cs-rdgr','cs-rdbu','cs-plasma'].forEach(id => {
+    document.getElementById(id).classList.remove('hm-active');
+  });
+  const idMap = { RdGr:'cs-rdgr', RdBu:'cs-rdbu', Plasma:'cs-plasma' };
+  document.getElementById(idMap[cs]).classList.add('hm-active');
+  if (hmEnabled) replot();
+}
+
+function setHmStatus(msg) {
+  document.getElementById('hm-status').textContent = msg;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  HEATMAP CSV LOADER & PARSER
+// ══════════════════════════════════════════════════════════════════════
+
+/**
+ * Parses the surface CSV generated by GEX_Surface.py
+ *
+ * Format:
+ *   "" (empty), 390, 387, 384, ... , 0   ← header row (column = minutes)
+ *   "540.5", val, val, val, ...           ← rows (index = strike price)
+ *
+ * Returns { strikes: [float], minutes: [int], z: [[row values]] }
+ * where z[i][j] = value at strike[i], minute[j]
+ */
+function parseSurfaceCSV(text) {
+  const lines = text.trim().split('\n').filter(l => l.trim());
+  if (lines.length < 2) return null;
+
+  // Header: first cell is empty (row index label), rest are minute values
+  const headerCells = lines[0].split(',');
+  const minutes = headerCells.slice(1).map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+
+  const strikes = [];
+  const z       = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    const cells = lines[i].split(',');
+    if (!cells[0]) continue;
+    const strike = parseFloat(cells[0].replace(/"/g, '').trim());
+    if (isNaN(strike)) continue;
+
+    const row = cells.slice(1).map(v => {
+      const n = parseFloat(v.trim());
+      return isNaN(n) ? 0 : n;
+    });
+
+    // Pad/trim to match minutes length
+    while (row.length < minutes.length) row.push(0);
+    strikes.push(strike);
+    z.push(row.slice(0, minutes.length));
+  }
+
+  return { strikes, minutes, z };
+}
+
+async function loadHeatmapData(activo, type) {
+  if (!activo) return;
+
+  const key = activo + '_' + type;
+  if (hmCache[activo]?.[type]) return;   // already cached
+  if (hmLoading[key]) return;            // already in flight
+
+  hmLoading[key] = true;
+  setHmStatus(`⟳ ${activo} ${type}…`);
+
+  const suffix = HM_CSV_SUFFIX[type];
+  const url    = CSV_FOLDER + activo.toLowerCase() + suffix + '?_=' + Date.now();
+
+  try {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const text = await r.text();
+    const data = parseSurfaceCSV(text);
+    if (!data) throw new Error('parse error');
+
+    if (!hmCache[activo]) hmCache[activo] = {};
+    hmCache[activo][type] = data;
+    setHmStatus(`✓ ${activo} ${type}`);
+    setTimeout(() => setHmStatus(''), 2000);
+  } catch(e) {
+    setHmStatus(`✗ ${activo} ${type}: ${e.message}`);
+    setTimeout(() => setHmStatus(''), 4000);
+  } finally {
+    hmLoading[key] = false;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  TIMESTAMP PARSING — sin ambigüedad de zona horaria
+//
+//  El CSV del engine guarda: "2026-04-29 09:00:00" (sin Z, sin T)
+//  new Date("2026-04-29 09:00:00") → comportamiento INCONSISTENTE entre
+//  browsers: algunos lo tratan como UTC, otros como local.
+//
+//  Solución: parseamos manualmente → siempre como número LOCAL puro
+//  (milisegundos desde epoch, misma referencia que new Date(y,m,d,h,mi))
+// ══════════════════════════════════════════════════════════════════════
+
+/**
+ * Parsea "YYYY-MM-DD HH:MM:SS" como hora LOCAL del browser.
+ * Equivalente a new Date(y,m,d,h,mi,s) pero acepta el string del CSV.
+ * NO hay conversión UTC — el número resultante es comparable directamente
+ * con new Date(y, m, d, hh, mm).getTime() usado en getCloseTimestamp().
+ */
+function parseLocalTs(str) {
+  // "2026-04-29 09:00:00" o "2026-04-29T09:00:00"
+  const s = str.replace('T', ' ').trim();
+  const [datePart, timePart] = s.split(' ');
+  const [y, mo, d]  = datePart.split('-').map(Number);
+  const [h, mi, sc] = (timePart || '00:00:00').split(':').map(Number);
+  return new Date(y, mo - 1, d, h, mi, sc || 0).getTime();
+}
+
+// Hora de cierre definida por el usuario (HH:MM en tiempo local)
+let hmCloseTimeStr = '15:00';
+
+function onHmCloseTime(val) {
+  hmCloseTimeStr = val;
+  updateAnchorBadge();
+  if (hmEnabled) replot();
+}
+
+/**
+ * Dado el último registro del CSV, construye el timestamp del cierre
+ * usando la hora que el usuario definió — todo en tiempo LOCAL.
+ *
+ * Mismo espacio de referencia que parseLocalTs() → no hay desfase.
+ */
+function getCloseTs(rows) {
+  const times = rows.map(r => parseLocalTs(r.Time)).filter(t => !isNaN(t));
+  if (!times.length) return null;
+  const lastMs = Math.max(...times);
+  const d      = new Date(lastMs);
+  const [hh, mm] = hmCloseTimeStr.split(':').map(Number);
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate(), hh, mm, 0).getTime();
+}
+
+function updateAnchorBadge() {
+  const badge = document.getElementById('hm-anchor-badge');
+  if (!badge) return;
+  const data  = currentTab ? hmCache[currentTab]?.[hmType] : null;
+  const mMax  = data ? Math.max(...data.minutes) : 390;
+  const [hh, mm] = hmCloseTimeStr.split(':').map(Number);
+  const openMs   = new Date(2000, 0, 1, hh, mm).getTime() - mMax * 60000;
+  const od       = new Date(openMs);
+  const openStr  = String(od.getHours()).padStart(2,'0') + ':' + String(od.getMinutes()).padStart(2,'0');
+  badge.textContent = openStr + '→' + hmCloseTimeStr;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  BUILD HEATMAP TRACE
+// ══════════════════════════════════════════════════════════════════════
+
+function buildHeatmapTrace(activo, rows) {
+  if (!hmEnabled) return null;
+  const data = hmCache[activo]?.[hmType];
+  if (!data || !data.z.length) return null;
+
+  const { strikes, minutes, z } = data;
+
+  // ── Anchor en tiempo local puro ───────────────────────────────────
+  // parseLocalTs() → ms locales  /  getCloseTs() → ms locales
+  // Ambos en el mismo espacio → sin desfase de TZ
+  const tClose = getCloseTs(rows);
+  if (!tClose) return null;
+
+  const mMax = Math.max(...minutes);
+
+  // minutes=0 → tClose (cierre del usuario)
+  // minutes=M → tClose - M minutos
+  // Emit as local datetime string (no Z) so Plotly treats same as scatter x values
+  function toLocalISOStr(ms) {
+    const d = new Date(ms);
+    const pad = n => String(n).padStart(2,'0');
+    return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+
+           'T'+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
+  }
+  const xDates = minutes.map(m => toLocalISOStr(tClose - m * 60 * 1000));
+
+  // ── Colorscale ────────────────────────────────────────────────────
+  const cs = COLORSCALES[hmColorscale] || COLORSCALES.RdGr;
+
+  // ── Symmetric z normalization ──────────────────────────────────────
+  // Center colorscale at 0 so positive=green/red and negative=opposite
+  const allVals = z.flat().filter(v => isFinite(v) && v !== 0);
+  const absMax  = allVals.length ? Math.max(...allVals.map(Math.abs)) : 1;
+
+  return {
+    type:        'heatmap',
+    x:           xDates,
+    y:           strikes,
+    z:           z,
+    zmin:        -absMax,
+    zmax:        absMax,
+    zmid:        0,
+    colorscale:  cs,
+    showscale:   false,       // hide colorbar to keep chart clean
+    opacity:     hmOpacity,
+    hoverinfo:   'skip',      // don't interfere with scatter hover
+    name:        `${hmType} Surface`,
+    xgap:        0,
+    ygap:        0,
+  };
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  TOOLBAR — individual signal buttons + hover toggle
+// ══════════════════════════════════════════════════════════════════════
+function buildToolbar() {
+  const tb = document.getElementById('toolbar');
+  tb.innerHTML = '';
+
+  // ALL / NONE
+  const all = document.createElement('button');
+  all.className = 'helper-btn'; all.textContent = 'ALL';
+  all.onclick = () => { hiddenSigs.clear(); syncButtons(); replot(); };
+  tb.appendChild(all);
+
+  const none = document.createElement('button');
+  none.className = 'helper-btn'; none.textContent = 'NONE';
+  none.onclick = () => {
+    Object.keys(SIGNALS).forEach(k => { if (k !== 'SPOT') hiddenSigs.add(k); });
+    syncButtons(); replot();
+  };
+  tb.appendChild(none);
+
+  // Divider
+  tb.appendChild(mkDiv());
+
+  // One button per individual signal
+  Object.entries(SIGNALS).forEach(([key, def]) => {
+    const btn = document.createElement('div');
+    btn.className = 'sig-btn';
+    btn.dataset.sig = key;
+    btn.style.borderColor = def.color + '70';
+    btn.style.color = def.color;
+
+    const dot = document.createElement('div');
+    dot.className = 'dot';
+    dot.style.background = def.line ? def.color : 'transparent';
+    dot.style.border = def.line ? 'none' : `1.5px solid ${def.color}`;
+    btn.appendChild(dot);
+    btn.appendChild(document.createTextNode(key));
+
+    if (key !== 'SPOT') {
+      btn.onclick = () => {
+        hiddenSigs.has(key) ? hiddenSigs.delete(key) : hiddenSigs.add(key);
+        syncButtons(); replot();
+      };
+    }
+    tb.appendChild(btn);
+  });
+
+  // Divider + HOVER toggle
+  tb.appendChild(mkDiv());
+  const hbtn = document.createElement('button');
+  hbtn.className = 'helper-btn hover-btn active-btn';
+  hbtn.id = 'btn-hover';
+  hbtn.textContent = 'HOVER ●';
+  hbtn.onclick = () => {
+    hoverOn = !hoverOn;
+    hbtn.textContent = hoverOn ? 'HOVER ●' : 'HOVER ○';
+    hbtn.classList.toggle('active-btn', hoverOn);
+    replot();
+  };
+  tb.appendChild(hbtn);
+
+  // Refresh
+  const rb = document.createElement('button');
+  rb.className = 'refresh-btn'; rb.textContent = '↺';
+  rb.onclick = loadAll;
+  tb.appendChild(rb);
+
+  // Init type button states
+  document.querySelectorAll('.hm-type-btn').forEach(b => {
+    b.classList.toggle('hm-selected', b.dataset.type === hmType);
+    b.classList.add('hm-off'); // start dimmed since heatmap is off
+  });
+  document.querySelectorAll('#cs-rdgr,#cs-rdbu,#cs-plasma')
+    .forEach(b => b.classList.add('hm-off'));
+}
+
+function mkDiv() {
+  const d = document.createElement('div');
+  d.className = 'divider-v'; return d;
+}
+
+function syncButtons() {
+  document.querySelectorAll('.sig-btn').forEach(btn => {
+    const k = btn.dataset.sig;
+    btn.classList.toggle('off', hiddenSigs.has(k));
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  CSV PARSER
+// ══════════════════════════════════════════════════════════════════════
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  if (lines.length < 2) return [];
+  const headers = lines[0].split(',').map(h => h.trim());
+  return lines.slice(1).map(line => {
+    const vals = line.split(',');
+    const obj = {};
+    headers.forEach((h, i) => {
+      const v = (vals[i] || '').trim();
+      obj[h] = v === '' ? null : isNaN(+v) ? v : +v;
+    });
+    return obj;
+  }).filter(r => r.Time)
+   .map(r => {
+     // Normalise Time: "2026-04-29 09:00:00" → "2026-04-29T09:00:00"
+     // WITHOUT trailing Z so Plotly treats it as local, not UTC.
+     if (r.Time && typeof r.Time === 'string') {
+       r.Time = r.Time.trim().replace(' ', 'T');
+     }
+     return r;
+   });
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  LOAD ALL CSVs
+// ══════════════════════════════════════════════════════════════════════
+async function loadAll() {
+  setStatus('Cargando CSVs…');
+  const found = [];
+
+  await Promise.all(ACTIVOS.map(async a => {
+    const url = CSV_FOLDER + a.toLowerCase() + '_gex_history.csv?_=' + Date.now();
+    try {
+      const r = await fetch(url);
+      if (!r.ok) return;
+      const text = await r.text();
+      const rows = parseCSV(text);
+      if (rows.length > 0) {
+        csvCache[a] = rows;
+        found.push(a);
+      }
+    } catch(e) { /* file not found, skip */ }
+  }));
+
+  if (!found.length) {
+    showError('No se encontraron archivos *_gex_history.csv\n' +
+      'Pon este HTML en la misma carpeta que los CSV (E:\\GEX\\Sync\\)\n' +
+      'o usa python -m http.server 8080 desde esa carpeta.');
+    return;
+  }
+
+  document.getElementById('ldot').className = 'live-dot';
+  document.getElementById('status').style.display = 'none';
+  document.getElementById('err').style.display = 'none';
+
+  if (!currentTab || !found.includes(currentTab)) currentTab = found[0];
+  buildTabs(found);
+  buildPanels(found);
+
+  // If heatmap is already enabled, pre-load for current tab
+  if (hmEnabled && currentTab) {
+    await loadHeatmapData(currentTab, hmType);
+  }
+
+  replot();
+  flashBadge();
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  TABS & PANELS
+// ══════════════════════════════════════════════════════════════════════
+function buildTabs(activos) {
+  const nav = document.getElementById('tabs-nav');
+  nav.innerHTML = '';
+  activos.forEach(a => {
+    const b = document.createElement('button');
+    b.className = 'tab' + (a === currentTab ? ' active' : '');
+    b.textContent = a;
+    b.onclick = async () => {
+      currentTab = a;
+      activateTab(a);
+      // Pre-load heatmap for newly activated tab
+      if (hmEnabled) await loadHeatmapData(a, hmType);
+      replot();
+    };
+    nav.appendChild(b);
+  });
+}
+
+function buildPanels(activos) {
+  const c = document.getElementById('panels');
+  c.innerHTML = '';
+  activos.forEach(a => {
+    const div = document.createElement('div');
+    div.className = 'panel' + (a === currentTab ? ' active' : '');
+    div.id = 'panel-' + a;
+    div.innerHTML = `<div id="chart-${a}" class="plotly-chart"></div>`;
+    c.appendChild(div);
+  });
+  requestAnimationFrame(fixChartHeights);
+}
+
+function fixChartHeights() {
+  const main = document.querySelector('main');
+  const h = main.getBoundingClientRect().height;
+  if (h < 10) return;
+  ACTIVOS.forEach(a => {
+    const el = document.getElementById('chart-' + a);
+    if (el) { el.style.height = h + 'px'; }
+  });
+}
+
+function activateTab(a) {
+  document.querySelectorAll('.tab').forEach(t =>
+    t.classList.toggle('active', t.textContent === a));
+  document.querySelectorAll('.panel').forEach(p =>
+    p.classList.toggle('active', p.id === 'panel-' + a));
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  PLOT
+// ══════════════════════════════════════════════════════════════════════
+
+const zoomState = {};
+
+function saveZoom(activo) {
+  const el = document.getElementById('chart-' + activo);
+  if (!el || !el.layout) return;
+  const xl = el.layout.xaxis, yl = el.layout.yaxis;
+  if (xl?.range && yl?.range) {
+    zoomState[activo] = { x: [...xl.range], y: [...yl.range] };
+  }
+}
+
+function replot() {
+  if (!currentTab || !csvCache[currentTab]) return;
+  const rows = csvCache[currentTab];
+  const el   = document.getElementById('chart-' + currentTab);
+  if (!el) return;
+
+  saveZoom(currentTab);
+
+  const traces = buildTraces(rows);
+  const layout = buildLayout(currentTab, rows);
+
+  const saved = zoomState[currentTab];
+  if (saved) {
+    layout.xaxis.range     = saved.x;
+    layout.xaxis.autorange = false;
+    layout.yaxis.range     = saved.y;
+    layout.yaxis.autorange = false;
+  }
+
+  Plotly.react(el, traces, layout, {
+    responsive: true,
+    displayModeBar: true,
+    modeBarButtonsToRemove: ['toImage','sendDataToCloud'],
+    displaylogo: false,
+  });
+
+  el.on('plotly_relayout', (evtData) => {
+    if (evtData['xaxis.range[0]'] !== undefined) {
+      zoomState[currentTab] = {
+        x: [evtData['xaxis.range[0]'], evtData['xaxis.range[1]']],
+        y: zoomState[currentTab]?.y || layout.yaxis.range,
+      };
+    }
+    if (evtData['yaxis.range[0]'] !== undefined) {
+      const cur = zoomState[currentTab] || {};
+      zoomState[currentTab] = {
+        x: cur.x || layout.xaxis.range,
+        y: [evtData['yaxis.range[0]'], evtData['yaxis.range[1]']],
+      };
+    }
+    if (evtData['xaxis.autorange'] === true || evtData['yaxis.autorange'] === true) {
+      delete zoomState[currentTab];
+    }
+  });
+}
+
+function buildTraces(rows) {
+  const times  = rows.map(r => r.Time);
+  const traces = [];
+
+  // ── 1. Heatmap trace — always FIRST so it renders behind everything ──
+  const hmTrace = buildHeatmapTrace(currentTab, rows);
+  if (hmTrace) traces.push(hmTrace);
+
+  // ── 2. Signal scatter traces ──────────────────────────────────────
+  Object.entries(SIGNALS).forEach(([key, def]) => {
+    const visible = !hiddenSigs.has(key);
+
+    if (def.line) {
+      traces.push({
+        x: times,
+        y: rows.map(r => r[key]),
+        name: key,
+        type: 'scatter',
+        mode: 'lines',
+        line: { color: def.color, width: 2 },
+        visible: visible ? true : 'legendonly',
+        legendgroup: def.group,
+        hovertemplate: `<b>${key}</b> %{y:.0f}<extra></extra>`,
+      });
+    } else {
+      const xVals = [], yVals = [];
+      rows.forEach(r => {
+        const v = r[key];
+        if (v !== null && v !== 0) {
+          xVals.push(r.Time);
+          yVals.push(v);
+        }
+      });
+      if (xVals.length === 0) return;
+
+      traces.push({
+        x: xVals,
+        y: yVals,
+        name: key,
+        type: 'scatter',
+        mode: 'markers',
+        marker: {
+          color: def.color,
+          symbol: def.sym,
+          size: def.size || 9,
+          line: { color: def.color, width: 1.5 },
+          opacity: 0.92,
+        },
+        visible: visible ? true : 'legendonly',
+        legendgroup: def.group,
+        hovertemplate: `<b>${key}</b> %{y:.0f}<extra></extra>`,
+      });
+    }
+  });
+
+  return traces;
+}
+
+function buildLayout(activo, rows) {
+  const allVals = [];
+  Object.keys(SIGNALS).forEach(k => {
+    rows.forEach(r => {
+      const v = r[k];
+      if (v !== null && v !== undefined && v !== 0 && isFinite(v)) allVals.push(v);
+    });
+  });
+
+  const yMin = allVals.length ? Math.min(...allVals) * 0.997 : 0;
+  const yMax = allVals.length ? Math.max(...allVals) * 1.003 : 1000;
+
+  // Heatmap label badge in title
+  const hmLabel = hmEnabled ? ` · <span style="opacity:.6">${hmType} SURFACE ${Math.round(hmOpacity*100)}%</span>` : '';
+
+  return {
+    autosize: true,
+    paper_bgcolor: '#06090d',
+    plot_bgcolor:  '#0b0f14',
+    font: { family: 'JetBrains Mono, monospace', color: '#7a8fa8', size: 10 },
+    title: {
+      text: `${activo} — GEX History${hmEnabled ? ' + ' + hmType + ' Surface' : ''}`,
+      font: { color: '#d0d8e4', size: 14, weight: 600 },
+      x: 0.02, xanchor: 'left',
+    },
+    margin: { l:60, r:20, t:44, b:46 },
+    xaxis: {
+      type: 'date',
+      color: '#3d5068',
+      gridcolor: '#1a2332',
+      tickfont: { size:9 },
+      showgrid: true,
+      zeroline: false,
+      autorange: true,
+    },
+    yaxis: {
+      title: { text: 'Strike / Nivel', font:{color:'#3d5068',size:9}, standoff:8 },
+      color: '#3d5068',
+      gridcolor: '#1a2332',
+      tickfont: { size:9 },
+      zeroline: false,
+      range: [yMin, yMax],
+    },
+    showlegend: false,
+    hovermode: hoverOn ? 'closest' : false,
+    hoverlabel: {
+      bgcolor: '#0f1419',
+      bordercolor: '#243040',
+      font: { family: 'JetBrains Mono, monospace', size:10 },
+    },
+    dragmode: 'zoom',
+    shapes:      hmEnabled ? _sessionShapes(rows) : [],
+    annotations: hmEnabled ? _sessionAnnotations(rows) : [],
+  };
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  SESSION BOUNDARY LINES
+// ══════════════════════════════════════════════════════════════════════
+function _localIsoStr(ms) {
+  const d = new Date(ms), p = n => String(n).padStart(2,'0');
+  return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+
+         'T'+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds());
+}
+function _sessionBounds(rows) {
+  const tClose = getCloseTs(rows);
+  if (!tClose) return null;
+  const data = currentTab ? hmCache[currentTab]?.[hmType] : null;
+  const mMax = data ? Math.max(...data.minutes) : 390;
+  return { tOpen: tClose - mMax * 60000, tClose };
+}
+function _sessionShapes(rows) {
+  const b = _sessionBounds(rows);
+  if (!b) return [];
+  return [
+    { type:'line', xref:'x', yref:'paper',
+      x0:_localIsoStr(b.tOpen),  x1:_localIsoStr(b.tOpen),  y0:0, y1:1,
+      line:{ color:'#22c55e55', width:1, dash:'dot' } },
+    { type:'line', xref:'x', yref:'paper',
+      x0:_localIsoStr(b.tClose), x1:_localIsoStr(b.tClose), y0:0, y1:1,
+      line:{ color:'#ef4444aa', width:1.5, dash:'dot' } },
+  ];
+}
+function _sessionAnnotations(rows) {
+  const b = _sessionBounds(rows);
+  if (!b) return [];
+  const fmt = ms => { const d=new Date(ms); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
+  return [
+    { xref:'x', yref:'paper', x:_localIsoStr(b.tOpen),  y:1.01,
+      text:'OPEN '+fmt(b.tOpen), showarrow:false,
+      font:{family:'JetBrains Mono',size:8,color:'#22c55eaa'}, xanchor:'left',  yanchor:'bottom' },
+    { xref:'x', yref:'paper', x:_localIsoStr(b.tClose), y:1.01,
+      text:'CLOSE '+fmt(b.tClose), showarrow:false,
+      font:{family:'JetBrains Mono',size:8,color:'#ef4444cc'}, xanchor:'right', yanchor:'bottom' },
+  ];
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════════════════════════════
+function setStatus(msg) {
+  const s = document.getElementById('status');
+  s.style.display = 'flex';
+  s.innerHTML = `<div class="spinner"></div><span>${msg}</span>`;
+}
+function showError(msg) {
+  document.getElementById('ldot').className = 'live-dot dead';
+  document.getElementById('status').style.display = 'none';
+  const el = document.getElementById('err');
+  el.style.display = 'block';
+  el.textContent = '⚠  ' + msg;
+}
+function flashBadge() {
+  const b = document.getElementById('nbadge');
+  b.textContent = '✓ LOADED'; b.classList.add('flash');
+  setTimeout(() => { b.textContent = 'AUTO 60s'; b.classList.remove('flash'); }, 900);
+}
+
+// ── CLOCK ──────────────────────────────────────────────────────────────
+setInterval(() => {
+  document.getElementById('ts').textContent =
+    new Date().toLocaleTimeString('en-US',{hour12:false});
+}, 1000);
+
+// ── COUNTDOWN ──────────────────────────────────────────────────────────
+let cd = REFRESH_MS / 1000;
+setInterval(() => {
+  cd--;
+  if (cd <= 0) { cd = REFRESH_MS / 1000; loadAll(); }
+  const b = document.getElementById('nbadge');
+  if (!b.classList.contains('flash')) b.textContent = `AUTO ${cd}s`;
+}, 1000);
+
+// ── RESIZE ────────────────────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  fixChartHeights();
+  const el = document.getElementById('chart-' + currentTab);
+  if (el && el.data) Plotly.relayout(el, { autosize: true });
+});
+
+// ── INIT ──────────────────────────────────────────────────────────────
+buildToolbar();
+updateAnchorBadge();
+loadAll();
+</script>
+</body>
+</html>
