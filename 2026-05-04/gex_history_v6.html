@@ -144,12 +144,16 @@ nav {
 .hm-type-btn[data-type="CEX"] { border-color:#22d3ee60; color:#22d3ee; }
 .hm-type-btn[data-type="COLOR"] { border-color:#f59e0b60; color:#f59e0b; }
 .hm-type-btn[data-type="SPEED"] { border-color:#38bdf860; color:#38bdf8; }
+.hm-type-btn[data-type="VOMMA"] { border-color:#38bdf860; color:#38bdf8; }
+.hm-type-btn[data-type="ZOMMA"] { border-color:#38bdf860; color:#38bdf8; }
 .hm-type-btn.hm-selected[data-type="GEX"] { background:#ef444420; border-color:#ef4444; }
 .hm-type-btn.hm-selected[data-type="VEX"] { background:#a78bfa20; border-color:#a78bfa; }
 .hm-type-btn.hm-selected[data-type="DEX"] { background:#fb923c20; border-color:#fb923c; }
 .hm-type-btn.hm-selected[data-type="CEX"] { background:#22d3ee20; border-color:#22d3ee; }
 .hm-type-btn.hm-selected[data-type="COLOR"] { background:#f59e0b20; border-color:#f59e0b; }
 .hm-type-btn.hm-selected[data-type="SPEED"] { background:#38bdf820; border-color:#38bdf8; }
+.hm-type-btn.hm-selected[data-type="VOMMA"] { background:#38bdf820; border-color:#38bdf8; }
+.hm-type-btn.hm-selected[data-type="ZOMMA"] { background:#38bdf820; border-color:#38bdf8; }
 
 /* opacity slider */
 .hm-slider-wrap { display:flex; align-items:center; gap:5px; }
@@ -240,6 +244,8 @@ main { flex:1; overflow:hidden; position:relative; }
   <button class="hm-type-btn" data-type="CEX" onclick="selectHmType('CEX')">CEX</button>
   <button class="hm-type-btn" data-type="COLOR" onclick="selectHmType('COLOR')">COLOR</button>
   <button class="hm-type-btn" data-type="SPEED" onclick="selectHmType('SPEED')">SPEED</button>
+  <button class="hm-type-btn" data-type="VOMMA" onclick="selectHmType('VOMMA')">VOMMA</button>
+  <button class="hm-type-btn" data-type="ZOMMA" onclick="selectHmType('ZOMMA')">ZOMMA</button>
 
   <div class="divider-v"></div>
 
@@ -292,8 +298,8 @@ const SIGNALS = {
   MINGEX:     { color:'#22c55e',  sym:'square-open',  group:'GEX',     size:8  },
   MAXVEX:     { color:'#ef4444',  sym:'x',            group:'VEX',     size:4  },
   MINVEX:     { color:'#22c55e',  sym:'x',            group:'VEX',     size:4  },
-  MAXDEX:     { color:'#ef4444',  sym:'hexagon-open',      group:'DEX',     size:12  },
-  MINDEX:     { color:'#22c55e',  sym:'hexagon-open',      group:'DEX',     size:12  },
+  MAXDEX:     { color:'#ef4444',  sym:'hexagon-open',      group:'DEX',     size:14  },
+  MINDEX:     { color:'#22c55e',  sym:'hexagon-open',      group:'DEX',     size:14  },
   ZERO:       { color:'#eab308',  sym:'circle-open',  group:'ZERO',    size:4 },
   MAXCP:      { color:'#ef4444',  sym:'circle',       group:'CP',      size:2  },
   MINCP:      { color:'#22c55e',  sym:'circle',       group:'CP',      size:2  },
@@ -303,10 +309,10 @@ const SIGNALS = {
   SAP:        { color:'#e879f9',  sym:'triangle-up',  group:'FLOW',    size:8 },
   LONGGAMMA:  { color:'#22d3ee',  sym:'cross',        group:'GAMMA',   size:4 },
   SHORTGAMMA: { color:'#e879f9',  sym:'cross',        group:'GAMMA',   size:4 },
-  LONGCALLS:  { color:'#22d3ee',  sym:'triangle-up-open',         group:'INV',     size:12 },
-  SHORTCALLS: { color:'#e879f9',  sym:'triangle-down-open',         group:'INV',     size:12 },
-  LONGPUTS:   { color:'#22d3ee',  sym:'triangle-down-open',group:'INV',  size:12 },
-  SHORTPUTS:  { color:'#e879f9',  sym:'triangle-up-open',group:'INV',  size:12 },
+  LONGCALLS:  { color:'#22d3ee',  sym:'triangle-up-open',         group:'INV',     size:14 },
+  SHORTCALLS: { color:'#e879f9',  sym:'triangle-up-open',         group:'INV',     size:14 },
+  LONGPUTS:   { color:'#22d3ee',  sym:'triangle-down-open',group:'INV',  size:14 },
+  SHORTPUTS:  { color:'#e879f9',  sym:'triangle-down-open',group:'INV',  size:14 },
   ZERO_OI:    { color:'#9ca3af',  sym:'line-ew',  group:'ZERO_OI',    size:6 },
 };
 
@@ -336,6 +342,8 @@ const HM_CSV_SUFFIX = {
   CEX: '_heatmap_charm.csv',
   COLOR: '_heatmap_color.csv',
   SPEED: '_heatmap_speed.csv',
+  VOMMA: '_heatmap_vomma.csv',
+  ZOMMA: '_heatmap_zomma.csv',
 
 };
 
