@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Signals Guide — GEX Engine</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:      #06090d;
+  --bg2:     #0b0f14;
+  --bg3:     #0f1419;
+  --border:  #1a2332;
+  --border2: #243040;
+  --text:    #d0d8e4;
+  --text2:   #7a8fa8;
+  --text3:   #3d5068;
+  --accent:  #4a9eff;
+  --green:   #22c55e;
+  --red:     #ef4444;
+  --yellow:  #eab308;
+  --cyan:    #22d3ee;
+  --magenta: #e879f9;
+  --purple:  #d8b4fe;
+  --orange:  #fb923c;
+  --mono:    'JetBrains Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 20px;
+  background: var(--bg2); border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+}
+.logo { font-size: 13px; font-weight: 700; letter-spacing: .12em; color: var(--accent); }
+.logo em { color: var(--text2); font-style: normal; font-weight: 300; }
+.hdr-right { display: flex; align-items: center; gap: 10px; }
+.back-link {
+  font-size: 9px; font-weight: 600; letter-spacing: .08em;
+  color: var(--text3); border: 1px solid var(--border); border-radius: 2px;
+  padding: 3px 8px; text-decoration: none; transition: color .15s, border-color .15s;
+}
+.back-link:hover { color: var(--accent); border-color: var(--accent); }
+
+/* ── LAYOUT ── */
+.page { max-width: 980px; margin: 0 auto; padding: 28px 20px 60px; }
+
+/* ── HERO ── */
+.hero {
+  border: 1px solid var(--border2); border-radius: 3px;
+  background: var(--bg2); padding: 20px 24px; margin-bottom: 28px;
+}
+.hero-title {
+  font-size: 18px; font-weight: 700; letter-spacing: .1em;
+  color: var(--text); margin-bottom: 8px;
+}
+.hero-sub {
+  color: var(--text2); font-size: 10px; line-height: 1.7; max-width: 700px;
+}
+.hero-sub code {
+  color: var(--accent); background: #4a9eff12;
+  padding: 1px 4px; border-radius: 2px;
+}
+
+/* ── SECTION HEADING ── */
+.section-title {
+  font-size: 9px; font-weight: 700; letter-spacing: .18em;
+  color: var(--text3); text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 6px; margin-bottom: 14px; margin-top: 32px;
+}
+.section-title:first-of-type { margin-top: 0; }
+
+/* ── SIGNAL CARD ── */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(440px, 1fr));
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 3px; padding: 14px 16px;
+  transition: border-color .15s;
+  position: relative; overflow: hidden;
+}
+.card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; width: 3px; height: 100%;
+}
+.card:hover { border-color: var(--border2); }
+
+/* accent strip colors */
+.card.clr-red::before    { background: var(--red); }
+.card.clr-green::before  { background: var(--green); }
+.card.clr-yellow::before { background: var(--yellow); }
+.card.clr-cyan::before   { background: var(--cyan); }
+.card.clr-purple::before { background: var(--purple); }
+.card.clr-accent::before { background: var(--accent); }
+.card.clr-orange::before { background: var(--orange); }
+.card.clr-white::before  { background: #f8f8f8; }
+.card.clr-magenta::before{ background: var(--magenta); }
+
+.card-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 8px;
+}
+.sig-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 9px; border-radius: 2px; border: 1px solid;
+  font-size: 10px; font-weight: 700; letter-spacing: .08em;
+  white-space: nowrap; flex-shrink: 0;
+}
+.sig-badge .dot {
+  width: 7px; height: 7px; border-radius: 1px; flex-shrink: 0;
+}
+.card-label {
+  font-size: 10px; font-weight: 600; color: var(--text2); letter-spacing: .06em;
+}
+
+.card-body { color: var(--text2); font-size: 10px; line-height: 1.75; }
+.card-body strong { color: var(--text); font-weight: 600; }
+.card-body code {
+  color: var(--accent); background: #4a9eff10;
+  padding: 1px 4px; border-radius: 2px; font-size: 9px;
+}
+.card-body .formula {
+  margin-top: 8px; padding: 7px 10px;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 2px; font-size: 9px; color: var(--text3);
+  line-height: 1.8;
+}
+.card-body .formula span { color: var(--accent); }
+
+/* ── PAIR CARD (MAXGEX/MINGEX style) ── */
+.pair-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  margin-bottom: 10px;
+}
+
+/* ── FLOW TABLE ── */
+.flow-table {
+  width: 100%; border-collapse: collapse;
+  margin-top: 10px; font-size: 10px;
+}
+.flow-table th {
+  text-align: left; padding: 5px 10px;
+  background: var(--bg3); color: var(--text3);
+  font-size: 9px; letter-spacing: .1em; font-weight: 600;
+  border-bottom: 1px solid var(--border);
+}
+.flow-table td {
+  padding: 7px 10px; border-bottom: 1px solid var(--border);
+  color: var(--text2); vertical-align: top; line-height: 1.6;
+}
+.flow-table td:first-child { color: var(--text); font-weight: 600; }
+.flow-table tr:last-child td { border-bottom: none; }
+.flow-table tr:hover td { background: #ffffff04; }
+
+/* ── TICK RULE BOX ── */
+.tick-box {
+  background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: 3px; padding: 12px 14px; margin-top: 12px;
+  font-size: 9px; line-height: 1.9; color: var(--text3);
+}
+.tick-box .rule { display: flex; gap: 8px; align-items: flex-start; }
+.tick-box .rule-label { color: var(--text2); font-weight: 600; min-width: 90px; flex-shrink: 0; }
+.tick-box .rule-val   { color: var(--accent); }
+.tick-box .note       { color: var(--text3); margin-top: 8px; font-size: 9px; }
+
+/* ── CHIP ── */
+.chip {
+  display: inline-block; font-size: 8px; font-weight: 700;
+  letter-spacing: .1em; padding: 2px 7px; border-radius: 2px;
+  margin-right: 4px; margin-bottom: 2px;
+  border: 1px solid;
+}
+.chip-bull { border-color: #22c55e60; color: var(--green); background: #22c55e0e; }
+.chip-bear { border-color: #ef444460; color: var(--red);   background: #ef44440e; }
+.chip-neutral { border-color: var(--border2); color: var(--text3); }
+.chip-flow { border-color: #22d3ee60; color: var(--cyan); background: #22d3ee0e; }
+
+/* ── FORMULA INLINE ── */
+.math {
+  display: block; margin: 8px 0; padding: 8px 12px;
+  background: var(--bg3); border-left: 2px solid var(--accent);
+  color: var(--text2); font-size: 9px; line-height: 1.9; border-radius: 0 2px 2px 0;
+}
+.math .sym { color: var(--accent); }
+.math .op  { color: var(--yellow); }
+
+/* ── NOTE BOX ── */
+.note-box {
+  padding: 10px 14px; border-radius: 2px; margin-top: 10px;
+  border: 1px solid var(--border2); background: #4a9eff08;
+  font-size: 9px; color: var(--text3); line-height: 1.75;
+}
+.note-box strong { color: var(--text2); }
+
+/* ── WIDE CARD (full width) ── */
+.card-wide {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 3px; padding: 14px 16px; margin-bottom: 10px;
+  position: relative; overflow: hidden;
+}
+.card-wide::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; width: 3px; height: 100%;
+}
+.card-wide.clr-white::before { background: #f8f8f8aa; }
+.card-wide.clr-yellow::before { background: var(--yellow); }
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border); padding: 14px 20px;
+  text-align: center; color: var(--text3); font-size: 9px; letter-spacing: .08em;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="logo">GEX <em>SIGNALS GUIDE</em></div>
+  </div>
+  <div class="hdr-right">
+    <a href="gex_history_v10.html" class="back-link">← GEX HISTORY</a>
+  </div>
+</header>
+
+<div class="page">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-title">Signal Reference · GEX Engine v6</div>
+    <div class="hero-sub">
+      Every row in <code>*_gex_history.csv</code> is a 60-second snapshot of the live options chain.
+      Each signal below is a <strong>strike price</strong> — not a value — indicating where a specific Greek extreme,
+      flow event, or structural level occurred at that moment in time.
+      The chart plots these strikes as scatter points on the price axis so you can see
+      how dealer positioning and order flow evolve through the session.
+    </div>
+  </div>
+
+  <!-- ══ GEX ══ -->
+  <div class="section-title">GEX — Gamma Exposure (Open Interest)</div>
+
+  <div class="card-grid">
+
+    <div class="card clr-red">
+      <div class="card-header">
+        <div class="sig-badge" style="border-color:#ef444470;color:#ef4444;">
+          <div class="dot" style="border:1.5px solid #ef4444;background:transparent;"></div>MAXGEX
+        </div>
+        <div class="card-label">Dominant Positive GEX Strike</div>
+      </div>
+      <div class="card-body">
+        <strong>What it is:</strong> The strike with the largest <em>positive</em> GEX value across the whole chain — the peak of dealer long-gamma positioning.<br><br>
+        <strong>Interpretation:</strong> Dealers are long gamma here. Above this strike they sell into rallies; below they buy dips. Acts as a <span style="color:var(--red)">magnetic ceiling</span> — price tends to get pinned or repelled. Strong positive GEX environments produce mean-reverting, low-vol tape.
+        <div class="formula">
+          GEX = <span>(Gamma_Call × OI_Call − Gamma_Put × OI_Put)</span> × 100 × Spot² × 0.01<br>
+          MAXGEX = strike where GEX is maximum <strong>if</strong> |max| ≥ |min|, else = 0
+        </div>
+      </div>
+    </div>
+
+    <div class="card clr-green">
+      <div class="card-header">
+        <div class="sig-badge" style="border-color:#22c55e70;color:#22c55e;">
+          <div class="dot" style="border:1.5px solid #22c55e;background:transparent;"></div>MINGEX
+        </div>
+        <div class="card-label">Dominant Negative GEX Strike</div>
+      </div>
+      <div class="card-body">
+        <strong>What it is:</strong> The strike with the most negative GEX — where puts overwhelm calls in dealer books.<br><br>
+        <strong>Interpretation:</strong> Dealers are short gamma here. They must sell into drops and buy into rips — <span style="color:var(--green)">amplifying moves</span>. Negative GEX environments are volatile: gaps, fast trends, spikes. MINGEX acts as a gravitational accelerant when breached.
+        <div class="formula">
+          MINGEX = strike where GEX is minimum <strong>if</strong> |min| &gt; |max|, else = 0<br>
+          <span style="color:var(--text3)">Only one of MAXGEX / MINGEX is non-zero per cycle — whichever dominates.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card clr-red">
+      <div class="card-header">
+        <div class="sig-badge" style="border-color:#ef444470;color:#ef4444;">
+          <div class="dot" style="border:1.5px solid #ef4444;background:transparent;background:none;"></div>MAXVEX
+        </div>
+        <div class="card-label">Dominant Positive VEX Strike</div>
+      </div>
+      <div class="card-body">
+        <strong>What it is:</strong> Same formula as GEX but using intraday <em>volume</em> instead of open interest. The strike where call-side gamma-weighted volume dominates today's flow.<br><br>
+        <strong>Interpretation:</strong> Reveals <em>today's</em> dealer hedging pressure, not the static OI book. MAXVEX is more reactive than MAXGEX — it moves with real-time flow. A MAXVEX close to spot with high volume signals strong call pinning or a local ceiling being actively traded.
+        <div class="formula">
+          VEX = <span>(Gamma_Call × Vol_Call − Gamma_Put × Vol_Put)</span> × 100 × Spot² × 0.01
+        </div>
+      </div>
+    </div>
+
+    <div class="card clr-green">
+      <div class="card-header">
+        <div class="sig-badge" style="border-color:#22c55e70;color:#22c55e;">
+          <div class="dot" style="border:1.5px solid #22c55e;background:transparent;"></div>MINVEX
+        </div>
+        <div class="card-label">Dominant Negative VEX Strike</div>
+      </div>
+      <div class="card-body">
+        <strong>What it is:</strong> Strike where put-side gamma-weighted volume dominates. The intraday equivalent of MINGEX.<br><br>
+        <strong>Interpretation:</strong> Where today's put flow is concentrating. If MINVEX is near spot and moving lower during the session, it suggests active put accumulation — dealers are getting shorter gamma in real time and may accelerate a breakdown.
+      </div>
+    </div>
+
+  </div><!-- /card-grid -->
+
+  <!-- ══ DEX ══ -->
+  <div class="section-title">DEX — Delta Exposure</div>
+
+  <div class="card-grid">
+    <div class="card clr-orange">
+      <div class="card-header">
+        <div class="sig-badge" style="border-color:#fb923c70;color:#fb923c;">
+          <div class="dot" style="border:1.5px solid #fb923c;background:transparent;"></div>MAXDEX
+        </div>
+        <div class="card-label">Maximum Delta Exposure Strike</div>
+      </div>
+      <div class="card-body">
+        <strong>What it is:</strong> The strike with the highest total delta exposure from open interest — where dealers carry the most directional hedge.<br><br>
+        <strong>Interpretation:</strong> High delta concentration means dealers must hold large stock/futures positions here. MAXDEX marks a structural level where the hedging flow is heaviest — often coincides with major resistance or a liquidity magnet.
+        <div class="formula">
+          DEX = <span>(Delta_Call × OI_Call + Delta_Put × OI_Put)</span> × 100<br>
+          <span style="color:var(--text3)">Puts have negative delta, so net DEX blends both sides.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card clr-green">
+      <div class="card-header">
+        <div class="sig-badge" style="border-color:#22c55e70;color:#22c55e;">
+          <div class="dot" style="border:1.5px solid #22c55e;background:transparent;"></div>MINDEX
+        </div>
+        <div class="card-label">Minimum Delta Exposure Strike</div>
+      </div>
+      <div class="card-body">
+        <strong>What it is:</strong> The strike where total delta exposure is most negative — where put delta dominates and dealers are net short delta.<br><br>
+        <strong>Interpretation:</strong> A strong MINDEX well below spot suggests a heavy put wall. Dealers are long puts here and short stock as a hedge. If price drops toward MINDEX, their buying to cover creates a floor; if it breaks through, the cascade can be violent.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ZERO ══ -->
+  <div class="section-title">ZERO — Gamma Flip Level</div>
+
+  <div class="card-wide clr-yellow">
+    <div class="card-header">
+      <div class="sig-badge" style="border-color:#eab30870;color:#eab308;">
+        <div class="dot" style="border:1.5px solid #eab308;background:transparent;"></div>ZERO
+      </div>
+      <div class="card-label" style="margin-left:4px;">VEX Zero-Cross (Volume-Based Flip)</div>
+    </div>
+    <div class="card-body">
+      <strong>What it is:</strong> The interpolated strike price where the VEX curve crosses zero — the point where call gamma-weighted volume and put gamma-weighted volume are balanced. This is the <em>intraday</em> gamma flip, computed from today's volume flow.<br><br>
+      <strong>Interpretation:</strong> The most important structural level in the chart.
+      <ul style="margin-top:6px;margin-left:14px;line-height:2;">
+        <li><strong style="color:var(--green)">Price above ZERO</strong> → positive gamma regime. Dealers stabilize the market. Expect mean reversion, compressed ranges, fades work better.</li>
+        <li><strong style="color:var(--red)">Price below ZERO</strong> → negative gamma regime. Dealers amplify moves. Trends and momentum work better; volatility expands.</li>
+        <li><strong>ZERO moving toward spot</strong> intraday → the regime is shifting. Watch for a volatility regime change on a confirmed cross.</li>
+      </ul>
+      <div class="formula">
+        Algorithm: finds the first sign-change in individual VEX values (ascending strikes)<br>
+        starting at ATM — interpolates exact cross between the two bracketing strikes.<br>
+        <span style="color:var(--text3)">Note: uses per-strike VEX values, not cumulative sum.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ FLOW SIGNALS ══ -->
+  <div class="section-title">FLOW — Real-Time Order Classification (ATM)</div>
+
+  <div class="note-box" style="margin-bottom:14px;">
+    <strong>Tick Classification Logic:</strong> Each 60s, the engine compares the last traded price of an option against its bid/ask spread to determine whether the trade was buyer- or seller-initiated. Only ATM strikes (within the configured window) crossing the volume threshold are reported.
+    <div class="tick-box">
+      <div class="rule"><span class="rule-label">CALL BUY</span><span class="rule-val">last ≥ bid + spread × 0.6</span><span style="color:var(--text3);margin-left:8px;">— buyer paid near the ask</span></div>
+      <div class="rule"><span class="rule-label">CALL SELL</span><span class="rule-val">last ≤ bid + spread × 0.4</span><span style="color:var(--text3);margin-left:8px;">— seller hit the bid</span></div>
+      <div class="rule"><span class="rule-label">PUT BUY</span><span class="rule-val">last ≤ bid + spread × 0.4</span><span style="color:var(--text3);margin-left:8px;">— inverse rule: put prices rise when bought</span></div>
+      <div class="rule"><span class="rule-label">PUT SELL</span><span class="rule-val">last ≥ bid + spread × 0.6</span><span style="color:var(--text3);margin-left:8px;">— put seller abandons cheaply</span></div>
+      <div class="note">NEUTRAL zone (between thresholds) → volume split 50/50 between buy and sell.</div>
+    </div>
+  </div>
+
+  <table class="flow-table">
+    <thead>
+      <tr>
+        <th style="width:90px">SIGNAL</th>
+        <th style="width:160px">SYMBOL</th>
+        <th>MEANING &amp; MARKET INTERPRETATION</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span style="color:#67e8f9">BAC</span></td>
+        <td><span style="color:#67e8f9">▲ Cyan triangle-up</span></td>
+        <td><strong style="color:var(--text)">Buy Aggressor — Calls.</strong> An ATM call was bought at or near the ask this cycle. Bullish directional intent. The strike printed is where the aggressive buyer acted. <span class="chip chip-bull">BULLISH</span></td>
+      </tr>
+      <tr>
+        <td><span style="color:#d8b4fe">SAC</span></td>
+        <td><span style="color:#d8b4fe">▲ Purple triangle-up</span></td>
+        <td><strong style="color:var(--text)">Sell Aggressor — Calls.</strong> An ATM call was sold at or near the bid. Could be a covered call, profit-take on a long call, or a short call initiation. Context matters. <span class="chip chip-bear">BEARISH</span> <span class="chip chip-neutral">or NEUTRAL</span></td>
+      </tr>
+      <tr>
+        <td><span style="color:#67e8f9">BAP</span></td>
+        <td><span style="color:#67e8f9">▼ Cyan triangle-down</span></td>
+        <td><strong style="color:var(--text)">Buy Aggressor — Puts.</strong> An ATM put was bought aggressively. Protective hedge or outright bearish speculation. Strong signal when volume exceeds threshold near a key level. <span class="chip chip-bear">BEARISH</span></td>
+      </tr>
+      <tr>
+        <td><span style="color:#d8b4fe">SAP</span></td>
+        <td><span style="color:#d8b4fe">▼ Purple triangle-down</span></td>
+        <td><strong style="color:var(--text)">Sell Aggressor — Puts.</strong> An ATM put was sold at or near the ask (put seller = bullish). Common during systematic put-selling or hedging unwinds. <span class="chip chip-bull">BULLISH</span> <span class="chip chip-neutral">or NEUTRAL</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note-box" style="margin-top:10px;">
+    <strong>Reading BAC/SAC/BAP/SAP together:</strong> Look for <em>confluence</em>. A BAC signal followed by another BAC at the same strike, with no offsetting SAC, shows sustained aggressive call buying — a strong bullish tell. Alternating BAC/SAC at the same strike suggests a two-sided market and less directional conviction. BAP and SAP together near a support level can signal a put spread being legged.
+  </div>
+
+  <!-- ══ MAXCP / MINCP ══ -->
+  <div class="section-title">CP — Net Volume Imbalance</div>
+
+  <div class="card-grid">
+    <div class="card clr-red">
+      <div class="card-header">
+        <div class="sig-badge" style="border-color:#ef444470;color:#ef4444;">
+          <div class="dot" style="background:#ef4444;border-radius:50%;"></div>MAXCP
+        </div>
+        <div class="card-label">Maximum Call/Put Imbalance (Bullish)</div>
+      </div>
+      <div class="card-body">
+        <strong>What it is:</strong> The strike with the highest raw net volume today: <code>Vol_Call − Vol_Put</code>. Where calls are most dominant relative to puts in raw volume terms.<br><br>
+        <strong>Interpretation:</strong> A <span style="color:var(--red)">call-heavy</span> strike. Market participants are placing disproportionate call volume here. Can act as a magnet (gamma pull) or a ceiling (dealer short call hedging).
+        <div class="formula">
+          MAXCP = <span>argmax</span>( Vol_Call[K] − Vol_Put[K] ) across all strikes K
+        </div>
+      </div>
+    </div>
+
+    <div class="card clr-green">
+      <div class="card-header">
+        <div class="sig-badge" style="border-color:#22c55e70;color:#22c55e;">
+          <div class="dot" style="background:#22c55e;border-radius:50%;"></div>MINCP
+        </div>
+        <div class="card-label">Maximum Call/Put Imbalance (Bearish)</div>
+      </div>
+      <div class="card-body">
+        <strong>What it is:</strong> The strike with the most negative net volume: <code>Vol_Call − Vol_Put</code> is most negative here — puts dominate.<br><br>
+        <strong>Interpretation:</strong> A <span style="color:var(--green)">put-heavy</span> strike. Large put volume relative to calls — could signal hedging demand, speculative bearish bets, or a key support level where participants are buying protection.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ INVENTORY STRIKES ══ -->
+  <div class="section-title">INVENTORY — Accumulated Intraday Positioning</div>
+
+  <div class="note-box" style="margin-bottom:14px;">
+    <strong>How inventory works:</strong> The engine tracks every delta-volume increment since open. Each tick is classified (buy/sell) and accumulated per strike. These signals are <em>cumulative</em> — they reflect the net flow since the session started, not just the last 60s. The strikes reported are where gamma-weighted inventory is most concentrated.
+  </div>
+
+  <table class="flow-table">
+    <thead>
+      <tr>
+        <th style="width:130px">SIGNAL</th>
+        <th>MEANING &amp; INTERPRETATION</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span style="color:#22d3ee">LONGGAMMA</span></td>
+        <td><strong style="color:var(--text)">Accumulated Long Gamma — Calls + Puts.</strong> Strike with the highest combined gamma × bought-volume across both calls and puts since open. Where the market has accumulated the most long-gamma exposure today. A rising LONGGAMMA near spot signals participants are positioned for a squeeze.</td>
+      </tr>
+      <tr>
+        <td><span style="color:#ef4444">SHORTGAMMA</span></td>
+        <td><strong style="color:var(--text)">Accumulated Short Gamma — Calls + Puts.</strong> Strike with the highest gamma × sold-volume. Where sellers have concentrated the most short-gamma exposure. If SHORTGAMMA is near spot and growing, a large breakout could force painful covering.</td>
+      </tr>
+      <tr>
+        <td><span style="color:#67e8f9">LONGCALLS</span></td>
+        <td><strong style="color:var(--text)">Accumulated Long Calls (gamma-weighted).</strong> Strike where call buying has been heaviest on a gamma-weighted basis all session. Bullish accumulation zone. Dealers are short these calls and long delta as a hedge — their buying supports price above this level.</td>
+      </tr>
+      <tr>
+        <td><span style="color:#d8b4fe">SHORTCALLS</span></td>
+        <td><strong style="color:var(--text)">Accumulated Short Calls (gamma-weighted).</strong> Strike where the most calls have been sold. Overhead resistance — dealers are long the sold calls and short delta as a hedge, creating selling pressure on rallies into this level.</td>
+      </tr>
+      <tr>
+        <td><span style="color:#67e8f9">LONGPUTS</span></td>
+        <td><strong style="color:var(--text)">Accumulated Long Puts (gamma-weighted).</strong> Strike where put buying is most concentrated all session. Protective demand floor. A rising LONGPUTS signal below spot suggests growing hedge demand — support level if buying is systematic.</td>
+      </tr>
+      <tr>
+        <td><span style="color:#d8b4fe">SHORTPUTS</span></td>
+        <td><strong style="color:var(--text)">Accumulated Short Puts (gamma-weighted).</strong> Strike where put selling has concentrated. Dealers are long these puts and short delta — they buy on weakness near this level. Acts as a cushion for sharp sell-offs.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ══ SPOT ══ -->
+  <div class="section-title">SPOT — Price Reference</div>
+
+  <div class="card-wide clr-white">
+    <div class="card-header">
+      <div class="sig-badge" style="border-color:#f8f8f830;color:#f8f8f8;">
+        <div class="dot" style="background:#f8f8f8;"></div>SPOT
+      </div>
+      <div class="card-label">Underlying Price (continuous line)</div>
+    </div>
+    <div class="card-body">
+      The underlying index/ETF price, plotted as a continuous white line. This is the anchor reference — all other signals are strikes on the same Y-axis, so you can directly read how far any Greek level is from the current price and watch them converge or diverge in real time.
+    </div>
+  </div>
+
+  <!-- ══ HOW TO READ ══ -->
+  <div class="section-title">Reading The Chart — Quick Reference</div>
+
+  <div class="card-grid">
+    <div class="card clr-accent">
+      <div class="card-header">
+        <div class="card-label" style="color:var(--accent);font-size:10px;font-weight:700;">REGIME DETECTION</div>
+      </div>
+      <div class="card-body">
+        <strong>SPOT above ZERO</strong> → <span style="color:var(--green)">positive gamma</span> regime. Fade extremes, sell vol.<br><br>
+        <strong>SPOT below ZERO</strong> → <span style="color:var(--red)">negative gamma</span> regime. Follow momentum, buy vol.<br><br>
+        <strong>ZERO crossing SPOT</strong> → regime flip. High-probability volatility expansion event.
+      </div>
+    </div>
+
+    <div class="card clr-cyan">
+      <div class="card-header">
+        <div class="card-label" style="color:var(--cyan);font-size:10px;font-weight:700;">STRUCTURAL LEVELS</div>
+      </div>
+      <div class="card-body">
+        <strong>MAXGEX / MINGEX</strong> → static OI walls. Think of them as the monthly structure.<br><br>
+        <strong>MAXVEX / MINVEX</strong> → today's active hedging. More dynamic, follow price action.<br><br>
+        <strong>MAXCP / MINCP</strong> → raw volume imbalance. Where the crowd is positioned right now.
+      </div>
+    </div>
+
+    <div class="card clr-purple">
+      <div class="card-header">
+        <div class="card-label" style="color:var(--purple);font-size:10px;font-weight:700;">FLOW SIGNALS (ATM)</div>
+      </div>
+      <div class="card-body">
+        <strong>BAC clusters</strong> → sustained call buying. Trend ignition fuel.<br><br>
+        <strong>BAP clusters</strong> → sustained put buying. Hedge accumulation or bear attack.<br><br>
+        <strong>Mixed BAC + SAP</strong> → synthetic long via options. Institutional bullish positioning.<br><br>
+        <strong>Mixed BAP + SAC</strong> → synthetic short. Bearish conviction.
+      </div>
+    </div>
+
+    <div class="card clr-yellow">
+      <div class="card-header">
+        <div class="card-label" style="color:var(--yellow);font-size:10px;font-weight:700;">INVENTORY CONTEXT</div>
+      </div>
+      <div class="card-body">
+        <strong>LONGGAMMA near SPOT</strong> → the crowd is long gamma. A big move benefits them — could cascade.<br><br>
+        <strong>SHORTGAMMA near SPOT</strong> → large short-gamma overhang. Breakout = forced covering.<br><br>
+        <strong>LONGCALLS above SPOT</strong> → dealer short delta hedge = selling pressure above.<br><br>
+        <strong>SHORTPUTS below SPOT</strong> → dealer long put = support if tested.
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<footer>
+  GEX Engine v6 · Black-Scholes · r = 5.3% · 0DTE · 60s intervals
+</footer>
+
+</body>
+</html>

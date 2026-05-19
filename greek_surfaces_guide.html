@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Greek Surfaces v7 — Guía intraday</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=IBM+Plex+Sans:wght@300;400;600&display=swap');
+
+  :root {
+    --bg:       #060a0f;
+    --bg1:      #0a0e15;
+    --bg2:      #0d1219;
+    --border:   #141c28;
+    --border2:  #1e2c3f;
+    --text:     #9db4cc;
+    --text-hi:  #c8d8e8;
+    --text-dim: #3d5268;
+    --text-dim2:#2a3848;
+
+    --gex:    #22c55e;  --gex-bg:    #22c55e12;  --gex-bd:    #22c55e30;
+    --vex:    #a78bfa;  --vex-bg:    #a78bfa12;  --vex-bd:    #a78bfa30;
+    --dex:    #38bdf8;  --dex-bg:    #38bdf812;  --dex-bd:    #38bdf830;
+    --charm:  #22d3ee;  --charm-bg:  #22d3ee12;  --charm-bd:  #22d3ee30;
+    --color:  #fb923c;  --color-bg:  #fb923c12;  --color-bd:  #fb923c30;
+    --speed:  #e879f9;  --speed-bg:  #e879f912;  --speed-bd:  #e879f930;
+    --vomma:  #f59e0b;  --vomma-bg:  #f59e0b12;  --vomma-bd:  #f59e0b30;
+    --zomma:  #f43f5e;  --zomma-bg:  #f43f5e12;  --zomma-bd:  #f43f5e30;
+
+    --bull: #22c55e;
+    --bear: #ef4444;
+    --inv:  #e879f9;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'IBM Plex Mono', monospace;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 11px;
+    line-height: 1.6;
+    padding: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* ── Header ── */
+  .header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border2);
+  }
+  .header-title { font-size: 13px; font-weight: 700; color: var(--text-hi); letter-spacing: .1em; text-transform: uppercase; }
+  .header-sub { font-size: 10px; color: var(--text-dim); margin-top: 4px; }
+  .version-badge {
+    font-size: 10px; font-weight: 700; padding: 3px 10px;
+    background: #f59e0b18; border: 1px solid #f59e0b50;
+    color: #f59e0b; border-radius: 3px; letter-spacing: .1em;
+  }
+
+  /* ── Section headers ── */
+  h2 {
+    font-size: 9px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--text-dim); margin: 28px 0 10px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  h2::after { content:''; flex:1; height:1px; background: var(--border); }
+
+  /* ── Surface cards ── */
+  .surface-card {
+    background: var(--bg1);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    transition: border-color .2s;
+  }
+  .surface-card:hover { border-color: var(--border2); }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+  }
+  .surface-tag {
+    font-size: 10px; font-weight: 700; padding: 2px 9px;
+    border-radius: 3px; letter-spacing: .1em; font-family: monospace;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .surface-name { font-size: 12px; font-weight: 600; color: var(--text-hi); }
+  .surface-deriv { font-size: 10px; color: var(--text-dim); margin-left: auto; white-space: nowrap; }
+  .new-badge {
+    font-size: 8px; font-weight: 700; padding: 1px 6px;
+    background: #f59e0b20; border: 1px solid #f59e0b40;
+    color: #f59e0b; border-radius: 2px; letter-spacing: .08em;
+    margin-left: 6px;
+  }
+  .inv-badge {
+    font-size: 8px; font-weight: 700; padding: 1px 6px;
+    background: #e879f920; border: 1px solid #e879f940;
+    color: #e879f9; border-radius: 2px; letter-spacing: .08em;
+    margin-left: 4px;
+  }
+
+  .card-body { padding: 12px 14px; }
+
+  .formula {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #5a7a9a;
+    background: var(--bg); padding: 7px 10px; border-radius: 4px;
+    margin: 0 0 10px; border-left: 2px solid var(--border2);
+    white-space: pre-wrap;
+  }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+  .grid4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; }
+
+  .mini {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 8px 10px;
+  }
+  .mini .lbl { font-size: 9px; color: var(--text-dim); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
+  .mini .val { font-size: 11px; color: var(--text); line-height: 1.5; }
+  .bull { color: var(--bull); }
+  .bear { color: var(--bear); }
+
+  .note {
+    font-size: 10.5px; color: #4a6080; margin-top: 10px;
+    border-left: 2px solid var(--border2); padding-left: 9px;
+    line-height: 1.6;
+  }
+  .note strong { color: #6a8aaa; }
+
+  /* ── INV family explanation ── */
+  .inv-panel {
+    background: #e879f908;
+    border: 1px solid #e879f920;
+    border-radius: 5px;
+    padding: 10px 13px;
+    margin: 6px 0 0;
+    font-size: 10.5px;
+    color: #8a6aaa;
+    line-height: 1.6;
+  }
+  .inv-panel strong { color: #e879f9; }
+
+  /* ── Timeline ── */
+  .timeline {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .tslot {
+    background: var(--bg1);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 10px;
+    position: relative;
+  }
+  .tslot-time {
+    font-size: 9px; color: var(--text-dim); text-transform: uppercase;
+    letter-spacing: .07em; margin-bottom: 6px;
+  }
+  .tslot-greeks { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+  .tslot-tag {
+    font-size: 9px; font-weight: 700; padding: 2px 6px;
+    border-radius: 3px; letter-spacing: .06em;
+  }
+  .tslot-desc { font-size: 10px; color: #4a6080; line-height: 1.5; }
+  .tslot-why  { font-size: 10px; color: #3a5060; margin-top: 5px; line-height: 1.4; }
+
+  /* ── Signals ── */
+  .signals { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+  .signal-box {
+    background: var(--bg1);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 12px;
+  }
+  .signal-title { font-size: 11px; font-weight: 700; margin-bottom: 8px; }
+  .signal-row {
+    display: flex; align-items: flex-start; gap: 7px;
+    font-size: 10.5px; color: #4a6080; padding: 3px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .signal-row:last-child { border-bottom: none; }
+  .signal-row .stag {
+    font-size: 8px; font-weight: 700; padding: 1px 5px;
+    border-radius: 2px; white-space: nowrap; flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ── Implementation status ── */
+  .impl-table { width: 100%; border-collapse: collapse; }
+  .impl-table th {
+    font-size: 9px; color: var(--text-dim); text-transform: uppercase;
+    letter-spacing: .1em; text-align: left; padding: 6px 10px;
+    border-bottom: 1px solid var(--border2); font-weight: 600;
+  }
+  .impl-table td { padding: 7px 10px; border-bottom: 1px solid var(--border); font-size: 11px; }
+  .impl-table tr:last-child td { border-bottom: none; }
+  .impl-table tr:hover td { background: var(--bg2); }
+  .status-done  { color: #22c55e; font-weight: 700; }
+  .status-new   { color: #f59e0b; font-weight: 700; }
+
+  /* ── CSV file list ── */
+  .csv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 4px; }
+  .csv-item {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 6px 10px;
+    font-size: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .csv-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .csv-name { color: #5a7a9a; font-family: monospace; }
+  .csv-new { font-size: 8px; color: #f59e0b; margin-left: auto; }
+
+  /* ── Footer ── */
+  .footer {
+    margin-top: 28px; padding-top: 12px;
+    border-top: 1px solid var(--border);
+    font-size: 9px; color: var(--text-dim2);
+    display: flex; justify-content: space-between;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-title">Greek Surfaces — Guía de lectura intraday</div>
+    <div class="header-sub">GEX_Surface_v7 · 16 superficies (8 OI + 8 INV) · SPY / QQQ / SPX / NDX</div>
+  </div>
+  <span class="version-badge">v7</span>
+</div>
+
+
+<!-- ══ FAMILIA OI ══ -->
+<h2>Superficies OI — basadas en Open Interest</h2>
+
+<!-- DEX -->
+<div class="surface-card">
+  <div class="card-header">
+    <span class="surface-tag" style="background:var(--dex-bg);color:var(--dex);border:1px solid var(--dex-bd)">DEX</span>
+    <span class="surface-name">Delta Exposure</span>
+    <span class="surface-deriv">dV/dS — primera derivada en precio</span>
+  </div>
+  <div class="card-body">
+    <div class="formula">Net_DEX = (OI_call × Δcall − OI_put × |Δput|) × S × 100</div>
+    <div class="grid4">
+      <div class="mini"><div class="lbl">qué mide</div><div class="val">Presión direccional neta de todos los dealers en cada strike</div></div>
+      <div class="mini"><div class="lbl">DEX positivo</div><div class="val bull">Calls dominan → dealers long delta → viento de cola alcista</div></div>
+      <div class="mini"><div class="lbl">DEX negativo</div><div class="val bear">Puts dominan → dealers short delta → presión bajista continua</div></div>
+      <div class="mini"><div class="lbl">cuándo importa</div><div class="val">Mediodía (11:30–13:00) para leer sesgo del rango lateral</div></div>
+    </div>
+    <div class="note"><strong>Nota:</strong> el DEX crudo (calls + puts) siempre es positivo y carece de señal. Usar Net DEX = calls − |puts|. El código ya lo implementa con is_call separado — la diferencia final es correcta.</div>
+  </div>
+</div>
+
+<!-- GEX -->
+<div class="surface-card">
+  <div class="card-header">
+    <span class="surface-tag" style="background:var(--gex-bg);color:var(--gex);border:1px solid var(--gex-bd)">GEX</span>
+    <span class="surface-name">Gamma Exposure</span>
+    <span class="surface-deriv">d²V/dS² — curvatura de precio</span>
+  </div>
+  <div class="card-body">
+    <div class="formula">GEX = (Γcall × OI_call − Γput × OI_put) × S² × 100 × 0.01</div>
+    <div class="grid4">
+      <div class="mini"><div class="lbl">qué mide</div><div class="val">Cuánto deben re-hedgear los dealers por cada $1 de movimiento en S</div></div>
+      <div class="mini"><div class="lbl">GEX positivo</div><div class="val bull">Dealers compran bajos y venden altos → régimen PIN, compresión de rango</div></div>
+      <div class="mini"><div class="lbl">GEX negativo</div><div class="val bear">Dealers amplifican movimientos → régimen tendencial, volatilidad</div></div>
+      <div class="mini"><div class="lbl">señal clave</div><div class="val">La ZERO LINE (cruce de cero) define el régimen del día. Es la señal más importante del sistema.</div></div>
+    </div>
+    <div class="note"><strong>Interpretación de superficie:</strong> columnas = tiempo restante hasta expiración. Filas = strikes. El color muestra dónde se concentra el gamma ahora y cómo va a evolucionar si el precio se mueve o el tiempo pasa.</div>
+  </div>
+</div>
+
+<!-- VEX -->
+<div class="surface-card">
+  <div class="card-header">
+    <span class="surface-tag" style="background:var(--vex-bg);color:var(--vex);border:1px solid var(--vex-bd)">VEX</span>
+    <span class="surface-name">Vanna Exposure</span>
+    <span class="surface-deriv">dΔ/dσ = dVega/dS</span>
+  </div>
+  <div class="card-body">
+    <div class="formula">VEX = OI × S² × 0.01 × vega × (1 − d1 / (σ√T)) / S</div>
+    <div class="grid4">
+      <div class="mini"><div class="lbl">qué mide</div><div class="val">Cómo cambia el delta del dealer cuando se mueve la volatilidad implícita</div></div>
+      <div class="mini"><div class="lbl">VEX+ con IV cayendo</div><div class="val bull">Dealers forzados a comprar → impulso alcista incluso sin catalizador de precio</div></div>
+      <div class="mini"><div class="lbl">VEX+ con IV subiendo</div><div class="val bear">Dealers venden cobertura → frena rallies o acelera caídas</div></div>
+      <div class="mini"><div class="lbl">cuándo importa</div><div class="val">Aperturas (08:30–09:30), datos macro, días post-evento con IV crush masivo</div></div>
+    </div>
+    <div class="note"><strong>En días post-evento (CPI, FOMC, NFP):</strong> el IV crush dispara el VEX como driver principal. Puede superar en importancia al GEX durante las primeras 2 horas de sesión.</div>
+  </div>
+</div>
+
+<!-- CHARM -->
+<div class="surface-card">
+  <div class="card-header">
+    <span class="surface-tag" style="background:var(--charm-bg);color:var(--charm);border:1px solid var(--charm-bd)">CHARM</span>
+    <span class="surface-name">Charm Exposure</span>
+    <span class="surface-deriv">dΔ/dt — theta del delta</span>
+  </div>
+  <div class="card-body">
+    <div class="formula">CEX = OI × S × [−e^(−qT) × n(d1) × (2(r−q)T − d2σ√T) / (2T σ√T)]</div>
+    <div class="grid4">
+      <div class="mini"><div class="lbl">qué mide</div><div class="val">Cómo se erosiona el delta con el paso del tiempo, sin que el precio se mueva</div></div>
+      <div class="mini"><div class="lbl">CEX calls tarde</div><div class="val bear">OTM calls pierden delta → dealers venden cobertura alcista → presión bajista silenciosa</div></div>
+      <div class="mini"><div class="lbl">CEX puts tarde</div><div class="val bull">OTM puts pierden delta negativo → dealers compran → soporte silencioso</div></div>
+      <div class="mini"><div class="lbl">cuándo importa</div><div class="val">13:00–14:30 en 0DTE. Moves sin catalizador visible = charm decay en acción</div></div>
+    </div>
+    <div class="note"><strong>Flujo fantasma:</strong> el charm genera hedging aunque el precio no cambie. Se acelera exponencialmente en las últimas 2h del 0DTE. Es el responsable de los moves de tarde "sin noticia".</div>
+  </div>
+</div>
+
+<!-- COLOR -->
+<div class="surface-card">
+  <div class="card-header">
+    <span class="surface-tag" style="background:var(--color-bg);color:var(--color);border:1px solid var(--color-bd)">COLOR</span>
+    <span class="surface-name">Color Exposure</span>
+    <span class="surface-deriv">dΓ/dt — tercera derivada en tiempo</span>
+  </div>
+  <div class="card-body">
+    <div class="formula">COLOR = OI × S² × [−n(d1) / (2ST σ√T)] × [2qT + 1 + d1(2(r−q)T − d2σ√T) / (σ√T)]</div>
+    <div class="grid4">
+      <div class="mini"><div class="lbl">qué mide</div><div class="val">Velocidad a la que el gamma va a cambiar con el paso del tiempo</div></div>
+      <div class="mini"><div class="lbl">uso práctico</div><div class="val">Predice cuánto gamma habrá en 30–60 min — anticipa squeezes y pines finales</div></div>
+      <div class="mini"><div class="lbl">COLOR fuerte</div><div class="val" style="color:var(--color)">El gamma está a punto de acelerar — preparar entrada o salida en el nivel</div></div>
+      <div class="mini"><div class="lbl">timeframe ideal</div><div class="val">Últimas 2h del 0DTE cuando el gamma explota cerca del ATM strike</div></div>
+    </div>
+    <div class="note"><strong>Uso combinado:</strong> GEX dice cuánto gamma hay <em>ahora</em>. COLOR dice cuánto habrá en N minutos. Ambas juntas permiten anticipar squeezes antes de que el precio llegue al strike.</div>
+  </div>
+</div>
+
+<!-- SPEED -->
+<div class="surface-card">
+  <div class="card-header">
+    <span class="surface-tag" style="background:var(--speed-bg);color:var(--speed);border:1px solid var(--speed-bd)">SPEED</span>
+    <span class="surface-name">Speed Exposure</span>
+    <span class="surface-deriv">dΓ/dS — tercera derivada en precio</span>
+  </div>
+  <div class="card-body">
+    <div class="formula">SPEED = OI × S³ × 0.01 × [−gamma / S × (d1/(σ√T) + 1)]</div>
+    <div class="grid4">
+      <div class="mini"><div class="lbl">qué mide</div><div class="val">Cómo cambia el gamma cuando el precio se mueve</div></div>
+      <div class="mini"><div class="lbl">pico de speed</div><div class="val" style="color:var(--speed)">Zona donde el gamma va a explotar si el precio llega ahí — entrada ATM inminente</div></div>
+      <div class="mini"><div class="lbl">complementa</div><div class="val">GEX dice cuánto gamma hay ahora. SPEED dice dónde va a crecer si el spot sigue</div></div>
+      <div class="mini"><div class="lbl">cuándo importa</div><div class="val">Breakouts de rango intraday — identifica el strike donde el momentum se va a amplificar</div></div>
+    </div>
+    <div class="note"><strong>Asimetría:</strong> SPEED es negativo entre strikes ITM/OTM y positivo ATM. Un pico de SPEED por encima del spot es una zona de aceleración de gamma inminente si el precio sigue subiendo.</div>
+  </div>
+</div>
+
+<!-- VOMMA -->
+<div class="surface-card" style="border-color: var(--vomma-bd)">
+  <div class="card-header">
+    <span class="surface-tag" style="background:var(--vomma-bg);color:var(--vomma);border:1px solid var(--vomma-bd)">VOMMA</span>
+    <span class="surface-name">Vomma Exposure</span>
+    <span class="new-badge">NUEVO v7</span>
+    <span class="surface-deriv">dVega/dσ — curvatura en volatilidad</span>
+  </div>
+  <div class="card-body">
+    <div class="formula">VOMMA = OI × S² × 0.01 × [vega × d1 × d2 / σ]
+  donde  vega = S × n(d1) × √T</div>
+    <div class="grid4">
+      <div class="mini"><div class="lbl">qué mide</div><div class="val">Cuánto cambia el vega del dealer cuando se mueve la vol implícita</div></div>
+      <div class="mini"><div class="lbl">VOMMA+ con vol subiendo</div><div class="val bull">Dealer largo de vomma → gana vega → cobertura pasiva, efecto estabilizador</div></div>
+      <div class="mini"><div class="lbl">VOMMA− con vol subiendo</div><div class="val bear">Dealer corto de vomma → pierde vega → debe comprar vol → amplifica spikes de IV</div></div>
+      <div class="mini"><div class="lbl">cuándo importa</div><div class="val">VIX spikes, macro prints, cualquier sesión con IV en movimiento ≥1 punto</div></div>
+    </div>
+    <div class="note">
+      <strong>Relación con VEX:</strong> VEX mide cómo la vol mueve el delta del dealer. VOMMA mide cómo la vol mueve el vega del dealer. Son complementarios: VEX afecta el hedging de acciones, VOMMA afecta el hedging de opciones.<br>
+      <strong>Concentración en OTM:</strong> vomma crece fuera del ATM → identifica strikes donde se concentra el riesgo de vol-of-vol. En sesiones de vol alta, estos niveles actúan como imanes o barreras de IV.
+    </div>
+    <div class="inv-panel">
+      <strong>INV_VOMMA:</strong> mismo cálculo pero con flujo neto de inventario (long − short) en lugar de OI. Muestra en tiempo real qué dealers del día están cortos de vomma y dónde está concentrado ese riesgo intraday.
+    </div>
+  </div>
+</div>
+
+<!-- ZOMMA -->
+<div class="surface-card" style="border-color: var(--zomma-bd)">
+  <div class="card-header">
+    <span class="surface-tag" style="background:var(--zomma-bg);color:var(--zomma);border:1px solid var(--zomma-bd)">ZOMMA</span>
+    <span class="surface-name">Zomma Exposure</span>
+    <span class="new-badge">NUEVO v7</span>
+    <span class="surface-deriv">dΓ/dσ — sensibilidad del gamma a la vol</span>
+  </div>
+  <div class="card-body">
+    <div class="formula">ZOMMA = OI × S³ × 0.01 × [gamma × (d1 × d2 − 1) / σ]
+  donde  gamma = n(d1) / (S × σ × √T)</div>
+    <div class="grid4">
+      <div class="mini"><div class="lbl">qué mide</div><div class="val">Cómo cambia el gamma efectivo del dealer cuando se mueve la volatilidad implícita</div></div>
+      <div class="mini"><div class="lbl">ZOMMA+ en un strike</div><div class="val bull">Expansión de vol REFUERZA el gamma en ese nivel → el muro de GEX se fortalece</div></div>
+      <div class="mini"><div class="lbl">ZOMMA− en un strike</div><div class="val bear">Expansión de vol DEBILITA el gamma → el muro de GEX puede romperse con vol alta</div></div>
+      <div class="mini"><div class="lbl">cuándo importa</div><div class="val">Siempre que un nivel de GEX alto sea cuestionado por el precio con vol expandida</div></div>
+    </div>
+    <div class="note">
+      <strong>Uso clave — robustez de niveles GEX:</strong> antes de operar un rebote en un strike de alto GEX, revisar el ZOMMA en ese nivel. Si ZOMMA es negativo y la IV está subiendo, el gamma del dealer se está erosionando y el nivel puede fallar.<br>
+      <strong>ATM vs OTM:</strong> |ZOMMA| mínimo cerca del ATM (d1×d2 ≈ 0). Crece en strikes OTM/ITM → las barreras estructurales más alejadas del spot son las más sensibles a la volatilidad.
+    </div>
+    <div class="inv-panel">
+      <strong>INV_ZOMMA:</strong> igual que ZOMMA pero ponderado por flujo neto intraday. Muestra qué niveles de gamma del inventario del día serían vulnerables si la vol se expande durante la sesión.
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ FAMILIA INV ══ -->
+<h2>Familia INV — superficies de inventario intraday</h2>
+
+<div class="surface-card">
+  <div class="card-body" style="padding:12px 14px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <span class="surface-tag" style="background:#e879f912;color:#e879f9;border:1px solid #e879f930">INV_*</span>
+      <span style="font-size:12px;font-weight:600;color:var(--text-hi)">Superficies de flujo neto acumulado</span>
+    </div>
+    <div class="formula">net_call_k = long_calls_k − short_calls_k   ← flujo neto comprador de calls en strike K
+net_put_k  = long_puts_k  − short_puts_k    ← flujo neto comprador de puts en strike K
+
+INV_GEX = net_call_k × S² × 100 × 0.01 × Γcall − net_put_k × S² × 100 × 0.01 × Γput</div>
+    <div class="grid3" style="margin-top:10px">
+      <div class="mini"><div class="lbl">fuente de datos</div><div class="val">&lt;activo&gt;_inv_profile.csv generado por GEX_Engine cada ciclo. Se actualiza en tiempo real durante la sesión.</div></div>
+      <div class="mini"><div class="lbl">qué aporta vs OI</div><div class="val">OI refleja posiciones abiertas históricas. INV refleja quién compró y quién vendió <em>hoy</em>. El flujo neto puede ser negativo.</div></div>
+      <div class="mini"><div class="lbl">interpretación</div><div class="val">INV_GEX &gt; 0 en K: flujo neto de calls supera puts → dealer corto gamma en K → soporte dinámico intraday.</div></div>
+    </div>
+    <div class="note" style="margin-top:10px">
+      <strong>8 superficies INV disponibles en v7:</strong> INV_GEX, INV_VEX, INV_DEX, INV_CHARM, INV_COLOR, INV_SPEED, INV_VOMMA, INV_ZOMMA.
+      Cada una usa el mismo cálculo que su par OI pero sustituye el OI por el flujo neto de inventario del día.
+      Si el CSV no existe o tiene inventario neto cero, las superficies INV se omiten automáticamente.
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ MAPA HORARIO ══ -->
+<h2>Mapa de uso intraday — hora local Bogotá (UTC−5)</h2>
+
+<div class="timeline">
+
+  <div class="tslot">
+    <div class="tslot-time">08:30 – 09:30</div>
+    <div class="tslot-greeks">
+      <span class="tslot-tag" style="background:var(--vex-bg);color:var(--vex);border:1px solid var(--vex-bd)">VEX</span>
+      <span class="tslot-tag" style="background:var(--vomma-bg);color:var(--vomma);border:1px solid var(--vomma-bd)">VOMMA</span>
+    </div>
+    <div class="tslot-desc">Apertura + IV crush post-overnight. La vol se mueve rápido → vanna impulsa o frena el primer movimiento del día.</div>
+    <div class="tslot-why">VOMMA identifica qué dealers están más expuestos al cambio de IV y dónde van a cubrirse primero.</div>
+  </div>
+
+  <div class="tslot">
+    <div class="tslot-time">09:30 – 11:30</div>
+    <div class="tslot-greeks">
+      <span class="tslot-tag" style="background:var(--gex-bg);color:var(--gex);border:1px solid var(--gex-bd)">GEX</span>
+      <span class="tslot-tag" style="background:var(--zomma-bg);color:var(--zomma);border:1px solid var(--zomma-bd)">ZOMMA</span>
+    </div>
+    <div class="tslot-desc">Sesión principal temprana. La ZERO LINE define el régimen. GEX domina: PIN vs tendencia.</div>
+    <div class="tslot-why">ZOMMA indica si los niveles GEX son robustos o frágiles ante la vol del día. Clave para evaluar si un breakout es sostenible.</div>
+  </div>
+
+  <div class="tslot">
+    <div class="tslot-time">11:30 – 13:00</div>
+    <div class="tslot-greeks">
+      <span class="tslot-tag" style="background:var(--dex-bg);color:var(--dex);border:1px solid var(--dex-bd)">DEX</span>
+      <span class="tslot-tag" style="background:var(--vex-bg);color:var(--vex);border:1px solid var(--vex-bd)">VEX</span>
+    </div>
+    <div class="tslot-desc">Rango del mediodía. El sesgo del Net DEX define el centro de gravedad. La vol se estabiliza.</div>
+    <div class="tslot-why">Si VEX y DEX apuntan en la misma dirección → el sesgo del mediodía tiene mayor probabilidad de continuar hacia el cierre.</div>
+  </div>
+
+  <div class="tslot">
+    <div class="tslot-time">13:00 – 14:30</div>
+    <div class="tslot-greeks">
+      <span class="tslot-tag" style="background:var(--charm-bg);color:var(--charm);border:1px solid var(--charm-bd)">CHARM</span>
+      <span class="tslot-tag" style="background:var(--speed-bg);color:var(--speed);border:1px solid var(--speed-bd)">SPEED</span>
+    </div>
+    <div class="tslot-desc">Tarde: charm decay impulsa moves silenciosos. Speed anticipa la siguiente zona de aceleración gamma.</div>
+    <div class="tslot-why">Moves sin catalizador visible en 0DTE = charm en acción. Speed pre-identifica el próximo strike que va a actuar como imán.</div>
+  </div>
+
+  <div class="tslot">
+    <div class="tslot-time">14:30 – 15:00</div>
+    <div class="tslot-greeks">
+      <span class="tslot-tag" style="background:var(--color-bg);color:var(--color);border:1px solid var(--color-bd)">COLOR</span>
+      <span class="tslot-tag" style="background:var(--gex-bg);color:var(--gex);border:1px solid var(--gex-bd)">GEX</span>
+      <span class="tslot-tag" style="background:#e879f912;color:#e879f9;border:1px solid #e879f920">INV_GEX</span>
+    </div>
+    <div class="tslot-desc">Cierre 0DTE. Gamma explosion. Color anticipa squeeze o pin final. INV_GEX muestra quién del día sostiene el nivel.</div>
+    <div class="tslot-why">La combinación GEX + COLOR + INV_GEX en el último tramo es la más predictiva del comportamiento del closing print.</div>
+  </div>
+
+</div>
+
+
+<!-- ══ SEÑALES COMBINADAS ══ -->
+<h2>Lecturas combinadas de superficies</h2>
+
+<div class="signals">
+  <div class="signal-box" style="border-color:#22c55e30">
+    <div class="signal-title bull">▲ Confluencia alcista</div>
+    <div class="signal-row">
+      <span class="stag" style="background:var(--gex-bg);color:var(--gex);border:1px solid var(--gex-bd)">GEX</span>
+      <span>GEX positivo bajo el spot → soporte dealer activo</span>
+    </div>
+    <div class="signal-row">
+      <span class="stag" style="background:var(--vex-bg);color:var(--vex);border:1px solid var(--vex-bd)">VEX</span>
+      <span>VEX+ con IV cayendo → forced buying de dealers</span>
+    </div>
+    <div class="signal-row">
+      <span class="stag" style="background:var(--vomma-bg);color:var(--vomma);border:1px solid var(--vomma-bd)">VOMMA</span>
+      <span>VOMMA+ → dealers ganan vega al bajar IV → no venden</span>
+    </div>
+    <div class="signal-row">
+      <span class="stag" style="background:var(--zomma-bg);color:var(--zomma);border:1px solid var(--zomma-bd)">ZOMMA</span>
+      <span>ZOMMA+ en el nivel de soporte → gamma se refuerza con la vol</span>
+    </div>
+    <div class="signal-row">
+      <span class="stag" style="background:var(--charm-bg);color:var(--charm);border:1px solid var(--charm-bd)">CHARM</span>
+      <span>CEX puts perdiendo delta → dealers compran silenciosamente</span>
+    </div>
+    <div class="signal-row">
+      <span class="stag" style="background:var(--dex-bg);color:var(--dex);border:1px solid var(--dex-bd)">DEX</span>
+      <span>Net DEX positivo ATM → calls dominan el OI del nivel</span>
+    </div>
+  </div>
+
+  <div class="signal-box" style="border-color:#ef444430">
+    <div class="signal-title bear">▼ Confluencia bajista</div>
+    <div class="signal-row">
+      <span class="stag" style="background:var(--gex-bg);color:var(--gex);border:1px solid var(--gex-bd)">GEX</span>
+      <span>GEX negativo → dealers amplifican caídas</span>
+    </div>
+    <div class="signal-row">
+      <span class="stag" style="background:var(--vex-bg);color:var(--vex);border:1px solid var(--vex-bd)">VEX</span>
+      <span>VEX+ con IV subiendo → dealers venden cobertura</span>
+    </div>
+    <div class="signal-row">
+      <span class="stag" style="background:var(--vomma-bg);color:var(--vomma);border:1px solid var(--vomma-bd)">VOMMA</span>
+      <span>VOMMA− → dealers deben comprar vol → spikes de IV</span>
+    </div>
+    <div class="signal-row">
+      <span class="stag" style="background:var(--zomma-bg);color:var(--zomma);border:1px solid var(--zomma-bd)">ZOMMA</span>
+      <span>ZOMMA− en soporte → gamma se debilita si la vol sube → nivel frágil</span>
+    </div>
+    <div class="signal-row">
+      <span class="stag" style="background:var(--charm-bg);color:var(--charm);border:1px solid var(--charm-bd)">CHARM</span>
+      <span>CEX calls perdiendo delta → dealers venden cobertura alcista</span>
+    </div>
+    <div class="signal-row">
+      <span class="stag" style="background:var(--color-bg);color:var(--color);border:1px solid var(--color-bd)">COLOR</span>
+      <span>COLOR acelerando bajo el spot → gamma creciendo en soporte que va a fallar</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ ESTADO DE IMPLEMENTACIÓN ══ -->
+<h2>Estado de implementación — GEX_Surface_v7</h2>
+
+<div class="surface-card">
+  <div class="card-body" style="padding:0">
+    <table class="impl-table">
+      <thead>
+        <tr>
+          <th style="width:90px">Superficie</th>
+          <th>Descripción</th>
+          <th style="width:80px">OI</th>
+          <th style="width:80px">INV</th>
+          <th style="width:70px">Versión</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="surface-tag" style="background:var(--gex-bg);color:var(--gex);border:1px solid var(--gex-bd)">GEX</span></td>
+          <td style="color:var(--text)">Gamma Exposure — curvatura de precio. ZERO line define régimen PIN vs tendencia.</td>
+          <td class="status-done">✓ v1</td><td class="status-done">✓ v6</td><td style="color:var(--text-dim)">v1+</td>
+        </tr>
+        <tr>
+          <td><span class="surface-tag" style="background:var(--vex-bg);color:var(--vex);border:1px solid var(--vex-bd)">VEX</span></td>
+          <td style="color:var(--text)">Vanna Exposure — delta sensible a vol. Crítico en aperturas y post-evento.</td>
+          <td class="status-done">✓ v1</td><td class="status-done">✓ v6</td><td style="color:var(--text-dim)">v1+</td>
+        </tr>
+        <tr>
+          <td><span class="surface-tag" style="background:var(--dex-bg);color:var(--dex);border:1px solid var(--dex-bd)">DEX</span></td>
+          <td style="color:var(--text)">Net Delta Exposure — sesgo direccional neto del dealer. Rango del mediodía.</td>
+          <td class="status-done">✓ v1</td><td class="status-done">✓ v6</td><td style="color:var(--text-dim)">v1+</td>
+        </tr>
+        <tr>
+          <td><span class="surface-tag" style="background:var(--charm-bg);color:var(--charm);border:1px solid var(--charm-bd)">CHARM</span></td>
+          <td style="color:var(--text)">Charm Exposure — theta del delta. Flujo silencioso de tarde en 0DTE.</td>
+          <td class="status-done">✓ v1</td><td class="status-done">✓ v6</td><td style="color:var(--text-dim)">v1+</td>
+        </tr>
+        <tr>
+          <td><span class="surface-tag" style="background:var(--color-bg);color:var(--color);border:1px solid var(--color-bd)">COLOR</span></td>
+          <td style="color:var(--text)">Color Exposure — dΓ/dt. Anticipa explosión de gamma en cierre 0DTE.</td>
+          <td class="status-done">✓ v1</td><td class="status-done">✓ v6</td><td style="color:var(--text-dim)">v1+</td>
+        </tr>
+        <tr>
+          <td><span class="surface-tag" style="background:var(--speed-bg);color:var(--speed);border:1px solid var(--speed-bd)">SPEED</span></td>
+          <td style="color:var(--text)">Speed Exposure — dΓ/dS. Dónde va a crecer el gamma. Anticipa breakouts.</td>
+          <td class="status-done">✓ v1</td><td class="status-done">✓ v6</td><td style="color:var(--text-dim)">v1+</td>
+        </tr>
+        <tr style="background:#f59e0b06">
+          <td><span class="surface-tag" style="background:var(--vomma-bg);color:var(--vomma);border:1px solid var(--vomma-bd)">VOMMA</span></td>
+          <td style="color:var(--text)">Vomma Exposure — dVega/dσ. Riesgo de vol-of-vol. Spikes de IV en OTM.</td>
+          <td class="status-new">✓ v7</td><td class="status-new">✓ v7</td><td style="color:#f59e0b;font-weight:700">v7 NUEVO</td>
+        </tr>
+        <tr style="background:#f43f5e06">
+          <td><span class="surface-tag" style="background:var(--zomma-bg);color:var(--zomma);border:1px solid var(--zomma-bd)">ZOMMA</span></td>
+          <td style="color:var(--text)">Zomma Exposure — dΓ/dσ. Robustez de niveles GEX ante expansión de vol.</td>
+          <td class="status-new">✓ v7</td><td class="status-new">✓ v7</td><td style="color:#f43f5e;font-weight:700">v7 NUEVO</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- ══ ARCHIVOS CSV ══ -->
+<h2>Archivos CSV generados por activo</h2>
+
+<div class="grid2">
+  <div>
+    <div style="font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">Familia OI — 8 archivos</div>
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <div class="csv-item"><span class="csv-dot" style="background:var(--gex)"></span><span class="csv-name">&lt;activo&gt;_heatmap.csv</span><span style="color:var(--text-dim);margin-left:auto">GEX</span></div>
+      <div class="csv-item"><span class="csv-dot" style="background:var(--vex)"></span><span class="csv-name">&lt;activo&gt;_heatmap_vex.csv</span><span style="color:var(--text-dim);margin-left:auto">VEX</span></div>
+      <div class="csv-item"><span class="csv-dot" style="background:var(--dex)"></span><span class="csv-name">&lt;activo&gt;_heatmap_dex.csv</span><span style="color:var(--text-dim);margin-left:auto">DEX</span></div>
+      <div class="csv-item"><span class="csv-dot" style="background:var(--charm)"></span><span class="csv-name">&lt;activo&gt;_heatmap_charm.csv</span><span style="color:var(--text-dim);margin-left:auto">CHARM</span></div>
+      <div class="csv-item"><span class="csv-dot" style="background:var(--color)"></span><span class="csv-name">&lt;activo&gt;_heatmap_color.csv</span><span style="color:var(--text-dim);margin-left:auto">COLOR</span></div>
+      <div class="csv-item"><span class="csv-dot" style="background:var(--speed)"></span><span class="csv-name">&lt;activo&gt;_heatmap_speed.csv</span><span style="color:var(--text-dim);margin-left:auto">SPEED</span></div>
+      <div class="csv-item" style="border-color:#f59e0b40"><span class="csv-dot" style="background:var(--vomma)"></span><span class="csv-name">&lt;activo&gt;_heatmap_vomma.csv</span><span class="csv-new">NUEVO v7</span></div>
+      <div class="csv-item" style="border-color:#f43f5e40"><span class="csv-dot" style="background:var(--zomma)"></span><span class="csv-name">&lt;activo&gt;_heatmap_zomma.csv</span><span class="csv-new">NUEVO v7</span></div>
+    </div>
+  </div>
+  <div>
+    <div style="font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">Familia INV — 8 archivos</div>
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <div class="csv-item"><span class="csv-dot" style="background:var(--gex)"></span><span class="csv-name">&lt;activo&gt;_heatmap_inv_gex.csv</span></div>
+      <div class="csv-item"><span class="csv-dot" style="background:var(--vex)"></span><span class="csv-name">&lt;activo&gt;_heatmap_inv_vex.csv</span></div>
+      <div class="csv-item"><span class="csv-dot" style="background:var(--dex)"></span><span class="csv-name">&lt;activo&gt;_heatmap_inv_dex.csv</span></div>
+      <div class="csv-item"><span class="csv-dot" style="background:var(--charm)"></span><span class="csv-name">&lt;activo&gt;_heatmap_inv_charm.csv</span></div>
+      <div class="csv-item"><span class="csv-dot" style="background:var(--color)"></span><span class="csv-name">&lt;activo&gt;_heatmap_inv_color.csv</span></div>
+      <div class="csv-item"><span class="csv-dot" style="background:var(--speed)"></span><span class="csv-name">&lt;activo&gt;_heatmap_inv_speed.csv</span></div>
+      <div class="csv-item" style="border-color:#f59e0b40"><span class="csv-dot" style="background:var(--vomma)"></span><span class="csv-name">&lt;activo&gt;_heatmap_inv_vomma.csv</span><span class="csv-new">NUEVO v7</span></div>
+      <div class="csv-item" style="border-color:#f43f5e40"><span class="csv-dot" style="background:var(--zomma)"></span><span class="csv-name">&lt;activo&gt;_heatmap_inv_zomma.csv</span><span class="csv-new">NUEVO v7</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <span>GEX_Surface_v7 · 16 superficies · OI + INV</span>
+  <span>VOMMA = dVega/dσ · ZOMMA = dΓ/dσ · agregadas v7</span>
+  <span>Bogotá UTC−5 · SPY QQQ SPX NDX ES NQ</span>
+</div>
+
+</body>
+</html>
