@@ -1,0 +1,972 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GEX Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:        #080c10;
+    --bg2:       #0d1117;
+    --bg3:       #111820;
+    --border:    #1e2d3d;
+    --border2:   #243447;
+    --text:      #c9d1d9;
+    --text2:     #8b949e;
+    --text3:     #4a5568;
+    --accent:    #58a6ff;
+    --green:     #3fb950;
+    --green2:    #238636;
+    --red:       #f85149;
+    --red2:      #da3633;
+    --yellow:    #d29922;
+    --purple:    #bc8cff;
+    --cyan:      #39d0d8;
+    --orange:    #f0883e;
+    --spot-line: #58a6ff44;
+    --bar-h:     14px;
+    --font-mono: 'IBM Plex Mono', monospace;
+    --font-sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── SCANLINE overlay ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,.06) 2px,
+      rgba(0,0,0,.06) 4px
+    );
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* ── HEADER ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-left {
+    display: flex; align-items: center; gap: 14px;
+  }
+  .logo {
+    font-size: 15px; font-weight: 600; letter-spacing: .08em;
+    color: var(--accent);
+  }
+  .logo span { color: var(--text2); font-weight: 300; }
+  .status-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity:1; box-shadow: 0 0 6px var(--green); }
+    50%      { opacity:.5; box-shadow: 0 0 12px var(--green); }
+  }
+  .status-dot.offline { background: var(--red); box-shadow: 0 0 6px var(--red); animation: none; }
+
+  .header-right {
+    display: flex; align-items: center; gap: 16px;
+  }
+  #ts { color: var(--text2); font-size: 11px; }
+  #refresh-badge {
+    font-size: 10px; color: var(--text3);
+    padding: 2px 7px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+  }
+  #refresh-badge.flash {
+    color: var(--cyan);
+    border-color: var(--cyan);
+    animation: flash .4s ease;
+  }
+  @keyframes flash { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  /* ── NAV TABS ── */
+  nav {
+    display: flex; gap: 2px;
+    padding: 8px 20px 0;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    position: sticky;
+    top: 44px; /* altura del header */
+    z-index: 99;
+  }
+  .tab {
+    padding: 6px 14px;
+    font-family: var(--font-mono);
+    font-size: 11px; font-weight: 500;
+    color: var(--text2);
+    background: transparent;
+    border: none; border-bottom: 2px solid transparent;
+    cursor: pointer; letter-spacing: .06em;
+    white-space: nowrap;
+    transition: color .15s, border-color .15s;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .tab .spot-tag {
+    margin-left: 6px;
+    font-size: 10px; color: var(--text3);
+    font-weight: 300;
+  }
+  .tab.active .spot-tag { color: var(--text2); }
+
+  /* ── MAIN CONTENT ── */
+  main { padding: 16px 20px; }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ── SPOT BAR ── */
+  .spot-bar {
+    display: flex; align-items: center; gap: 20px;
+    padding: 8px 14px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 14px;
+  }
+  .spot-val {
+    font-size: 20px; font-weight: 600; color: var(--accent);
+    letter-spacing: .02em;
+  }
+  .spot-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing:.1em; }
+  .key-strikes {
+    display: flex; gap: 14px; flex-wrap: wrap; margin-left: auto;
+  }
+  .ks {
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+  }
+  .ks-label { font-size: 9px; color: var(--text3); letter-spacing:.08em; }
+  .ks-val {
+    font-size: 12px; font-weight: 500;
+    padding: 1px 6px;
+    border-radius: 2px;
+  }
+  .ks-val.long  { color: var(--green); background: #3fb95015; }
+  .ks-val.short { color: var(--red);   background: #f8514915; }
+  .ks-val.call  { color: var(--cyan);  background: #39d0d815; }
+  .ks-val.put   { color: var(--orange);background: #f0883e15; }
+  .ks-val.zero  { color: var(--yellow);background: #d2992215; }
+
+  /* ── CHART GRID ── */
+  .chart-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  @media (max-width: 1400px) { .chart-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 1000px) { .chart-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px)  { .chart-grid { grid-template-columns: 1fr; } }
+
+  .chart-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 12px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  /* scrollable bar area */
+  .bar-chart-scroll {
+    overflow-y: auto;
+    max-height: 420px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border2) transparent;
+    flex: 1;
+  }
+  .bar-chart-scroll::-webkit-scrollbar { width: 4px; }
+  .bar-chart-scroll::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+  .bar-chart-scroll::-webkit-scrollbar-track { background: transparent; }
+  /* scroll hint fade at bottom */
+  .chart-box::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0; height: 18px;
+    background: linear-gradient(transparent, var(--bg2));
+    pointer-events: none;
+    opacity: 0.7;
+  }
+  .chart-box::before {
+    content: '';
+    position: absolute; top:0; left:0; right:0; height:2px;
+  }
+  .chart-box.gex::before    { background: linear-gradient(90deg, var(--green), transparent); }
+  .chart-box.vex::before    { background: linear-gradient(90deg, var(--cyan),  transparent); }
+  .chart-box.vol::before    { background: linear-gradient(90deg, var(--yellow),transparent); }
+  .chart-box.oi::before     { background: linear-gradient(90deg, var(--purple),transparent); }
+  .chart-box.dex::before    { background: linear-gradient(90deg, var(--orange), transparent); }
+  .chart-box.inv-c::before  { background: linear-gradient(90deg, var(--accent), transparent); }
+  .chart-box.inv-p::before  { background: linear-gradient(90deg, var(--orange), transparent); }
+  .chart-box.inv-gex::before{ background: linear-gradient(90deg, var(--purple), transparent); }
+  .chart-box.inv-net::before{ background: linear-gradient(90deg, var(--cyan),   transparent); }
+
+  .chart-title {
+    font-size: 10px; font-weight: 500; letter-spacing:.1em;
+    text-transform: uppercase; color: var(--text2);
+    margin-bottom: 8px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .chart-title .range { font-size: 9px; color: var(--text3); font-weight:300; }
+
+  /* ── HORIZONTAL BAR CHART ── */
+  .bar-chart { width: 100%; }
+  .bar-row {
+    display: grid;
+    grid-template-columns: 48px 1fr 48px;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 3px;
+    position: relative;
+  }
+  .bar-row.spot-row .strike-label { color: var(--accent); font-weight: 600; }
+  .bar-strike {
+    font-size: 10px; color: var(--text2); text-align: right;
+    white-space: nowrap; letter-spacing:.02em;
+  }
+  .bar-track {
+    position: relative;
+    height: var(--bar-h);
+    background: transparent;
+    display: flex; align-items: center;
+  }
+  .bar-fill {
+    position: absolute;
+    height: 100%;
+    transition: width .35s ease, left .35s ease;
+    border-radius: 1px;
+    min-width: 1px;
+  }
+  /* positive bars grow right from center */
+  .bar-fill.pos { left: 50%; }
+  /* negative bars grow left from center */
+  .bar-fill.neg { right: 50%; }
+
+  .bar-center-line {
+    position: absolute; left: 50%; top: 0; bottom: 0;
+    width: 1px; background: var(--border2);
+  }
+  .bar-spot-line {
+    position: absolute; top: -2px; bottom: -2px;
+    width: 1px; background: var(--spot-line);
+    z-index: 2;
+  }
+
+  .bar-val {
+    font-size: 9px; color: var(--text3); text-align: left;
+    white-space: nowrap;
+  }
+
+  /* Colors per chart type */
+  .gex  .bar-fill.pos  { background: var(--green); opacity:.80; }
+  .gex  .bar-fill.neg  { background: var(--red);   opacity:.80; }
+  .vex  .bar-fill.pos  { background: var(--green); opacity:.80; }
+  .vex  .bar-fill.neg  { background: var(--red);   opacity:.80; }
+  .vol  .bar-fill.pos  { background: var(--green); opacity:.80; }
+  .vol  .bar-fill.neg  { background: var(--orange);   opacity:.80; }
+  .oi   .bar-fill.pos  { background: var(--green); opacity:.80; }
+  .oi   .bar-fill.neg  { background: var(--orange);   opacity:.80; }
+  .inv-c .bar-fill.pos { background: var(--cyan);   opacity:.80; }
+  .inv-c .bar-fill.neg { background: var(--purple);  opacity:.80; }
+  .inv-p .bar-fill.pos { background: var(--cyan);   opacity:.80; }
+  .inv-p .bar-fill.neg { background: var(--purple);  opacity:.80; }
+  .inv-gex .bar-fill.pos { background: var(--cyan);   opacity:.85; }
+  .inv-gex .bar-fill.neg { background: var(--purple);  opacity:.85; }
+  .inv-net .bar-fill.pos { background: var(--cyan);   opacity:.85; }
+  .inv-net .bar-fill.neg { background: var(--purple);  opacity:.85; }
+
+  .dex  .bar-fill.pos { background: var(--orange); opacity:.80; }
+  .dex  .bar-fill.neg { background: var(--purple);  opacity:.80; }
+  .spot-marker {
+    position: absolute;
+    top: -1px;
+    font-size: 8px;
+    color: var(--accent);
+    white-space: nowrap;
+    pointer-events: none;
+    transform: translateX(-50%);
+    z-index: 5;
+  }
+
+  /* ── LOADING / ERROR ── */
+  #loading {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; height: 60vh; gap: 14px;
+    color: var(--text2);
+  }
+  .spinner {
+    width: 28px; height: 28px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #error-msg {
+    display: none;
+    padding: 12px 16px;
+    border: 1px solid var(--red2);
+    background: #f8514910;
+    border-radius: 4px;
+    color: var(--red);
+    font-size: 11px;
+    margin: 20px;
+  }
+
+  /* ── TOOLTIP ── */
+  .tooltip {
+    position: fixed; z-index: 999;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 11px;
+    color: var(--text);
+    pointer-events: none;
+    display: none;
+    min-width: 140px;
+    box-shadow: 0 4px 16px #00000060;
+  }
+  .tooltip .tt-strike { font-weight: 600; color: var(--accent); margin-bottom: 4px; }
+  .tooltip .tt-row { display: flex; justify-content: space-between; gap: 14px; color: var(--text2); }
+  .tooltip .tt-row span:last-child { color: var(--text); font-weight: 500; }
+
+  /* ── SUMMARY SECTIONS ── */
+  #summary-area { margin-top: 20px; display: flex; flex-direction: column; gap: 12px; }
+
+  .section {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  .section-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 14px;
+    cursor: pointer; user-select: none;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    transition: background .15s;
+  }
+  .section-header:hover { background: #162130; }
+  .section-header .s-title {
+    font-size: 11px; font-weight: 600; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--text); flex: 1;
+  }
+  .section-header .s-desc { font-size: 10px; color: var(--text3); font-weight: 300; }
+  .chevron { font-size: 10px; color: var(--text3); transition: transform .2s; flex-shrink: 0; }
+  .section.collapsed .chevron { transform: rotate(-90deg); }
+  .section-body {
+    overflow: hidden;
+    max-height: 600px;
+    transition: max-height .3s ease;
+  }
+  .section.collapsed .section-body { max-height: 0 !important; }
+
+  /* summary tables */
+  .tbl-wrap { overflow-x: auto; }
+  .sum-table {
+    width: 100%; border-collapse: collapse; font-size: 11px;
+  }
+  .sum-table thead th {
+    padding: 6px 10px; text-align: center;
+    font-size: 9px; font-weight: 600;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: var(--text3); border-bottom: 1px solid var(--border);
+    white-space: nowrap; background: var(--bg2);
+  }
+  .sum-table thead th.th-left { text-align: left; }
+  .sum-table thead th.grp-gex   { color: var(--green); }
+  .sum-table thead th.grp-vex   { color: var(--cyan);  }
+  .sum-table thead th.grp-dex   { color: var(--orange);}
+  .sum-table thead th.grp-vol   { color: var(--yellow);}
+  .sum-table thead th.grp-oi    { color: var(--purple);}
+  .sum-table thead th.grp-inv   { color: var(--accent);}
+  .sum-table thead tr.grp-row th {
+    padding: 4px 10px; font-size: 9px; font-weight: 700;
+    background: #0a1220; border-bottom: 1px solid var(--border);
+  }
+  .sum-table tbody tr { border-bottom: 1px solid #131c27; transition: background .1s; }
+  .sum-table tbody tr:last-child { border-bottom: none; }
+  .sum-table tbody tr:hover { background: #0f1c2a; }
+  .sum-table td {
+    padding: 6px 10px; text-align: center; white-space: nowrap;
+  }
+  .sum-table td.sym {
+    text-align: left; font-weight: 600; font-size: 12px;
+    color: var(--accent); letter-spacing: .05em;
+    border-right: 1px solid var(--border); min-width: 52px;
+  }
+  .sum-table td.spot-v { color: var(--text2); font-size: 11px; border-right: 1px solid var(--border); }
+  .sum-table td.sk-max { color: var(--green); font-weight: 500; }
+  .sum-table td.sk-min { color: var(--red);   font-weight: 500; }
+  .sum-table td.vp { color: var(--green); }
+  .sum-table td.vn { color: var(--red);   }
+  .sum-table td.vz { color: var(--text2); }
+  .sum-table td.np { color: var(--green); font-weight: 500; }
+  .sum-table td.nn { color: var(--red);   font-weight: 500; }
+  .sum-table td.col-sep { border-left: 1px solid var(--border); }
+  .sum-table td.col-end { border-right: 1px solid var(--border); }
+  .sum-table th.col-sep { border-left: 1px solid var(--border); }
+  .sum-table th.col-end { border-right: 1px solid var(--border); }
+  .null-dash { color: var(--text3); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="status-dot" id="status-dot"></div>
+    <div class="logo">GEX<span>/VEX</span> DASHBOARD</div>
+  </div>
+  <div class="header-right">
+    <span id="ts">--:--:--</span>
+    <span id="refresh-badge">REFRESH 60s</span>
+  </div>
+</header>
+
+<nav id="nav-tabs"></nav>
+
+<main>
+  <div id="loading">
+    <div class="spinner"></div>
+    <span>Cargando dashboard_strikes.json…</span>
+  </div>
+  <div id="error-msg"></div>
+  <div id="panels"></div>
+  <div id="summary-area"></div>
+</main>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────
+const JSON_PATH     = 'dashboard_strikes.json';
+const REFRESH_MS    = 60000;   // 60 s — sincronizado con el engine
+const MAX_STRIKES   = 60;      // strikes visibles por gráfico (scroll habilitado)
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+let currentTab  = null;
+let lastEtag    = null;
+let data        = null;
+
+// ── FETCH & RENDER ────────────────────────────────────────────────────────
+async function fetchData() {
+  try {
+    const res = await fetch(JSON_PATH + '?_=' + Date.now());
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const raw = await res.json();
+    data = raw;
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('error-msg').style.display = 'none';
+    setOnline(true);
+    render(data);
+    flashBadge();
+  } catch(e) {
+    setOnline(false);
+    showError(e.message);
+  }
+}
+
+function setOnline(ok) {
+  const dot = document.getElementById('status-dot');
+  dot.className = 'status-dot' + (ok ? '' : ' offline');
+}
+function showError(msg) {
+  const el = document.getElementById('error-msg');
+  el.textContent = '⚠ No se pudo leer dashboard_strikes.json — ' + msg +
+    '\n\nVerifica que E:\\GEX\\Sync\\dashboard_strikes.json exista y que este HTML esté en la misma carpeta.';
+  el.style.display = 'block';
+}
+function flashBadge() {
+  const b = document.getElementById('refresh-badge');
+  b.textContent = 'ACTUALIZADO';
+  b.classList.add('flash');
+  setTimeout(() => {
+    b.textContent = 'REFRESH 60s';
+    b.classList.remove('flash');
+  }, 800);
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────
+function render(d) {
+  const activos = Object.keys(d);
+  if (!currentTab || !activos.includes(currentTab)) currentTab = activos[0];
+
+  renderTabs(activos, d);
+  renderPanels(activos, d);
+  renderSummary(activos, d);
+  document.getElementById('ts').textContent =
+    d[activos[0]]?.timestamp || new Date().toLocaleTimeString('en-US', {hour12:false});
+}
+
+function renderTabs(activos, d) {
+  const nav = document.getElementById('nav-tabs');
+  nav.innerHTML = '';
+  activos.forEach(a => {
+    const spot = d[a]?.spot || 0;
+    const t = document.createElement('button');
+    t.className = 'tab' + (a === currentTab ? ' active' : '');
+    t.innerHTML = `${a}<span class="spot-tag">${fmt(spot)}</span>`;
+    t.onclick = () => { currentTab = a; activateTab(a); };
+    nav.appendChild(t);
+  });
+}
+
+function activateTab(a) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => {
+    if (t.textContent.startsWith(a)) t.classList.add('active');
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  const panel = document.getElementById('panel-' + a);
+  if (panel) panel.classList.add('active');
+}
+
+function renderPanels(activos, d) {
+  const container = document.getElementById('panels');
+  container.innerHTML = '';
+
+  activos.forEach(a => {
+    const panel = document.createElement('div');
+    panel.className = 'panel' + (a === currentTab ? ' active' : '');
+    panel.id = 'panel-' + a;
+    panel.innerHTML = buildPanel(a, d[a]);
+    container.appendChild(panel);
+  });
+
+  // bind tooltips after DOM insert
+  document.querySelectorAll('.bar-row[data-tip]').forEach(el => {
+    el.addEventListener('mousemove', showTip);
+    el.addEventListener('mouseleave', hideTip);
+  });
+
+  // auto-scroll each chart to center the spot row
+  document.querySelectorAll('.bar-chart-scroll').forEach(scroll => {
+    const spotRow = scroll.querySelector('.spot-row');
+    if (spotRow) {
+      const offset = spotRow.offsetTop - scroll.clientHeight / 2 + spotRow.offsetHeight / 2;
+      scroll.scrollTop = Math.max(0, offset);
+    }
+  });
+}
+
+function buildPanel(activo, payload) {
+  if (!payload || !payload.data || payload.data.length === 0) {
+    return `<div style="padding:40px;color:var(--text3);text-align:center">Sin datos para ${activo}</div>`;
+  }
+
+  const spot    = payload.spot || 0;
+  const rows    = payload.data;
+
+  // Sort by strike desc, keep MAX_STRIKES centered around spot
+  const sorted  = [...rows].sort((a,b) => b.strike - a.strike);
+  const trimmed = trimAroundSpot(sorted, spot, MAX_STRIKES);
+
+  // Compute summary strikes from inv data
+  const summary = computeSummary(trimmed, spot);
+
+  return `
+    <div class="spot-bar">
+      <div>
+        <div class="spot-label">SPOT</div>
+        <div class="spot-val">${fmt(spot)}</div>
+      </div>
+      <div class="key-strikes">
+        ${ksBadge('LONG γ',  summary.longGamma,  'long')}
+        ${ksBadge('SHORT γ', summary.shortGamma, 'short')}
+        ${ksBadge('LONG C',  summary.longCalls,  'call')}
+        ${ksBadge('SHORT C', summary.shortCalls, 'short')}
+        ${ksBadge('LONG P',  summary.longPuts,   'put')}
+        ${ksBadge('SHORT P', summary.shortPuts,  'short')}
+        ${ksBadge('ZERO',    summary.zero,        'zero')}
+      </div>
+    </div>
+    <div class="chart-grid">
+      ${buildChart('GEX',         'gex',          trimmed, spot, r => r.gex,           fmt2M)}
+      ${buildChart('VEX',         'vex',          trimmed, spot, r => r.vex,           fmt2M)}
+      ${buildChart('DEX',         'dex',          trimmed, spot, r => r.dex || 0,      fmt2M)}
+      ${buildChart('VOL NETO',    'vol',          trimmed, spot, r => r.vol_net,        fmtK)}
+      ${buildChart('OI NETO',     'oi',           trimmed, spot, r => r.oi_net,         fmtK)}
+      ${buildChart('INV CALLS',   'inv-c',        trimmed, spot, r => r.inv_vex_call,  fmt2M)}
+      ${buildChart('INV PUTS',    'inv-p',        trimmed, spot, r => r.inv_vex_put,   fmt2M)}
+      ${buildChart('INV GEX',     'inv-gex',      trimmed, spot, r => r.inv_gex,       fmt2M)}
+      ${buildChart('INV NET',     'inv-net',      trimmed, spot, r => r.inv_net || 0,  fmt2M)}
+    </div>
+  `;
+}
+
+function ksBadge(label, val, cls) {
+  if (!val || val === 0) return '';
+  return `<div class="ks">
+    <span class="ks-label">${label}</span>
+    <span class="ks-val ${cls}">${fmt(val)}</span>
+  </div>`;
+}
+
+function buildChart(title, cls, rows, spot, accessor, fmtFn) {
+  const vals   = rows.map(r => accessor(r) || 0);
+  const maxAbs = Math.max(...vals.map(Math.abs), 1);
+  const range  = fmtFn(maxAbs);
+
+  // find closest strike to spot for the marker
+  const spotIdx = rows.reduce((best, r, i) =>
+    Math.abs(r.strike - spot) < Math.abs(rows[best].strike - spot) ? i : best, 0);
+
+  const bars = rows.map((r, i) => {
+    const v     = accessor(r) || 0;
+    const pct   = Math.abs(v) / maxAbs * 50;   // max 50% of half-width
+    const isPos = v >= 0;
+    const isSpot = i === spotIdx;
+
+    // Tooltip data
+    const tip = JSON.stringify({
+      strike: r.strike,
+      gex: r.gex, vex: r.vex, dex: r.dex || 0,
+      vol_net: r.vol_net, oi_net: r.oi_net,
+      inv_c: r.inv_vex_call, inv_p: r.inv_vex_put,
+      inv_gex: r.inv_gex, inv_net: r.inv_net || 0
+    }).replace(/"/g,"'");
+
+    return `
+      <div class="bar-row${isSpot ? ' spot-row' : ''}" data-tip="${tip}">
+        <span class="bar-strike strike-label">${r.strike}</span>
+        <div class="bar-track">
+          <div class="bar-center-line"></div>
+          <div class="bar-fill ${isPos?'pos':'neg'}" style="width:${pct}%"></div>
+          ${isSpot ? `<div class="bar-spot-line"></div>` : ''}
+        </div>
+        <span class="bar-val">${v !== 0 ? fmtFn(v) : ''}</span>
+      </div>`;
+  }).join('');
+
+  return `
+    <div class="chart-box ${cls}">
+      <div class="chart-title">
+        ${title}
+        <span class="range">±${range}</span>
+      </div>
+      <div class="bar-chart-scroll">
+        <div class="bar-chart">${bars}</div>
+      </div>
+    </div>`;
+}
+
+// ── SUMMARY STRIKES ───────────────────────────────────────────────────────
+function computeSummary(rows, spot) {
+  let maxGammaL = 0, maxGammaS = 0, maxLC = 0, maxSC = 0, maxLP = 0, maxSP = 0;
+  let longGamma = 0, shortGamma = 0, longCalls = 0, shortCalls = 0, longPuts = 0, shortPuts = 0;
+
+  // Zero cross on GEX cumulative
+  const sorted  = [...rows].sort((a,b) => a.strike - b.strike);
+  let cumGex = 0, zero = spot;
+  for (let i = 0; i < sorted.length - 1; i++) {
+    const prev = cumGex;
+    cumGex += sorted[i].gex || 0;
+    if (prev * cumGex <= 0 && prev !== cumGex) {
+      const s0 = sorted[i].strike, s1 = sorted[i+1].strike;
+      zero = s0 + (0 - prev) * (s1 - s0) / (cumGex - prev);
+      break;
+    }
+  }
+
+  rows.forEach(r => {
+    const gl = (r.inv_vex_call || 0) + (r.inv_vex_put || 0);
+    const gs = Math.abs(Math.min((r.inv_vex_call||0) - Math.abs(r.inv_vex_call||0), 0))
+             + Math.abs(Math.min((r.inv_vex_put ||0) - Math.abs(r.inv_vex_put ||0), 0));
+    const lc = r.long_calls  || 0;
+    const sc = r.short_calls || 0;
+    const lp = r.long_puts   || 0;
+    const sp = r.short_puts  || 0;
+
+    if (gl > maxGammaL) { maxGammaL = gl; longGamma  = r.strike; }
+    if (lc > maxLC)      { maxLC = lc;     longCalls  = r.strike; }
+    if (sc > maxSC)      { maxSC = sc;     shortCalls = r.strike; }
+    if (lp > maxLP)      { maxLP = lp;     longPuts   = r.strike; }
+    if (sp > maxSP)      { maxSP = sp;     shortPuts  = r.strike; }
+  });
+
+  // shortGamma: strike with most negative inv_gex
+  let minInvGex = 0;
+  rows.forEach(r => {
+    const ig = r.inv_gex || 0;
+    if (ig < minInvGex) { minInvGex = ig; shortGamma = r.strike; }
+  });
+
+  return { longGamma, shortGamma, longCalls, shortCalls, longPuts, shortPuts, zero: Math.round(zero*10)/10 };
+}
+
+// ── SUMMARY TABLES ────────────────────────────────────────────────────────
+function renderSummary(activos, d) {
+  const area = document.getElementById('summary-area');
+  area.innerHTML = '';
+  area.appendChild(buildSummarySection1(activos, d));
+  area.appendChild(buildSummarySection2(activos, d));
+}
+
+function makeSection(title, desc, open) {
+  const sec = document.createElement('div');
+  sec.className = 'section' + (open ? '' : ' collapsed');
+  sec.innerHTML = `
+    <div class="section-header">
+      <span class="s-title">${title}</span>
+      <span class="s-desc">${desc}</span>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="section-body"></div>`;
+  sec.querySelector('.section-header').addEventListener('click', () => {
+    const body = sec.querySelector('.section-body');
+    sec.classList.toggle('collapsed');
+    body.style.maxHeight = sec.classList.contains('collapsed') ? '0' : '600px';
+  });
+  return sec;
+}
+
+function sExtremes(rows, acc) {
+  let maxV = -Infinity, minV = Infinity, maxSk = null, minSk = null;
+  rows.forEach(r => {
+    const v = acc(r);
+    if (v == null || isNaN(v)) return;
+    if (v > maxV) { maxV = v; maxSk = r.strike; }
+    if (v < minV) { minV = v; minSk = r.strike; }
+  });
+  return {
+    maxSk, maxV: maxV === -Infinity ? null : maxV,
+    minSk, minV: minV === Infinity  ? null : minV
+  };
+}
+
+function sNet(rows, acc) {
+  let s = 0;
+  rows.forEach(r => { const v = acc(r); if (v != null && !isNaN(v)) s += v; });
+  return s;
+}
+
+function fmtV(v) {
+  if (v == null || isNaN(v)) return '<span class="null-dash">—</span>';
+  const a = Math.abs(v);
+  if (a >= 1e9) return (v/1e9).toFixed(2)+'B';
+  if (a >= 1e6) return (v/1e6).toFixed(2)+'M';
+  if (a >= 1e3) return (v/1e3).toFixed(1)+'K';
+  return (+v).toFixed(1);
+}
+function vcls(v) {
+  if (v == null || isNaN(v)) return 'vz';
+  return v > 0 ? 'vp' : v < 0 ? 'vn' : 'vz';
+}
+function ncls(v) {
+  if (v == null || isNaN(v)) return 'vz';
+  return v > 0 ? 'np' : v < 0 ? 'nn' : 'vz';
+}
+function sk(v) {
+  return v != null ? (+v).toLocaleString('en-US', {maximumFractionDigits:0}) : '<span class="null-dash">—</span>';
+}
+
+// TABLE 1 — Strike MAX/MIN + NETO for OI, VOL, GEX, VEX, DEX, INV GEX
+function buildSummarySection1(activos, d) {
+  const metrics = [
+    { label:'OI',      cls:'grp-oi',  acc: r => r.oi_net       },
+    { label:'VOL',     cls:'grp-vol', acc: r => r.vol_net      },
+    { label:'GEX',     cls:'grp-gex', acc: r => r.gex          },
+    { label:'VEX',     cls:'grp-vex', acc: r => r.vex          },
+    { label:'DEX',     cls:'grp-dex', acc: r => r.dex    || 0  },
+    { label:'INV GEX', cls:'grp-inv', acc: r => r.inv_gex|| 0  },
+  ];
+
+  let grpHdr = `<tr class="grp-row"><th colspan="2" class="th-left"></th>`;
+  metrics.forEach((m,i) => {
+    const sep = i === 0 ? ' col-sep' : ' col-sep';
+    grpHdr += `<th colspan="3" class="${m.cls}${sep}">${m.label}</th>`;
+  });
+  grpHdr += `</tr>`;
+
+  let subHdr = `<tr><th class="th-left">SYM</th><th>SPOT</th>`;
+  metrics.forEach(m => {
+    subHdr += `<th class="${m.cls} col-sep">SK MAX</th>`;
+    subHdr += `<th class="${m.cls}">SK MIN</th>`;
+    subHdr += `<th class="${m.cls} col-end">NETO</th>`;
+  });
+  subHdr += `</tr>`;
+
+  let rows = '';
+  activos.forEach(sym => {
+    const p = d[sym]; if (!p || !p.data) return;
+    let row = `<td class="sym">${sym}</td><td class="spot-v">${fmt(p.spot||0)}</td>`;
+    metrics.forEach(m => {
+      const ex  = sExtremes(p.data, m.acc);
+      const net = sNet(p.data, m.acc);
+      row += `<td class="sk-max col-sep">${sk(ex.maxSk)}</td>`;
+      row += `<td class="sk-min">${sk(ex.minSk)}</td>`;
+      row += `<td class="${ncls(net)} col-end">${fmtV(net)}</td>`;
+    });
+    rows += `<tr>${row}</tr>`;
+  });
+
+  const sec = makeSection(
+    'SUMMARY · Strike Extremes + Net',
+    'Strike MAX/MIN de OI · VOL · GEX · VEX · DEX · INV GEX — y neto total',
+    true
+  );
+  sec.querySelector('.section-body').innerHTML =
+    `<div class="tbl-wrap"><table class="sum-table"><thead>${grpHdr}${subHdr}</thead><tbody>${rows}</tbody></table></div>`;
+  return sec;
+}
+
+// TABLE 2 — Strike MAX/MIN + VALUE for GEX, VEX, INV GEX, DEX
+function buildSummarySection2(activos, d) {
+  const metrics = [
+    { label:'GEX',     cls:'grp-gex', acc: r => r.gex       || 0 },
+    { label:'VEX',     cls:'grp-vex', acc: r => r.vex       || 0 },
+    { label:'INV GEX', cls:'grp-inv', acc: r => r.inv_gex   || 0 },
+    { label:'DEX',     cls:'grp-dex', acc: r => r.dex       || 0 },
+  ];
+
+  let grpHdr = `<tr class="grp-row"><th colspan="2" class="th-left"></th>`;
+  metrics.forEach(m => {
+    grpHdr += `<th colspan="4" class="${m.cls} col-sep">${m.label}</th>`;
+  });
+  grpHdr += `</tr>`;
+
+  let subHdr = `<tr><th class="th-left">SYM</th><th>SPOT</th>`;
+  metrics.forEach(m => {
+    subHdr += `<th class="${m.cls} col-sep">SK MAX</th>`;
+    subHdr += `<th class="${m.cls}">VAL</th>`;
+    subHdr += `<th class="${m.cls}">SK MIN</th>`;
+    subHdr += `<th class="${m.cls} col-end">VAL</th>`;
+  });
+  subHdr += `</tr>`;
+
+  let rows = '';
+  activos.forEach(sym => {
+    const p = d[sym]; if (!p || !p.data) return;
+    let row = `<td class="sym">${sym}</td><td class="spot-v">${fmt(p.spot||0)}</td>`;
+    metrics.forEach(m => {
+      const ex = sExtremes(p.data, m.acc);
+      row += `<td class="sk-max col-sep">${sk(ex.maxSk)}</td>`;
+      row += `<td class="${vcls(ex.maxV)}">${fmtV(ex.maxV)}</td>`;
+      row += `<td class="sk-min">${sk(ex.minSk)}</td>`;
+      row += `<td class="${vcls(ex.minV)} col-end">${fmtV(ex.minV)}</td>`;
+    });
+    rows += `<tr>${row}</tr>`;
+  });
+
+  const sec = makeSection(
+    'SUMMARY · Strike + Value: GEX · VEX · INV GEX · DEX',
+    'Strike con mayor y menor valor — y el valor exacto en ese strike',
+    true
+  );
+  sec.querySelector('.section-body').innerHTML =
+    `<div class="tbl-wrap"><table class="sum-table"><thead>${grpHdr}${subHdr}</thead><tbody>${rows}</tbody></table></div>`;
+  return sec;
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────
+function trimAroundSpot(sorted, spot, n) {
+  if (sorted.length <= n) return sorted;
+  const idx = sorted.reduce((b,r,i) =>
+    Math.abs(r.strike - spot) < Math.abs(sorted[b].strike - spot) ? i : b, 0);
+  const half = Math.floor(n / 2);
+  const start = Math.max(0, idx - half);
+  return sorted.slice(start, start + n);
+}
+
+function fmt(v)   { return v == null ? '—' : (+v).toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:2}); }
+function fmt2M(v) {
+  const a = Math.abs(v);
+  if (a >= 1e9) return (v/1e9).toFixed(1)+'B';
+  if (a >= 1e6) return (v/1e6).toFixed(1)+'M';
+  if (a >= 1e3) return (v/1e3).toFixed(1)+'K';
+  return (+v).toFixed(1);
+}
+function fmtK(v) {
+  const a = Math.abs(v);
+  if (a >= 1e6) return (v/1e6).toFixed(1)+'M';
+  if (a >= 1e3) return (v/1e3).toFixed(0)+'K';
+  return (+v).toFixed(0);
+}
+
+// ── TOOLTIP ───────────────────────────────────────────────────────────────
+function showTip(e) {
+  const raw = e.currentTarget.dataset.tip;
+  if (!raw) return;
+  const d = JSON.parse(raw.replace(/'/g,'"'));
+  const tt = document.getElementById('tooltip');
+  tt.innerHTML = `
+    <div class="tt-strike">Strike ${d.strike}</div>
+    <div class="tt-row"><span>GEX</span><span>${fmt2M(d.gex||0)}</span></div>
+    <div class="tt-row"><span>VEX</span><span>${fmt2M(d.vex||0)}</span></div>
+    <div class="tt-row"><span>DEX</span><span>${fmt2M(d.dex||0)}</span></div>
+    <div class="tt-row"><span>Vol Neto</span><span>${fmtK(d.vol_net||0)}</span></div>
+    <div class="tt-row"><span>OI Neto</span><span>${fmtK(d.oi_net||0)}</span></div>
+    <div class="tt-row"><span>Inv Calls</span><span>${fmt2M(d.inv_c||0)}</span></div>
+    <div class="tt-row"><span>Inv Puts</span><span>${fmt2M(d.inv_p||0)}</span></div>
+    <div class="tt-row"><span>Inv GEX</span><span>${fmt2M(d.inv_gex||0)}</span></div>
+    <div class="tt-row"><span>Inv Net</span><span>${fmt2M(d.inv_net||0)}</span></div>
+  `;
+  tt.style.display = 'block';
+  moveTip(e);
+}
+function moveTip(e) {
+  const tt = document.getElementById('tooltip');
+  let x = e.clientX + 14, y = e.clientY + 14;
+  if (x + 160 > window.innerWidth)  x = e.clientX - 160;
+  if (y + 160 > window.innerHeight) y = e.clientY - 100;
+  tt.style.left = x + 'px';
+  tt.style.top  = y + 'px';
+  document.querySelectorAll('.bar-row[data-tip]').forEach(el =>
+    el.addEventListener('mousemove', moveTip));
+}
+function hideTip() { document.getElementById('tooltip').style.display = 'none'; }
+
+// ── CLOCK ─────────────────────────────────────────────────────────────────
+function tickClock() {
+  document.getElementById('ts').textContent =
+    new Date().toLocaleTimeString('en-US', {hour12:false});
+}
+setInterval(tickClock, 1000);
+
+// ── COUNTDOWN BADGE ───────────────────────────────────────────────────────
+let countdown = REFRESH_MS / 1000;
+setInterval(() => {
+  countdown--;
+  if (countdown <= 0) countdown = REFRESH_MS / 1000;
+  const b = document.getElementById('refresh-badge');
+  if (!b.classList.contains('flash'))
+    b.textContent = `NEXT ${countdown}s`;
+}, 1000);
+
+// ── POLL LOOP ─────────────────────────────────────────────────────────────
+fetchData();
+setInterval(fetchData, REFRESH_MS);
+</script>
+</body>
+</html>

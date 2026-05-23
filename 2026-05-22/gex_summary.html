@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GEX Summary · Leaders</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:      #080c10;
+    --bg2:     #0d1117;
+    --bg3:     #111820;
+    --border:  #1e2d3d;
+    --border2: #243447;
+    --text:    #c9d1d9;
+    --text2:   #8b949e;
+    --text3:   #4a5568;
+    --accent:  #58a6ff;
+    --green:   #3fb950;
+    --red:     #f85149;
+    --yellow:  #d29922;
+    --purple:  #bc8cff;
+    --cyan:    #39d0d8;
+    --orange:  #f0883e;
+    --font-mono: 'IBM Plex Mono', monospace;
+    --font-sans: 'IBM Plex Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    min-height: 100vh;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.05) 2px, rgba(0,0,0,.05) 4px);
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* ── HEADER ── */
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo { font-size: 15px; font-weight: 600; letter-spacing: .08em; color: var(--accent); }
+  .logo span { color: var(--text2); font-weight: 300; }
+  .status-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--green); box-shadow: 0 0 6px var(--green);
+    animation: pulse 2s infinite;
+  }
+  .status-dot.offline { background: var(--red); box-shadow: 0 0 6px var(--red); animation: none; }
+  @keyframes pulse { 0%,100%{opacity:1;box-shadow:0 0 6px var(--green)} 50%{opacity:.5;box-shadow:0 0 12px var(--green)} }
+  .header-left { display: flex; align-items: center; gap: 14px; }
+  .header-right { display: flex; align-items: center; gap: 16px; }
+  #ts { color: var(--text2); font-size: 11px; }
+  #refresh-badge {
+    font-size: 10px; color: var(--text3);
+    padding: 2px 7px; border: 1px solid var(--border); border-radius: 3px;
+  }
+  #refresh-badge.flash { color: var(--cyan); border-color: var(--cyan); animation: flash .4s ease; }
+  @keyframes flash { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  main { padding: 16px 20px; display: flex; flex-direction: column; gap: 16px; }
+
+  /* ── SECTION ── */
+  .section {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  .section-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px;
+    cursor: pointer;
+    user-select: none;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    transition: background .15s;
+  }
+  .section-header:hover { background: #162130; }
+  .section-header .s-title {
+    font-size: 11px; font-weight: 600; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--text);
+    flex: 1;
+  }
+  .section-header .s-desc {
+    font-size: 10px; color: var(--text3); font-weight: 300;
+  }
+  .chevron {
+    font-size: 10px; color: var(--text3);
+    transition: transform .2s;
+    flex-shrink: 0;
+  }
+  .section.collapsed .chevron { transform: rotate(-90deg); }
+  .section-body { overflow: hidden; transition: max-height .3s ease; }
+  .section.collapsed .section-body { max-height: 0 !important; }
+
+  /* ── TABLE ── */
+  .tbl-wrap { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+  }
+  thead th {
+    padding: 7px 10px;
+    text-align: center;
+    font-size: 9px; font-weight: 600;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: var(--text3);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    position: sticky; top: 0;
+    background: var(--bg2);
+  }
+  thead th.th-left { text-align: left; }
+  thead th.group-gex   { color: var(--green); }
+  thead th.group-vex   { color: var(--cyan); }
+  thead th.group-dex   { color: var(--orange); }
+  thead th.group-vol   { color: var(--yellow); }
+  thead th.group-oi    { color: var(--purple); }
+  thead th.group-inv   { color: var(--accent); }
+
+  thead tr.group-row th {
+    padding: 4px 10px;
+    font-size: 9px; font-weight: 700;
+    background: #0a1220;
+    border-bottom: 1px solid var(--border);
+  }
+
+  tbody tr {
+    border-bottom: 1px solid #131c27;
+    transition: background .1s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #0f1c2a; }
+
+  td {
+    padding: 7px 10px;
+    text-align: center;
+    white-space: nowrap;
+  }
+  td.sym {
+    text-align: left; font-weight: 600; font-size: 12px;
+    color: var(--accent); letter-spacing: .05em;
+    border-right: 1px solid var(--border);
+    min-width: 56px;
+  }
+  td.spot-val { color: var(--text2); font-size: 11px; border-right: 1px solid var(--border); }
+
+  /* strike cells */
+  td.sk-max { color: var(--green); font-weight: 500; }
+  td.sk-min { color: var(--red);   font-weight: 500; }
+  td.val-pos { color: var(--green); }
+  td.val-neg { color: var(--red); }
+  td.val-neu { color: var(--text2); }
+  td.net-pos { color: var(--green); font-weight: 500; }
+  td.net-neg { color: var(--red);   font-weight: 500; }
+  td.divider { border-right: 1px solid var(--border); }
+
+  /* col separators */
+  .col-sep { border-left: 1px solid var(--border); }
+
+  /* loading */
+  #loading {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; height: 50vh; gap: 14px; color: var(--text2);
+  }
+  .spinner {
+    width: 28px; height: 28px; border: 2px solid var(--border);
+    border-top-color: var(--accent); border-radius: 50%;
+    animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #error-msg {
+    display: none; margin: 20px;
+    padding: 12px 16px; border: 1px solid var(--red);
+    background: #f8514910; border-radius: 4px;
+    color: var(--red); font-size: 11px;
+  }
+
+  /* null dash */
+  .null { color: var(--text3); }
+
+  /* highlight top value */
+  td.top { position: relative; }
+  td.top::after {
+    content: '▲';
+    position: absolute; right: 2px; top: 50%; transform: translateY(-50%);
+    font-size: 7px; color: var(--green); opacity: .6;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="status-dot" id="status-dot"></div>
+    <div class="logo">GEX<span>/VEX</span> SUMMARY</div>
+  </div>
+  <div class="header-right">
+    <span id="ts">--:--:--</span>
+    <span id="refresh-badge">NEXT --s</span>
+  </div>
+</header>
+
+<main>
+  <div id="loading">
+    <div class="spinner"></div>
+    <span>Cargando dashboard_strikes.json…</span>
+  </div>
+  <div id="error-msg"></div>
+  <div id="content" style="display:none; display:flex; flex-direction:column; gap:16px;"></div>
+</main>
+
+<script>
+const JSON_PATH  = 'dashboard_strikes.json';
+const REFRESH_MS = 60000;
+
+let countdown = REFRESH_MS / 1000;
+let globalData = null;
+
+// ── UTILS ────────────────────────────────────────────────────────────────
+function fmt(v) {
+  if (v == null || isNaN(v)) return '<span class="null">—</span>';
+  return (+v).toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0});
+}
+function fmtV(v) {
+  if (v == null || isNaN(v)) return '<span class="null">—</span>';
+  const a = Math.abs(v);
+  if (a >= 1e9) return (v/1e9).toFixed(2)+'B';
+  if (a >= 1e6) return (v/1e6).toFixed(2)+'M';
+  if (a >= 1e3) return (v/1e3).toFixed(1)+'K';
+  return (+v).toFixed(1);
+}
+function fmtVc(v) {
+  if (v == null || isNaN(v)) return 'val-neu';
+  return v > 0 ? 'val-pos' : v < 0 ? 'val-neg' : 'val-neu';
+}
+function netClass(v) {
+  if (v == null || isNaN(v)) return 'val-neu';
+  return v > 0 ? 'net-pos' : v < 0 ? 'net-neg' : 'val-neu';
+}
+
+// ── LEADERS PER METRIC ───────────────────────────────────────────────────
+function strikeExtremes(rows, accessor) {
+  let maxV = -Infinity, minV = Infinity;
+  let maxSk = null, minSk = null;
+  rows.forEach(r => {
+    const v = accessor(r);
+    if (v == null || isNaN(v)) return;
+    if (v > maxV) { maxV = v; maxSk = r.strike; }
+    if (v < minV) { minV = v; minSk = r.strike; }
+  });
+  return {
+    maxSk: maxSk, maxV: maxV === -Infinity ? null : maxV,
+    minSk: minSk, minV: minV === Infinity  ? null : minV
+  };
+}
+
+function netSum(rows, accessor) {
+  let s = 0;
+  rows.forEach(r => { const v = accessor(r); if (v != null && !isNaN(v)) s += v; });
+  return s;
+}
+
+// ── RENDER ───────────────────────────────────────────────────────────────
+function render(d) {
+  const activos = Object.keys(d);
+  globalData = d;
+
+  // timestamp from first asset
+  const ts = d[activos[0]]?.timestamp;
+  if (ts) document.getElementById('ts').textContent = ts;
+
+  const content = document.getElementById('content');
+  content.style.display = 'flex';
+  content.innerHTML = '';
+
+  content.appendChild(buildTable1(activos, d));
+  content.appendChild(buildTable2(activos, d));
+}
+
+// ────────────────────────────────────────────────────────────────────────
+// TABLE 1 — Strike MAX/MIN of OI, VOL, GEX, VEX, DEX + NETO
+// ────────────────────────────────────────────────────────────────────────
+function buildTable1(activos, d) {
+  const section = makeSection(
+    'TABLE 1 · Strike Extremes + Net',
+    'Para cada activo: strike con mayor y menor valor de OI, VOL, GEX, VEX, DEX — más el neto total',
+    true
+  );
+
+  const metrics = [
+    { key:'oi',  label:'OI',  cls:'group-oi',  acc: r => r.oi_net,       fmtFn: fmtV, isNet: r => r.oi_net },
+    { key:'vol', label:'VOL', cls:'group-vol', acc: r => r.vol_net,      fmtFn: fmtV, isNet: r => r.vol_net },
+    { key:'gex', label:'GEX', cls:'group-gex', acc: r => r.gex,          fmtFn: fmtV, isNet: r => r.gex },
+    { key:'vex', label:'VEX', cls:'group-vex', acc: r => r.vex,          fmtFn: fmtV, isNet: r => r.vex },
+    { key:'dex', label:'DEX', cls:'group-dex', acc: r => r.dex || 0,     fmtFn: fmtV, isNet: r => r.dex || 0 },
+    { key:'igx', label:'INV GEX', cls:'group-inv', acc: r => r.inv_gex || 0, fmtFn: fmtV, isNet: r => r.inv_gex || 0 },
+  ];
+
+  // Group header row
+  let groupHdr = `<tr class="group-row">
+    <th colspan="2" class="th-left"></th>`;
+  metrics.forEach(m => {
+    groupHdr += `<th colspan="3" class="${m.cls} col-sep">${m.label}</th>`;
+  });
+  groupHdr += `</tr>`;
+
+  // Sub-header
+  let subHdr = `<tr>
+    <th class="th-left">SYM</th>
+    <th>SPOT</th>`;
+  metrics.forEach(m => {
+    subHdr += `<th class="${m.cls} col-sep">SK MAX</th>`;
+    subHdr += `<th class="${m.cls}">SK MIN</th>`;
+    subHdr += `<th class="${m.cls} divider">NETO</th>`;
+  });
+  subHdr += `</tr>`;
+
+  // Rows
+  let rows = '';
+  activos.forEach(sym => {
+    const payload = d[sym];
+    if (!payload || !payload.data) return;
+    const spot = payload.spot || 0;
+    const data = payload.data;
+
+    let row = `<td class="sym">${sym}</td><td class="spot-val">${fmt(spot)}</td>`;
+    metrics.forEach(m => {
+      const ex = strikeExtremes(data, m.acc);
+      const net = netSum(data, m.isNet);
+      row += `<td class="sk-max col-sep">${ex.maxSk != null ? fmt(ex.maxSk) : '<span class="null">—</span>'}</td>`;
+      row += `<td class="sk-min">${ex.minSk != null ? fmt(ex.minSk) : '<span class="null">—</span>'}</td>`;
+      row += `<td class="divider ${netClass(net)}">${fmtV(net)}</td>`;
+    });
+
+    rows += `<tr>${row}</tr>`;
+  });
+
+  const html = `
+    <div class="tbl-wrap">
+      <table>
+        <thead>${groupHdr}${subHdr}</thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+
+  section.querySelector('.section-body').innerHTML = html;
+  section.querySelector('.section-body').style.maxHeight = '600px';
+  return section;
+}
+
+// ────────────────────────────────────────────────────────────────────────
+// TABLE 2 — Strike MAX/MIN + VALUE of GEX, VEX, GEX INV, DEX
+// ────────────────────────────────────────────────────────────────────────
+function buildTable2(activos, d) {
+  const section = makeSection(
+    'TABLE 2 · Strike + Value: GEX · VEX · INV GEX · DEX',
+    'Strike con mayor y menor valor absoluto, más el valor exacto en ese strike',
+    true
+  );
+
+  const metrics = [
+    { key:'gex',    label:'GEX',     cls:'group-gex', acc: r => r.gex || 0 },
+    { key:'vex',    label:'VEX',     cls:'group-vex', acc: r => r.vex || 0 },
+    { key:'inv_gex',label:'INV GEX', cls:'group-inv', acc: r => r.inv_gex || 0 },
+    { key:'dex',    label:'DEX',     cls:'group-dex', acc: r => r.dex || 0 },
+  ];
+
+  // Group header
+  let groupHdr = `<tr class="group-row"><th colspan="2" class="th-left"></th>`;
+  metrics.forEach(m => {
+    groupHdr += `<th colspan="4" class="${m.cls} col-sep">${m.label}</th>`;
+  });
+  groupHdr += `</tr>`;
+
+  // Sub-header
+  let subHdr = `<tr><th class="th-left">SYM</th><th>SPOT</th>`;
+  metrics.forEach(m => {
+    subHdr += `<th class="${m.cls} col-sep">SK MAX</th>`;
+    subHdr += `<th class="${m.cls}">VAL</th>`;
+    subHdr += `<th class="${m.cls}">SK MIN</th>`;
+    subHdr += `<th class="${m.cls} divider">VAL</th>`;
+  });
+  subHdr += `</tr>`;
+
+  // Rows
+  let rows = '';
+  activos.forEach(sym => {
+    const payload = d[sym];
+    if (!payload || !payload.data) return;
+    const spot = payload.spot || 0;
+    const data = payload.data;
+
+    let row = `<td class="sym">${sym}</td><td class="spot-val">${fmt(spot)}</td>`;
+    metrics.forEach(m => {
+      // Find row with max and min value
+      let maxV = -Infinity, minV = Infinity;
+      let maxSk = null, minSk = null, maxVal = null, minVal = null;
+      data.forEach(r => {
+        const v = m.acc(r);
+        if (v == null || isNaN(v)) return;
+        if (v > maxV) { maxV = v; maxSk = r.strike; maxVal = v; }
+        if (v < minV) { minV = v; minSk = r.strike; minVal = v; }
+      });
+
+      const maxVDisp = maxVal != null ? fmtV(maxVal) : '<span class="null">—</span>';
+      const minVDisp = minVal != null ? fmtV(minVal) : '<span class="null">—</span>';
+      const maxVCls = maxVal != null ? fmtVc(maxVal) : 'val-neu';
+      const minVCls = minVal != null ? fmtVc(minVal) : 'val-neu';
+
+      row += `<td class="sk-max col-sep">${maxSk != null ? fmt(maxSk) : '<span class="null">—</span>'}</td>`;
+      row += `<td class="${maxVCls}">${maxVDisp}</td>`;
+      row += `<td class="sk-min">${minSk != null ? fmt(minSk) : '<span class="null">—</span>'}</td>`;
+      row += `<td class="${minVCls} divider">${minVDisp}</td>`;
+    });
+
+    rows += `<tr>${row}</tr>`;
+  });
+
+  const html = `
+    <div class="tbl-wrap">
+      <table>
+        <thead>${groupHdr}${subHdr}</thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+
+  section.querySelector('.section-body').innerHTML = html;
+  section.querySelector('.section-body').style.maxHeight = '600px';
+  return section;
+}
+
+// ── COLLAPSIBLE SECTION HELPER ───────────────────────────────────────────
+function makeSection(title, desc, open = true) {
+  const sec = document.createElement('div');
+  sec.className = 'section' + (open ? '' : ' collapsed');
+  sec.innerHTML = `
+    <div class="section-header">
+      <span class="s-title">${title}</span>
+      <span class="s-desc">${desc}</span>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="section-body"></div>`;
+  sec.querySelector('.section-header').addEventListener('click', () => {
+    sec.classList.toggle('collapsed');
+    const body = sec.querySelector('.section-body');
+    if (sec.classList.contains('collapsed')) {
+      body.style.maxHeight = '0';
+    } else {
+      body.style.maxHeight = '600px';
+    }
+  });
+  return sec;
+}
+
+// ── FETCH ─────────────────────────────────────────────────────────────────
+async function fetchData() {
+  try {
+    const res = await fetch(JSON_PATH + '?_=' + Date.now());
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const raw = await res.json();
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('error-msg').style.display = 'none';
+    document.getElementById('status-dot').className = 'status-dot';
+    render(raw);
+    flashBadge();
+  } catch(e) {
+    document.getElementById('status-dot').className = 'status-dot offline';
+    const el = document.getElementById('error-msg');
+    el.textContent = '⚠ No se pudo leer dashboard_strikes.json — ' + e.message;
+    el.style.display = 'block';
+  }
+}
+
+function flashBadge() {
+  const b = document.getElementById('refresh-badge');
+  b.textContent = 'ACTUALIZADO';
+  b.style.color = 'var(--cyan)';
+  b.style.borderColor = 'var(--cyan)';
+  setTimeout(() => {
+    b.style.color = '';
+    b.style.borderColor = '';
+  }, 800);
+}
+
+// ── CLOCK + COUNTDOWN ─────────────────────────────────────────────────────
+setInterval(() => {
+  countdown--;
+  if (countdown <= 0) countdown = REFRESH_MS / 1000;
+  const b = document.getElementById('refresh-badge');
+  if (b.textContent !== 'ACTUALIZADO')
+    b.textContent = `NEXT ${countdown}s`;
+}, 1000);
+
+fetchData();
+setInterval(fetchData, REFRESH_MS);
+</script>
+</body>
+</html>
