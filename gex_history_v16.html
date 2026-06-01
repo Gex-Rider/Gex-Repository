@@ -1597,8 +1597,8 @@ async function loadAll() {
   });
 
   // ── v12: load signals.json and dashboard_strikes.json ─────────────────
-  loadSignals();
-  loadInstPanel(currentTab);
+  if (signalsPanelOpen) loadSignals();
+  if (instPanelOpen)    loadInstPanel(currentTab);
 }
 
 // ══════════════════════════════════════════════════════════════════════
@@ -1660,26 +1660,34 @@ async function loadSignals() {
       const qcls = qs >= 70 ? 'hi' : qs >= 50 ? 'mid' : 'lo';
 
       // Key fields — different signals have different keys
-      const rows = [];
-      if (s.SPOT)              rows.push(['SPOT',       fmtP(s.SPOT)]);
-      if (s.ZERO)              rows.push(['ZERO',       fmtP(s.ZERO)]);
-      if (s.FlowVelocity)      rows.push(['Velocity',   '$'+fmtM(s.FlowVelocity)]);
-      if (s.FlowImbalance != null) rows.push(['Imb Sess', (s.FlowImbalance > 0 ? '+' : '') + (+s.FlowImbalance).toFixed(2)]);
-      if (s.Imbalance5m != null)   rows.push(['Imb 5m',   (s.Imbalance5m > 0 ? '+' : '') + (+s.Imbalance5m).toFixed(2)]);
-      if (s.NetDeltaFlow != null)  rows.push(['Δ Flow',    fmtM(s.NetDeltaFlow)]);
-      if (s.DeltaZscore != null)   rows.push(['Δ Z-score', (+s.DeltaZscore).toFixed(2)]);
-      if (s.CharmVelocity != null) rows.push(['Charm Vel', (+s.CharmVelocity).toFixed(4)]);
-      if (s.CharmAcceleration!=null) rows.push(['Charm Acc',(+s.CharmAcceleration).toFixed(4)]);
-      if (s.HorasRestantes!=null)  rows.push(['T restante', (+s.HorasRestantes).toFixed(1)+'h']);
-      if (s.DealerStress)          rows.push(['Stress',     Math.round(s.DealerStress)]);
-      if (s.AbsorptionScore)       rows.push(['Absorb',     Math.round(s.AbsorptionScore)]);
-      if (s.GammaCompression)      rows.push(['GammaComp',  Math.round(s.GammaCompression)]);
-      if (s.PinStrike)             rows.push(['PinStrike',  fmtP(s.PinStrike)]);
-      if (s.GEXWallStrike)         rows.push(['GEX Wall',   fmtP(s.GEXWallStrike)]);
-      if (s.ExpectedVol)           rows.push(['Vol exp.',   s.ExpectedVol.replace(/_/g,' ')]);
-      if (s.Invalidation)          rows.push(['Inv.',       s.Invalidation]);
+      // Build rows — show most relevant fields for each signal type
+      const sRows = [];
+      const _addIf = (label, val, fmt) => {
+        if (val == null || val === '' || val === 0) return;
+        sRows.push([label, fmt ? fmt(val) : String(val)]);
+      };
+      const _fmtPct = v => (v >= 0 ? '+' : '') + (+v).toFixed(2);
+      _addIf('SPOT',      s.SPOT,             fmtP);
+      _addIf('ZERO',      s.ZERO,             fmtP);
+      _addIf('Velocity',  s.FlowVelocity,     v => '$'+fmtM(v));
+      _addIf('Imb Sess',  s.FlowImbalance,    _fmtPct);
+      _addIf('Imb 5m',    s.Imbalance5m,      _fmtPct);
+      _addIf('Δ Flow',    s.NetDeltaFlow,     v => fmtM(v));
+      _addIf('Δ Z',       s.DeltaZscore,      v => (+v).toFixed(2));
+      _addIf('Charm Vel', s.CharmVelocity,    v => (+v).toFixed(4));
+      _addIf('Charm Acc', s.CharmAcceleration,v => (+v).toFixed(4));
+      _addIf('T rest.',   s.HorasRestantes,   v => (+v).toFixed(1)+'h');
+      _addIf('Stress',    s.DealerStress,     v => Math.round(v));
+      _addIf('Absorb',    s.AbsorptionScore,  v => Math.round(v));
+      _addIf('GComp',     s.GammaCompression, v => Math.round(v));
+      _addIf('Pin',       s.PinStrike,        fmtP);
+      _addIf('GEX Wall',  s.GEXWallStrike,    fmtP);
+      _addIf('Vol exp.',  s.ExpectedVol,      v => v.replace(/_/g,' '));
+      _addIf('Prob',      s.Probability != null ? (s.Probability*100).toFixed(0)+'%' : null, v => v);
+      // Limit to 6 rows max so cards stay compact
+      const rows = sRows.slice(0, 6);
 
-      const rowsHtml = rows.slice(0,5).map(([l,v]) =>
+      const rowsHtml = rows.map(([l,v]) =>
         `<div class="sig-card-row"><span class="sig-card-lbl">${l}</span><span class="sig-card-val">${v}</span></div>`
       ).join('');
 
@@ -2343,12 +2351,37 @@ function toggleFlowPanel() {
 }
 
 // ── FLOW SUB-CHART SELECTOR ──────────────────────────────────────────
-function selectFlowChart(name) {
+async function selectFlowChart(name) {
   flowChart = name;
+  saveSettings();
   document.querySelectorAll('.flow-tab-btn').forEach(b => {
     const isActive = b.dataset.fchart === name;
     b.classList.toggle('flow-active', isActive);
   });
+
+  // If the flow panel is not open, open it automatically
+  if (!flowPanelOpen) {
+    flowPanelOpen = true;
+    const wrapper = document.getElementById('flow-panel-wrapper');
+    const btn     = document.getElementById('flow-toggle-btn');
+    if (wrapper) wrapper.classList.add('open');
+    if (btn)     { btn.textContent = 'FLOW \u25cf'; btn.classList.add('flow-on'); }
+    const flowEl = document.getElementById('flow-chart');
+    if (flowEl) flowEl._flowZoomAttached = false;
+    _cursorSyncAttached = false;
+    setTimeout(() => {
+      fixChartHeights();
+      const el = document.getElementById('chart-' + currentTab);
+      if (el && el.data) Plotly.relayout(el, { autosize: true });
+    }, 50);
+  }
+
+  // Ensure data is loaded for current asset before plotting
+  if (!flowCache[currentTab]) {
+    const rows = await loadFlowCSV(currentTab);
+    if (rows && rows.length) flowCache[currentTab] = rows;
+  }
+
   replotFlow();
 }
 
@@ -2367,17 +2400,27 @@ function parseFlowCSV(text) {
   const lines = text.trim().split('\n');
   if (lines.length < 2) return [];
   const headers = lines[0].split(',').map(h => h.trim());
+
+  // v16: detect if this CSV has v15 columns (backward-compat with old CSVs)
+  const hasV15 = headers.includes('FlowImbalance5m');
+
   return lines.slice(1).map(line => {
     const vals = line.split(',');
-    const obj = {};
+    const obj  = {};
     headers.forEach((h, i) => {
       let v = (vals[i] || '').trim();
-      // Special: Events column may contain pipes, keep as string
       if (h === 'Events') { obj[h] = v; return; }
       obj[h] = v === '' ? null : isNaN(+v) ? v : +v;
     });
     if (obj.Time && typeof obj.Time === 'string') {
       obj.Time = obj.Time.trim().replace(' ', 'T');
+    }
+    // v16: safe defaults for v15 columns if CSV was written by old engine
+    if (!hasV15) {
+      obj.FlowImbalance5m    = obj.FlowImbalanceCycle = obj.FlowImbalance15m = null;
+      obj.CycleCallPremBuy   = obj.CyclePutPremBuy    = null;
+      obj.CharmVelocity      = obj.CharmAcceleration  = null;
+      obj.BullishScoreRaw    = obj.BearishScoreRaw     = null;
     }
     return obj;
   }).filter(r => r.Time);
@@ -2407,20 +2450,20 @@ function updateFlowStatBar(activo) {
   setVal('fs-velocity',  last.FlowVelocity,    fmtM);
   setVal('fs-delta',     last.NetDeltaFlow,    v => v.toFixed(1));
 
-  // v16: Rolling 5m imbalance
+  // v16: Rolling 5m imbalance (null-safe for old CSVs)
   const imb5mEl = document.getElementById('fs-imb5m');
   if (imb5mEl) {
-    const v5m = parseFloat(last.FlowImbalance5m);
+    const v5m = last.FlowImbalance5m != null ? parseFloat(last.FlowImbalance5m) : NaN;
     imb5mEl.textContent = isNaN(v5m) ? '—' : (v5m >= 0 ? '+' : '') + v5m.toFixed(2);
-    imb5mEl.className = 'flow-stat-val ' + (isNaN(v5m) ? 'neu' : v5m > 0.15 ? 'pos' : v5m < -0.15 ? 'neg' : 'neu');
+    imb5mEl.className   = 'flow-stat-val ' + (isNaN(v5m) ? 'neu' : v5m > 0.15 ? 'pos' : v5m < -0.15 ? 'neg' : 'neu');
   }
 
-  // v16: Charm velocity
+  // v16: Charm velocity (null-safe)
   const charmVelEl = document.getElementById('fs-charmvel');
   if (charmVelEl) {
-    const cv = parseFloat(last.CharmVelocity);
+    const cv = last.CharmVelocity != null ? parseFloat(last.CharmVelocity) : NaN;
     charmVelEl.textContent = isNaN(cv) ? '—' : (cv >= 0 ? '+' : '') + cv.toFixed(3);
-    charmVelEl.className = 'flow-stat-val ' + (isNaN(cv) ? 'neu' : cv > 0.001 ? 'pos' : cv < -0.001 ? 'neg' : 'neu');
+    charmVelEl.className   = 'flow-stat-val ' + (isNaN(cv) ? 'neu' : cv > 0.001 ? 'pos' : cv < -0.001 ? 'neg' : 'neu');
   }
 
   // v16: Divergence detector (delta vs spot direction)
@@ -2507,6 +2550,9 @@ function _updateEodBadge() {
 })();
 
 // ── FLOW CHART BUILDER ────────────────────────────────────────────────
+let _lastFlowChart = null;   // track last rendered mode to detect mode changes
+let _lastFlowActivo = null;  // track last rendered activo to detect asset changes
+
 function replotFlow() {
   if (!flowPanelOpen) return;
   const activo = currentTab;
@@ -2514,8 +2560,20 @@ function replotFlow() {
   const el     = document.getElementById('flow-chart');
   if (!el) return;
 
+  // Detect asset change — when activo changes we MUST purge the Plotly element
+  // so that stale .on() listeners from the previous asset are fully removed.
+  // Plotly.react() does NOT remove event listeners; only purge() does.
+  const activoChanged = (_lastFlowActivo !== activo);
+  if (activoChanged && el.data && el.data.length) {
+    Plotly.purge(el);
+    el._flowZoomAttached = false;
+    _cursorSyncAttached  = false;
+  }
+
   if (!rows || !rows.length) {
     Plotly.react(el, [], _flowLayout(activo, 'Sin datos de flow'), { responsive: true, displayModeBar: false });
+    _lastFlowChart  = null;
+    _lastFlowActivo = activo;
     return;
   }
 
@@ -2621,18 +2679,22 @@ function replotFlow() {
     case 'DELTA': {
       // v16: delta acumulado + SPOT normalizado overlay para ver divergencia
       title = 'Net Delta Flow (acumulado) + SPOT overlay';
-      const dv = rows.map(r => r.NetDeltaFlow || 0);
-      const spotVals = rows.map(r => r.SPOT || 0).filter(Boolean);
-      const spotMin = Math.min(...spotVals);
-      const spotMax = Math.max(...spotVals);
-      const spotRange = spotMax - spotMin || 1;
-      const dvMin = Math.min(...dv);
-      const dvMax = Math.max(...dv);
-      const dvRange = dvMax - dvMin || 1;
+      const dv        = rows.map(r => r.NetDeltaFlow || 0);
+      const spotVals  = rows.map(r => r.SPOT).filter(v => v != null && v > 0);
+      // Safe guards — empty arrays cause Infinity/-Infinity
+      const spotMin   = spotVals.length ? Math.min(...spotVals) : 0;
+      const spotMax   = spotVals.length ? Math.max(...spotVals) : 1;
+      const spotRange = (spotMax - spotMin) || 1;
+      const dvFinite  = dv.filter(v => isFinite(v) && v !== 0);
+      const dvMin     = dvFinite.length ? Math.min(...dvFinite) : 0;
+      const dvMax     = dvFinite.length ? Math.max(...dvFinite) : 1;
+      const dvRange   = (dvMax - dvMin) || 1;
       // Normalize SPOT to delta range for overlay
-      const spotNorm = rows.map(r => r.SPOT
-        ? dvMin + ((r.SPOT - spotMin) / spotRange) * dvRange
-        : null);
+      const spotNorm  = rows.map(r =>
+        (r.SPOT && r.SPOT > 0)
+          ? dvMin + ((r.SPOT - spotMin) / spotRange) * dvRange
+          : null
+      );
       traces = [
         { name: 'Net Δ Flow',
           x: times, y: dv,
@@ -2655,10 +2717,11 @@ function replotFlow() {
       title = 'v16 — Divergencia Delta/Gamma vs Precio (señal de amplificación)';
       const dv2    = rows.map(r => r.NetDeltaFlow || 0);
       const gv2    = rows.map(r => r.NetGammaFlow || 0);
-      const spotD  = rows.map(r => r.SPOT || 0);
-      const spotMinD = Math.min(...spotD.filter(Boolean));
-      const spotMaxD = Math.max(...spotD.filter(Boolean));
-      const spotRangeD = spotMaxD - spotMinD || 1;
+      const spotD     = rows.map(r => r.SPOT || 0);
+      const spotDVals = spotD.filter(v => v > 0);
+      const spotMinD  = spotDVals.length ? Math.min(...spotDVals) : 0;
+      const spotMaxD  = spotDVals.length ? Math.max(...spotDVals) : 1;
+      const spotRangeD = (spotMaxD - spotMinD) || 1;
       // Detect divergence zones: delta negative while SPOT rising
       const divColors = rows.map((r, i) => {
         if (i === 0) return '#6b7280';
@@ -2668,6 +2731,11 @@ function replotFlow() {
         if (r.NetDeltaFlow > 0 && falling) return '#ef4444cc'; // bear divergence
         return '#6b728040';
       });
+      // Safe range for SPOT normalization into delta space
+      const dv2Finite   = dv2.filter(v => isFinite(v) && v !== 0);
+      const dv2Min      = dv2Finite.length ? Math.min(...dv2Finite) : 0;
+      const dv2Max      = dv2Finite.length ? Math.max(...dv2Finite) : 1;
+      const dv2Range    = (dv2Max - dv2Min) || 1;
       traces = [
         { name: 'Net Δ Flow',
           x: times, y: dv2,
@@ -2679,7 +2747,11 @@ function replotFlow() {
           line:{ color:'#e879f9', width:1.5, dash:'dot' },
           yaxis:'y2' },
         { name: 'SPOT',
-          x: times, y: spotD.map(v => v ? spotMinD + ((v-spotMinD)/spotRangeD) * (Math.max(...dv2.filter(Boolean))-Math.min(...dv2.filter(Boolean))) + Math.min(...dv2.filter(Boolean)) : null),
+          x: times, y: spotD.map(v =>
+            (v && v > 0)
+              ? dv2Min + ((v - spotMinD) / spotRangeD) * dv2Range
+              : null
+          ),
           type:'scatter', mode:'lines',
           line:{ color:'#ffffff80', width:2 },
           hovertemplate:'SPOT: %{text}<extra></extra>',
@@ -2843,6 +2915,16 @@ function replotFlow() {
     layout.xaxis.autorange = false;
   }
 
+  // When the chart mode changes (but same asset), purge to avoid Plotly
+  // carrying over old axis configuration (e.g. dual-axis remnants)
+  const modeChanged = (_lastFlowChart !== flowChart);
+  if (modeChanged && !activoChanged && el.data && el.data.length) {
+    Plotly.purge(el);
+    el._flowZoomAttached = false;
+  }
+  _lastFlowChart  = flowChart;
+  _lastFlowActivo = activo;
+
   Plotly.react(el, traces, layout, { responsive: true, displayModeBar: false, scrollZoom: true });
 
   // Attach flow→main X sync and bidirectional cursor after every render
@@ -2944,34 +3026,49 @@ function _needsDualAxis(chartName) {
 
 // ── CANONICAL TAB SWITCH — single function, no double-definition issues ─
 async function switchTab(a) {
-  if (a === currentTab && document.getElementById('panel-' + a)?.classList.contains('active')) {
-    // Already on this tab — just refresh data
-  } else {
-    currentTab = a;
+  const tabChanged = (a !== currentTab);
+
+  // ── 1. Update DOM tab state ──────────────────────────────────────
+  currentTab = a;
+  if (tabChanged || !document.getElementById('panel-' + a)?.classList.contains('active')) {
     activateTabDOM(a);
   }
 
-  // Always refresh the main GEX chart
+  // ── 2. Reset stale listener state when asset changes ─────────────
+  if (tabChanged) {
+    _cursorSyncAttached  = false;
+    _lastFlowActivo      = null;                      // forces replotFlow() to purge & re-init
+    const flowEl = document.getElementById('flow-chart');
+    if (flowEl) {
+      flowEl._flowZoomAttached = false;
+      // Purge flow chart so old asset's listeners don't survive
+      if (flowEl.data && flowEl.data.length) Plotly.purge(flowEl);
+    }
+  }
+
+  // ── 3. Render main GEX chart ─────────────────────────────────────
   replot();
 
-  // Flow panel: update stat bar and chart; lazy-load CSV if missing
+  // ── 4. Flow panel: lazy-load CSV + re-render ─────────────────────
   if (flowPanelOpen) {
-    updateFlowStatBar(a);
     if (!flowCache[a]) {
       const rows = await loadFlowCSV(a);
       if (rows && rows.length) flowCache[a] = rows;
     }
+    updateFlowStatBar(a);
     replotFlow();
   }
 
-  // Heatmap: pre-load for new tab
+  // ── 5. Heatmap pre-load (non-blocking) ───────────────────────────
   if (hmEnabled) loadHeatmapData(a, hmType).then(() => replot());
 
-  // v12 inst panel
-  if (instPanelOpen) loadInstPanel(a);
+  // ── 6. Side panels ───────────────────────────────────────────────
+  if (instPanelOpen)     loadInstPanel(a);
+  if (signalsPanelOpen)  loadSignals();
 
-  // Sync X range from zoomState if the tab has a saved range
-  _applySavedZoom(a);
+  // ── 7. Restore saved zoom AFTER main chart renders ───────────────
+  //    Use requestAnimationFrame so Plotly has finished its layout pass
+  requestAnimationFrame(() => _applySavedZoom(a));
 }
 
 // Keep activateTab as alias so any legacy call still works
@@ -3128,6 +3225,11 @@ syncButtons();
     document.getElementById('toolbar').classList.add('expanded');
     document.getElementById('toolbar-toggle').classList.add('open');
   }
+
+  // Restore active flow sub-chart button visual
+  document.querySelectorAll('.flow-tab-btn').forEach(b => {
+    b.classList.toggle('flow-active', b.dataset.fchart === flowChart);
+  });
 })();
 
 updateAnchorBadge();
