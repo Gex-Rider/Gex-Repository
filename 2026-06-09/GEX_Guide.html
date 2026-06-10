@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GEX Engine v16 — Guía Completa</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:#05080c; --bg2:#090d12; --bg3:#0c1118; --bg4:#10161f;
+  --border:#162030; --border2:#1e2e42;
+  --text:#cdd8e8; --text2:#6e8aa6; --text3:#35506a;
+  --accent:#4a9eff; --green:#22c55e; --red:#ef4444;
+  --yellow:#eab308; --cyan:#22d3ee; --mag:#e879f9;
+  --orange:#f97316; --violet:#a78bfa;
+  --mono:'JetBrains Mono',monospace; --sans:'Syne',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:12px;line-height:1.65;scroll-behavior:smooth;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:var(--accent);}
+.layout{display:flex;min-height:100vh;}
+aside{width:228px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;}
+.sidebar-logo{padding:16px 14px 12px;border-bottom:1px solid var(--border);font-family:var(--sans);font-size:13px;font-weight:800;letter-spacing:.08em;color:var(--accent);}
+.sidebar-logo span{color:var(--text2);font-weight:400;font-size:9px;display:block;margin-top:2px;}
+.sidebar-section{padding:10px 0 3px 14px;font-size:9px;font-weight:700;letter-spacing:.14em;color:var(--text3);text-transform:uppercase;}
+.sidebar-link{display:block;padding:4px 14px;font-size:10px;color:var(--text2);text-decoration:none;letter-spacing:.03em;transition:color .12s,background .12s;border-left:2px solid transparent;}
+.sidebar-link:hover{color:var(--text);background:var(--bg3);}
+.sidebar-link.active{color:var(--accent);border-left-color:var(--accent);background:#4a9eff08;}
+main{flex:1;padding:0 36px 80px;max-width:940px;}
+.hero{padding:44px 0 32px;border-bottom:1px solid var(--border);margin-bottom:44px;}
+.hero-tag{font-size:9px;font-weight:700;letter-spacing:.18em;color:var(--accent);text-transform:uppercase;margin-bottom:10px;}
+.hero h1{font-family:var(--sans);font-size:30px;font-weight:800;line-height:1.1;color:#e8f0fb;margin-bottom:10px;}
+.hero h1 em{color:var(--accent);font-style:normal;}
+.hero-sub{font-size:12px;color:var(--text2);max-width:640px;line-height:1.75;}
+.vb{display:flex;gap:6px;flex-wrap:wrap;margin-top:18px;}
+.badge{font-size:9px;font-weight:700;letter-spacing:.1em;padding:3px 8px;border-radius:3px;border:1px solid;text-transform:uppercase;}
+.bg{color:var(--green);border-color:#22c55e40;background:#22c55e0c;}
+.bb{color:var(--accent);border-color:#4a9eff40;background:#4a9eff0c;}
+.bv{color:var(--violet);border-color:#a78bfa40;background:#a78bfa0c;}
+.bc{color:var(--cyan);border-color:#22d3ee40;background:#22d3ee0c;}
+.by{color:var(--yellow);border-color:#eab30840;background:#eab3080c;}
+.bo{color:var(--orange);border-color:#f9731640;background:#f973160c;}
+.bm{color:var(--mag);border-color:#e879f940;background:#e879f90c;}
+section{margin-bottom:52px;}
+section h2{font-family:var(--sans);font-size:19px;font-weight:800;color:#e0eaf8;margin-bottom:18px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+section h3{font-family:var(--sans);font-size:13px;font-weight:700;color:var(--accent);margin:24px 0 10px;}
+section h4{font-size:11px;font-weight:700;color:var(--text);margin:14px 0 6px;letter-spacing:.05em;}
+p{color:var(--text2);margin-bottom:9px;line-height:1.7;}
+p strong{color:var(--text);}
+.module{background:var(--bg2);border:1px solid var(--border);border-radius:5px;margin-bottom:8px;overflow:hidden;}
+.module-head{display:flex;align-items:center;gap:8px;padding:9px 12px;cursor:pointer;user-select:none;background:var(--bg3);}
+.module-head:hover{background:var(--bg4);}
+.mod-dot{width:7px;height:7px;border-radius:2px;flex-shrink:0;}
+.mod-name{font-size:10px;font-weight:700;letter-spacing:.06em;flex:1;}
+.mod-chev{font-size:10px;color:var(--text3);transition:transform .2s;}
+.module.open .mod-chev{transform:rotate(180deg);}
+.module-body{padding:12px 14px;display:none;border-top:1px solid var(--border);}
+.module.open .module-body{display:block;}
+.sig-table{width:100%;border-collapse:collapse;font-size:10px;margin-top:10px;}
+.sig-table th{text-align:left;padding:5px 9px;font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--text3);border-bottom:1px solid var(--border);background:var(--bg3);}
+.sig-table td{padding:6px 9px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top;}
+.sig-table tr:last-child td{border-bottom:none;}
+.sig-table tr:hover td{background:var(--bg3);}
+.sn{font-weight:700;}
+.formula{background:var(--bg3);border:1px solid var(--border2);border-left:3px solid var(--accent);border-radius:4px;padding:9px 12px;font-size:11px;color:var(--cyan);margin:9px 0;letter-spacing:.03em;}
+.formula em{color:var(--text2);font-style:normal;}
+.callout{border-radius:4px;padding:9px 12px;margin:10px 0;font-size:11px;border:1px solid;display:flex;gap:8px;align-items:flex-start;}
+.callout-body{color:var(--text2);line-height:1.65;}
+.callout-body strong{color:var(--text);}
+.callout.info{border-color:#4a9eff30;background:#4a9eff08;}
+.callout.warn{border-color:#eab30830;background:#eab30808;}
+.callout.tip{border-color:#22c55e30;background:#22c55e08;}
+.callout.danger{border-color:#ef444430;background:#ef444408;}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
+.cols3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px;}
+.sc{background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:11px 13px;}
+.sc-title{font-size:9px;font-weight:700;letter-spacing:.12em;color:var(--text3);text-transform:uppercase;margin-bottom:5px;}
+.sc-val{font-size:17px;font-weight:700;color:var(--accent);}
+.sc-desc{font-size:10px;color:var(--text2);margin-top:3px;}
+.csv-grid{display:grid;grid-template-columns:210px 1fr;gap:2px;background:var(--border);border-radius:4px;overflow:hidden;font-size:10px;margin:10px 0;}
+.csv-key{background:var(--bg3);padding:5px 9px;font-weight:600;color:var(--cyan);}
+.csv-val{background:var(--bg2);padding:5px 9px;color:var(--text2);}
+.steps{display:flex;flex-direction:column;gap:7px;margin:12px 0;}
+.step{display:flex;gap:10px;align-items:flex-start;background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:9px 12px;}
+.step-num{width:20px;height:20px;border-radius:50%;background:var(--accent);color:#000;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.step-title{font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.step-desc{font-size:10px;color:var(--text2);line-height:1.6;}
+.scenario{background:var(--bg2);border:1px solid var(--border2);border-radius:5px;padding:14px 16px;margin:10px 0;}
+.scenario-title{font-size:11px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.tick-box{border:1px solid var(--border2);border-radius:4px;overflow:hidden;margin:9px 0;font-size:10px;}
+.tick-row{display:grid;grid-template-columns:90px 140px 1fr;}
+.tick-cell{padding:6px 9px;border-bottom:1px solid var(--border);}
+.tick-row:last-child .tick-cell{border-bottom:none;}
+.tick-head{background:var(--bg3);font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--text3);}
+.arch{background:var(--bg2);border:1px solid var(--border);border-radius:5px;padding:16px;margin:14px 0;}
+.arch-title{font-size:9px;font-weight:700;letter-spacing:.14em;color:var(--text3);text-transform:uppercase;margin-bottom:12px;}
+.arch-layers{display:flex;flex-direction:column;gap:5px;}
+.arch-layer{display:flex;align-items:center;gap:9px;padding:7px 11px;border-radius:4px;border:1px solid;}
+.arch-num{font-size:9px;font-weight:700;width:16px;flex-shrink:0;}
+.arch-name{font-size:10px;font-weight:700;min-width:170px;}
+.arch-desc{font-size:9px;color:var(--text3);}
+.al1{border-color:#ef444428;background:#ef444406;} .al1 .arch-num{color:#ef4444;} .al1 .arch-name{color:#ef4444;}
+.al2{border-color:#a78bfa28;background:#a78bfa06;} .al2 .arch-num{color:#a78bfa;} .al2 .arch-name{color:#a78bfa;}
+.al3{border-color:#22d3ee28;background:#22d3ee06;} .al3 .arch-num{color:#22d3ee;} .al3 .arch-name{color:#22d3ee;}
+.al4{border-color:#22c55e28;background:#22c55e06;} .al4 .arch-num{color:#22c55e;} .al4 .arch-name{color:#22c55e;}
+.al5{border-color:#4a9eff28;background:#4a9eff06;} .al5 .arch-num{color:#4a9eff;} .al5 .arch-name{color:#4a9eff;}
+.al6{border-color:#eab30828;background:#eab30806;} .al6 .arch-num{color:#eab308;} .al6 .arch-name{color:#eab308;}
+.al7{border-color:#f9731628;background:#f9731606;} .al7 .arch-num{color:#f97316;} .al7 .arch-name{color:#f97316;}
+.al8{border-color:#e879f928;background:#e879f906;} .al8 .arch-num{color:#e879f9;} .al8 .arch-name{color:#e879f9;}
+.al9{border-color:#38bdf828;background:#38bdf806;} .al9 .arch-num{color:#38bdf8;} .al9 .arch-name{color:#38bdf8;}
+.al10{border-color:#86efac28;background:#86efac06;} .al10 .arch-num{color:#86efac;} .al10 .arch-name{color:#86efac;}
+.al11{border-color:#fb923c28;background:#fb923c06;} .al11 .arch-num{color:#fb923c;} .al11 .arch-name{color:#fb923c;}
+.al12{border-color:#6b728028;background:#6b728006;} .al12 .arch-num{color:#6b7280;} .al12 .arch-name{color:#6b7280;}
+.sig-card{background:var(--bg3);border:1px solid var(--border);border-left-width:3px;border-radius:5px;padding:11px 13px;margin-bottom:7px;}
+.sig-card-head{display:flex;align-items:center;gap:7px;margin-bottom:5px;}
+.sig-card-name{font-size:11px;font-weight:700;}
+.sig-card-badges{display:flex;gap:5px;flex-wrap:wrap;margin-left:auto;}
+.sc-green{border-color:#22c55e;} .sc-red{border-color:#ef4444;} .sc-yellow{border-color:#eab308;}
+.sc-cyan{border-color:#22d3ee;} .sc-blue{border-color:#4a9eff;} .sc-mag{border-color:#e879f9;}
+.sc-orange{border-color:#f97316;} .sc-violet{border-color:#a78bfa;}
+code{background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:1px 4px;font-family:var(--mono);font-size:10px;color:var(--cyan);}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside id="sidebar">
+  <div class="sidebar-logo">GEX ENGINE<span>v16 · Dashboard v21 · Guía Completa</span></div>
+  <div class="sidebar-section">Introducción</div>
+  <a class="sidebar-link" href="#overview">Visión General</a>
+  <a class="sidebar-link" href="#architecture">Arquitectura de Capas</a>
+  <a class="sidebar-link" href="#config">Configuración</a>
+  <a class="sidebar-link" href="#data-flow">Flujo de Datos</a>
+  <div class="sidebar-section">Motor de Cálculo</div>
+  <a class="sidebar-link" href="#black-scholes">Black-Scholes</a>
+  <a class="sidebar-link" href="#tick-classification">Clasificación de Tick</a>
+  <a class="sidebar-link" href="#zero-cross">Nivel ZERO</a>
+  <div class="sidebar-section">Capas 1–12</div>
+  <a class="sidebar-link" href="#inventory">1 — Inventory Tracker</a>
+  <a class="sidebar-link" href="#flow-tracker">2 — Flow Tracker</a>
+  <a class="sidebar-link" href="#market-state">3 — Market State</a>
+  <a class="sidebar-link" href="#block-scanner">4 — Block Scanner</a>
+  <a class="sidebar-link" href="#normalization">5 — Normalization</a>
+  <a class="sidebar-link" href="#dealer-pos">6 — Dealer Position</a>
+  <a class="sidebar-link" href="#charm-engine">7 — Charm Engine</a>
+  <a class="sidebar-link" href="#sweep-detector">8 — Sweep Detector</a>
+  <a class="sidebar-link" href="#absorption">9 — Absorption</a>
+  <a class="sidebar-link" href="#regime-persist">10 — Regime Persistence</a>
+  <a class="sidebar-link" href="#signal-quality">11 — Signal Quality</a>
+  <a class="sidebar-link" href="#backtest">12 — Backtest Layer</a>
+  <div class="sidebar-section">Capas Avanzadas</div>
+  <a class="sidebar-link" href="#hedge-engine">Hedge Engine</a>
+  <a class="sidebar-link" href="#absorb-exhaust">Absorb-Exhaustion</a>
+  <a class="sidebar-link" href="#surface-dynamics">Surface Dynamics</a>
+  <a class="sidebar-link" href="#microstructure">Microstructure</a>
+  <a class="sidebar-link" href="#greek-cache">GreekCache (v16)</a>
+  <a class="sidebar-link" href="#vanna-engine">True Vanna Engine (v16)</a>
+  <a class="sidebar-link" href="#dealer-regime">Dealer Regime Engine (v16)</a>
+  <a class="sidebar-link" href="#trade-scoring">Trade Scoring Engine (v16)</a>
+  <a class="sidebar-link" href="#signal-perf">Signal Performance Engine (v16)</a>
+  <div class="sidebar-section">Señales</div>
+  <a class="sidebar-link" href="#signals-overview">Resumen 17 señales</a>
+  <a class="sidebar-link" href="#signals-base">Base S1–S5</a>
+  <a class="sidebar-link" href="#signals-v12">v12 S6–S12</a>
+  <a class="sidebar-link" href="#signals-v15">v15 S13–S17</a>
+  <a class="sidebar-link" href="#signals-v16">v16 S18</a>
+  <a class="sidebar-link" href="#signal-scoring">Scoring Quality</a>
+  <div class="sidebar-section">Regímenes</div>
+  <a class="sidebar-link" href="#regimes">Los 7 Regímenes Dealer (v16)</a>
+  <a class="sidebar-link" href="#regimes-v15">Regímenes v15 (5 estados)</a>
+  <a class="sidebar-link" href="#regime-examples">Ejemplos Prácticos</a>
+  <div class="sidebar-section">Dashboard v19</div>
+  <a class="sidebar-link" href="#dashboard-overview">Vista General</a>
+  <a class="sidebar-link" href="#main-chart">Gráfico Principal</a>
+  <a class="sidebar-link" href="#flow-panel">Panel FLOW</a>
+  <a class="sidebar-link" href="#signals-panel">Panel SIGNALS</a>
+  <a class="sidebar-link" href="#inst-panel">Panel INST</a>
+  <a class="sidebar-link" href="#heatmap">Surface Heatmap</a>
+  <div class="sidebar-section">CSV Outputs</div>
+  <a class="sidebar-link" href="#csv-files">Archivos Generados</a>
+  <div class="sidebar-section">Workflow</div>
+  <a class="sidebar-link" href="#workflow">Proceso de Lectura</a>
+  <a class="sidebar-link" href="#scenarios">Escenarios de Trading</a>
+</aside>
+<main>
+<!-- HERO -->
+<div class="hero" id="top">
+  <div class="hero-tag">Documentación técnica · Engine v16 · Dashboard v21</div>
+  <h1>GEX Engine <em>v16</em> — Guía Completa</h1>
+  <p class="hero-sub">Sistema de análisis cuantitativo de opciones 0DTE en tiempo real. Lee DATA.xlsx vía xlwings, calcula exposición griega multi-capa y genera señales de trading intradiario con scoring probabilístico. v16 transforma el engine en una plataforma de Dealer Regime + Trade Scoring, añadiendo GreekCache, TrueVannaExposureEngine, DealerRegimeEngine (7 estados), TradeScoringEngine, SignalPerformanceEngine y normalización percentile adaptativa.</p>
+  <div class="vb">
+    <span class="badge bb">Engine v16</span>
+    <span class="badge bc">Dashboard v21</span>
+    <span class="badge bg">18 Señales</span>
+    <span class="badge bv">12+ Capas</span>
+    <span class="badge by">4 Workers paralelos</span>
+    <span class="badge bo">8 Activos</span>
+    <span class="badge bm">Dealer Regime Platform</span>
+    <span class="badge" style="color:var(--cyan);border-color:#22d3ee40;background:#22d3ee0c">GreekCache</span>
+    <span class="badge" style="color:var(--green);border-color:#22c55e40;background:#22c55e0c">TrueVanna</span>
+  </div>
+</div>
+
+<!-- OVERVIEW -->
+<section id="overview">
+  <h2>Visión General del Sistema</h2>
+  <p>El GEX Engine procesa la cadena de opciones 0DTE exportada por ThinkorSwim en tiempo real. En cada ciclo de 60 segundos, calcula más de 50 métricas cuantitativas, detecta el régimen de mercado, evalúa 17 tipos de señales y actualiza todos los archivos de salida de forma asíncrona.</p>
+  <div class="cols3">
+    <div class="sc"><div class="sc-title">Ciclo</div><div class="sc-val">60s</div><div class="sc-desc">Tick-anchored scheduler, sin drift</div></div>
+    <div class="sc"><div class="sc-title">Activos</div><div class="sc-val">8</div><div class="sc-desc">SPY QQQ SPX NDX ES NQ RTY VIX</div></div>
+    <div class="sc"><div class="sc-title">Señales</div><div class="sc-val">18</div><div class="sc-desc">Con quality score 0–100 (13 factores)</div></div>
+    <div class="sc"><div class="sc-title">Workers</div><div class="sc-val">4+4</div><div class="sc-desc">4 compute + 4 I/O async</div></div>
+    <div class="sc"><div class="sc-title">Greeks</div><div class="sc-val">Γ Δ ν Θ</div><div class="sc-desc">+ Vanna Charm Color Speed · GreekCache</div></div>
+    <div class="sc"><div class="sc-title">CSVs</div><div class="sc-val">12+</div><div class="sc-desc">Por activo más globales + signal_performance_summary</div></div>
+  </div>
+  <h3>Fuente de datos — TOS → DATA.xlsx</h3>
+  <p>ThinkorSwim exporta la cadena de opciones 0DTE a <code>DATA.xlsx</code>. Cada hoja es un activo. La celda <code>A1</code> contiene el SPOT; <code>B2</code> la fecha de expiración. Los datos comienzan en la fila 6:</p>
+  <div class="formula">Col 0: Strike | 1: OI_C | 2: OI_P | 3: VOL_C | 4: VOL_P<br>Col 5: LAST_C | 6: LAST_P | 7: ASK_C | 8: ASK_P | 9: BID_C | 10: BID_P | 11: IV_C | 12: IV_P</div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section id="architecture">
+  <h2>Arquitectura de Capas</h2>
+  <p>El engine procesa datos en <strong>12 capas secuenciales</strong>, cada una alimentando a las siguientes. Las capas 1–4 son el núcleo original; las 5–12 son capas institucionales añadidas progresivamente. <strong>v16 añade 5 engines transversales</strong> que corren en compute paralelo junto a las capas existentes.</p>
+  <div class="arch">
+    <div class="arch-title">Stack de procesamiento — orden de ejecución por ciclo</div>
+    <div class="arch-layers">
+      <div class="arch-layer al1"><span class="arch-num">1</span><span class="arch-name">Inventory Tracker</span><span class="arch-desc">Clasificación tick call/put BUY/SELL · BAC/SAC/BAP/SAP · INV_BAC/SAC/BAP/SAP · GEX de inventario por strike</span></div>
+      <div class="arch-layer al2"><span class="arch-num">2</span><span class="arch-name">Flow Tracker</span><span class="arch-desc">Premium $, Delta/Gamma/Charm flow, velocity, acceleration, imbalance rolling 5m/cycle, CharmVelocity/Acceleration (v15)</span></div>
+      <div class="arch-layer al3"><span class="arch-num">3</span><span class="arch-name">Market State Engine</span><span class="arch-desc">Régimen (5 tipos), bias, risk, bullish/bearish/squeeze/panic/vol scores con EMA smoothing alpha=0.35 (v15)</span></div>
+      <div class="arch-layer al4"><span class="arch-num">4</span><span class="arch-name">Premium Block Scanner</span><span class="arch-desc">Bloques institucionales por strike · CALL_BLOCK_BUY/SELL · PUT_BLOCK_BUY/SELL · UNUSUAL_VOL</span></div>
+      <div class="arch-layer al5"><span class="arch-num">5</span><span class="arch-name">Normalization Engine</span><span class="arch-desc">Z-scores rolling 5/15/30m · percentiles sesión · EMA adaptativo · notional normalizado p95</span></div>
+      <div class="arch-layer al6"><span class="arch-num">6</span><span class="arch-name">Dealer Position Engine</span><span class="arch-desc">Posición gamma/delta inferida · hedge_pressure · hedge_rebalance · skew_shift · OI/IV changes</span></div>
+      <div class="arch-layer al7"><span class="arch-num">7</span><span class="arch-name">True Charm Engine</span><span class="arch-desc">Charm × OI × dealer_sign · EOD acceleration factor · overnight decay projection · atm_charm_exposure</span></div>
+      <div class="arch-layer al8"><span class="arch-num">8</span><span class="arch-name">Sweep Detector</span><span class="arch-desc">Multi-strike sweeps · ladders direccionales · BULLISH/BEARISH/VOL_CRUSH/HEDGE_CHASE_SWEEP</span></div>
+      <div class="arch-layer al9"><span class="arch-num">9</span><span class="arch-name">Absorption Engine</span><span class="arch-desc">Premium sin movimiento de spot · BULLISH/BEARISH/DEALER/TRAPPED absorption · absorbed_premium</span></div>
+      <div class="arch-layer al10"><span class="arch-num">10</span><span class="arch-name">Regime Persistence</span><span class="arch-desc">Anti flip-flop · hysteresis 2 ciclos (v15) · confidence decay · weighted persistence exponencial</span></div>
+      <div class="arch-layer al11"><span class="arch-num">11</span><span class="arch-name">Signal Quality Engine</span><span class="arch-desc">Score 0-100 por 11 factores de confirmación · quality_breakdown detallado por componente</span></div>
+      <div class="arch-layer al12"><span class="arch-num">12</span><span class="arch-name">Backtest Layer</span><span class="arch-desc">Outcome 5m/15m/30m/1h · MAE/MFE tracking · signals_performance.csv · adaptive threshold</span></div>
+    </div>
+  </div>
+  <h3>Capas avanzadas (siempre activas, compute paralelo)</h3>
+  <div class="cols2">
+    <div class="arch-layer al6" style="border-radius:4px;padding:9px 12px;"><span class="arch-num">H</span><span class="arch-name">Hedge Engine</span><span class="arch-desc">dealer_stress_score 0–100, hedge_pressure, velocity, exhaustion flag, VIX divergence · normalización P80 percentile (v16)</span></div>
+    <div class="arch-layer al8" style="border-radius:4px;padding:9px 12px;"><span class="arch-num">A</span><span class="arch-name">Absorb-Exhaustion</span><span class="arch-desc">absorption_score, exhaustion_score, failed_squeeze_flag continuo 0–100</span></div>
+    <div class="arch-layer al2" style="border-radius:4px;padding:9px 12px;"><span class="arch-num">S</span><span class="arch-name">Surface Dynamics</span><span class="arch-desc">IV curvature, gamma_compression, vol_expansion_prob, atm_iv_trend, charm_cascade</span></div>
+    <div class="arch-layer al5" style="border-radius:4px;padding:9px 12px;"><span class="arch-num">M</span><span class="arch-name">Microstructure</span><span class="arch-desc">pin_probability, liquidity_void, dealer_trap, wall strikes, magnet_strike</span></div>
+  </div>
+  <h3>Engines nuevos v16</h3>
+  <div class="cols2">
+    <div class="arch-layer al9" style="border-radius:4px;padding:9px 12px;"><span class="arch-num">GC</span><span class="arch-name">GreekCache</span><span class="arch-desc">Cache de IV/greeks por ciclo · key bucketeada (spot/0.5, iv/0.001, T/0.0001) · reset al inicio de cada ciclo · elimina doble Newton-Raphson cross-engine</span></div>
+    <div class="arch-layer al10" style="border-radius:4px;padding:9px 12px;"><span class="arch-num">TV</span><span class="arch-name">TrueVannaExposureEngine</span><span class="arch-desc">vanna×OI×dealer_sign · vanna_pressure 0-100 · vanna_flip_probability · vanna_acceleration · dominant_side CALLS/PUTS/BALANCED</span></div>
+    <div class="arch-layer al11" style="border-radius:4px;padding:9px 12px;"><span class="arch-num">DR</span><span class="arch-name">DealerRegimeEngine</span><span class="arch-desc">7 estados estructurales · hysteresis CONFIRMATION_CYCLES=2 · regime_confidence 0-100 · transition_probability · score_hist rolling 10 ciclos</span></div>
+    <div class="arch-layer al12" style="border-radius:4px;padding:9px 12px;"><span class="arch-num">TS</span><span class="arch-name">TradeScoringEngine</span><span class="arch-desc">LongScore / ShortScore 0-100 · 6 componentes ponderados (regime 30%, flow 25%, charm 15%, vanna 15%, micro 10%, sweep 5%) · TradeBias LONG/SHORT/NEUTRAL</span></div>
+    <div class="arch-layer al1" style="border-radius:4px;padding:9px 12px;"><span class="arch-num">SP</span><span class="arch-name">SignalPerformanceEngine</span><span class="arch-desc">win_rate, expectancy, MAE, MFE, sharpe_like por tipo de señal · intradiario · exporta signal_performance_summary.csv al cierre</span></div>
+  </div>
+</section>
+
+<!-- CONFIG -->
+<section id="config">
+  <h2>Configuración del Engine</h2>
+  <div class="csv-grid">
+    <div class="csv-key">EXCEL_PATH</div><div class="csv-val">E:\GEX\DATA.xlsx — fuente de datos TOS</div>
+    <div class="csv-key">CSV_FOLDER</div><div class="csv-val">E:\GEX\Sync — destino de todos los CSVs y JSONs</div>
+    <div class="csv-key">REPO_PATH</div><div class="csv-val">E:\GEX\GitHub\Gex-Repository — espejo git (push cada 240 ciclos)</div>
+    <div class="csv-key">ACTIVOS</div><div class="csv-val">SPY QQQ SPX NDX ES NQ RTY VIX</div>
+    <div class="csv-key">INTERVALO</div><div class="csv-val">60 segundos por ciclo (tick-anchored, sin drift)</div>
+    <div class="csv-key">MULT</div><div class="csv-val">100 — multiplicador de contratos</div>
+    <div class="csv-key">RISK_FREE</div><div class="csv-val">0.053 (5.3% anual)</div>
+    <div class="csv-key">EXPORT_MODE</div><div class="csv-val">"VEX" o "GEX" — qué métrica exporta *_gex_data.csv</div>
+    <div class="csv-key">FLOW_WINDOWS</div><div class="csv-val">1m / 5m / 15m / 30m / session (en ciclos de INTERVALO segundos)</div>
+  </div>
+  <h3>ATM Window y umbrales por activo</h3>
+  <div class="formula">ATM_WINDOW: SPY ±2pts | QQQ ±4pts | SPX ±20pts | NDX ±400pts | VIX ±5pts<br>VOL_THRESHOLD: SPY 2000 | QQQ 1000 | SPX 750 | NDX 50 | VIX 500<br>BLOCK_THRESHOLD premium_block: SPY $1M | QQQ $500K | SPX $5M | NDX $1M | ES $3M</div>
+</section>
+
+<!-- DATA FLOW -->
+<section id="data-flow">
+  <h2>Flujo de Datos por Ciclo</h2>
+  <div class="steps">
+    <div class="step"><div class="step-num">1</div><div><div class="step-title">FASE 1 — Lectura SERIAL (xlwings/COM)</div><div class="step-desc">VIX se lee primero para que vix_spot_val esté disponible. xlwings/COM de Windows no es thread-safe; la lectura de todos los activos es serial. Solo se usa el 0DTE del día; si está vacío, usa la cadena completa.</div></div></div>
+    <div class="step"><div class="step-num">2</div><div><div class="step-title">FASE 2 — Compute PARALELO (4 workers, ThreadPoolExecutor)</div><div class="step-desc">Cada activo se procesa en su propio thread: <code>greek_cache.reset()</code> → calcular_todo() + Block Scanner + Sweep Detector + Norm + DealerPos + HedgeEngine + AbsorbEngine + SurfaceEngine + MicroEngine + <strong>TrueCharmEngine + TrueVannaExposureEngine + DealerRegimeEngine + TradeScoringEngine</strong>. Los workers no tocan xlwings → thread-safe.</div></div></div>
+    <div class="step"><div class="step-num">3</div><div><div class="step-title">FASE 3 — Señales SERIAL (cross-asset context)</div><div class="step-desc">generar_señales() necesita el estado VIX para VIX_REGIME_CONFIRM. El SignalQualityEngine puntúa cada señal con 11 factores. El BacktestLayer actualiza outcomes pendientes.</div></div></div>
+    <div class="step"><div class="step-num">4</div><div><div class="step-title">FASE 4 — I/O ASYNC (4 workers fire-and-forget)</div><div class="step-desc">Todos los CSVs y JSONs se escriben en el pool AsyncIOWriter. El main loop no espera al disco. dashboard_strikes.json usa datos ya en memoria (FIX 3: single xlwings read).</div></div></div>
+  </div>
+</section>
+
+<!-- BLACK SCHOLES -->
+<section id="black-scholes">
+  <h2>Motor Black-Scholes</h2>
+  <p>El engine implementa BSM completo para inferir greeks de los precios mid de TOS. Si IV no está disponible o es inválida, usa Newton-Raphson (60 iteraciones) para calcularla del precio.</p>
+  <div class="formula">GEX(K) = (Γ_call × OI_call − Γ_put × OI_put) × MULT × SPOT² × 0.01<br>VEX(K) = (Γ_call × VOL_call − Γ_put × VOL_put) × MULT × SPOT² × 0.01<br>DEX(K) = (Δ_call × OI_call + Δ_put × OI_put) × MULT</div>
+  <table class="sig-table">
+    <tr><th>Greek</th><th>Fórmula</th><th>Uso principal</th></tr>
+    <tr><td class="sn" style="color:var(--green)">Gamma (Γ)</td><td><code>N'(d1)/(S·σ·√T)</code></td><td>GEX/VEX por strike, dealer_gamma_position, hedge_pressure</td></tr>
+    <tr><td class="sn" style="color:var(--accent)">Delta (Δ)</td><td><code>N(d1)</code> call | <code>N(d1)−1</code> put</td><td>DEX, delta_flow, DealerPositionEngine</td></tr>
+    <tr><td class="sn" style="color:var(--cyan)">Charm (∂Δ/∂t)</td><td><code>−N'(d1)[2rT−d2σ√T]/(2Tσ√T)</code></td><td>Charm exposure EOD, charm_cascade, CHARM signals (v15)</td></tr>
+    <tr><td class="sn" style="color:var(--violet)">IV implícita</td><td>Newton-Raphson vs mid price</td><td>Rellena IV faltante de TOS, base de todos los greeks</td></tr>
+  </table>
+</section>
+
+<!-- TICK CLASSIFICATION -->
+<section id="tick-classification">
+  <h2>Clasificación de Tick — Fundamento del sistema</h2>
+  <p>Cada delta de volumen entre ciclos se clasifica como comprador o vendedor agresivo comparando el precio <em>last</em> con el spread bid-ask. Esta clasificación alimenta inventario, flow, blocks y sweeps.</p>
+  <div class="tick-box">
+    <div class="tick-row">
+      <div class="tick-cell tick-head">Opción</div>
+      <div class="tick-cell tick-head">Condición</div>
+      <div class="tick-cell tick-head">Resultado</div>
+    </div>
+    <div class="tick-row">
+      <div class="tick-cell" style="color:var(--cyan);font-weight:700">CALL BUY</div>
+      <div class="tick-cell" style="color:var(--text2)">last ≥ bid + spread × 0.6</div>
+      <div class="tick-cell" style="color:var(--green)">Comprador agresivo → INV_BAC ↑</div>
+    </div>
+    <div class="tick-row">
+      <div class="tick-cell" style="color:var(--cyan);font-weight:700">CALL SELL</div>
+      <div class="tick-cell" style="color:var(--text2)">last ≤ bid + spread × 0.4</div>
+      <div class="tick-cell" style="color:var(--red)">Vendedor agresivo → INV_SAC ↑</div>
+    </div>
+    <div class="tick-row">
+      <div class="tick-cell" style="color:var(--violet);font-weight:700">PUT BUY</div>
+      <div class="tick-cell" style="color:var(--text2)">last ≤ bid + spread × 0.4 ← INVERSO</div>
+      <div class="tick-cell" style="color:var(--green)">Comprador agresivo → INV_BAP ↑</div>
+    </div>
+    <div class="tick-row">
+      <div class="tick-cell" style="color:var(--violet);font-weight:700">PUT SELL</div>
+      <div class="tick-cell" style="color:var(--text2)">last ≥ bid + spread × 0.6 ← INVERSO</div>
+      <div class="tick-cell" style="color:var(--red)">Vendedor agresivo → INV_SAP ↑</div>
+    </div>
+    <div class="tick-row">
+      <div class="tick-cell" style="color:var(--text3)">NEUTRAL</div>
+      <div class="tick-cell" style="color:var(--text3)">zona media del spread</div>
+      <div class="tick-cell" style="color:var(--text3)">Inventario: ignorado. Flow/blocks: 50/50</div>
+    </div>
+  </div>
+  <div class="callout info"><div>ℹ</div><div class="callout-body"><strong>Puts tienen regla inversa:</strong> cuando una put se compra agresivamente, su precio sube hacia el ask. Por eso el umbral de BUY en puts es ≤ bid+spread×0.4 (precio aún cerca del bid = comprador pagando agresivamente para subir el precio).</div></div>
+</section>
+
+<!-- ZERO -->
+<section id="zero-cross">
+  <h2>Nivel ZERO — Frontera Gamma</h2>
+  <p>El <strong>ZERO</strong> es el precio donde la exposición gamma neta del dealer cambia de signo. Es el nivel de control más importante: define el régimen macro del mercado.</p>
+  <div class="cols2">
+    <div class="sc"><div class="sc-title">ZERO (VEX)</div><div class="sc-val" style="font-size:13px;color:var(--yellow)">Volumen del día</div><div class="sc-desc">Primer cruce de cero en VEX acumulado (strikes ascendentes), parando en el primero ≥ ATM. Replica exactamente la lógica del script TradingView de referencia.</div></div>
+    <div class="sc"><div class="sc-title">ZERO_OI (GEX)</div><div class="sc-val" style="font-size:13px;color:var(--text2)">Open Interest</div><div class="sc-desc">Mismo cálculo con OI. Más estable y lento. Útil como confirmación del ZERO (VEX).</div></div>
+  </div>
+  <div class="callout tip"><div>💡</div><div class="callout-body"><strong>SPOT &gt; ZERO:</strong> entorno LONG GAMMA → dealer compra caídas, vende rallies → mean reversion. <strong>SPOT &lt; ZERO:</strong> entorno SHORT GAMMA → dealer amplifica movimientos en ambas direcciones → tendencia/breakout.</div></div>
+</section>
+
+<!-- CAPA 1 -->
+<section id="inventory">
+  <h2>Capa 1 — Inventory Tracker</h2>
+  <p>Mantiene el <strong>inventario acumulado de la sesión</strong> clasificando cada delta de volumen por strike con las fórmulas de tick. Resetea al cambiar de día.</p>
+  <table class="sig-table">
+    <tr><th>Métrica</th><th>Descripción</th><th>Interpretación</th></tr>
+    <tr><td class="sn" style="color:var(--cyan)">INV_BAC</td><td>Contratos de calls comprados agresivamente (sesión)</td><td>↑ Demanda alcista genuina acumulada</td></tr>
+    <tr><td class="sn" style="color:var(--cyan)">INV_SAC</td><td>Contratos de calls vendidos agresivamente</td><td>↑ Venta/cierre de calls → presión bajista</td></tr>
+    <tr><td class="sn" style="color:var(--violet)">INV_BAP</td><td>Contratos de puts comprados agresivamente</td><td>↑ Compra de protección bajista</td></tr>
+    <tr><td class="sn" style="color:var(--violet)">INV_SAP</td><td>Contratos de puts vendidos agresivamente</td><td>↑ Venta de puts (bullish conditioned)</td></tr>
+    <tr><td class="sn">NET_CALL_FLOW</td><td>INV_BAC − INV_SAC</td><td>Positivo = flujo neto alcista en calls</td></tr>
+    <tr><td class="sn">NET_PUT_FLOW</td><td>INV_BAP − INV_SAP</td><td>Positivo = presión bajista neta en puts</td></tr>
+  </table>
+  <h3>Strikes clave del inventario (por ciclo)</h3>
+  <table class="sig-table">
+    <tr><th>Señal</th><th>Definición</th></tr>
+    <tr><td class="sn" style="color:var(--cyan)">BAC / SAC</td><td>Strike ATM con mayor flujo de compra / venta agresiva en calls en el ciclo actual</td></tr>
+    <tr><td class="sn" style="color:var(--violet)">BAP / SAP</td><td>Strike ATM con mayor flujo de compra / venta agresiva en puts en el ciclo actual</td></tr>
+    <tr><td class="sn" style="color:var(--green)">LONGGAMMA</td><td>Strike con mayor gamma × volumen comprador total (calls + puts)</td></tr>
+    <tr><td class="sn" style="color:var(--red)">SHORTGAMMA</td><td>Strike con mayor gamma × volumen vendedor total</td></tr>
+    <tr><td class="sn" style="color:var(--cyan)">LONGCALLS / SHORTCALLS</td><td>Strike de mayor concentración gamma × calls compradas / vendidas</td></tr>
+    <tr><td class="sn" style="color:var(--violet)">LONGPUTS / SHORTPUTS</td><td>Strike de mayor concentración gamma × puts compradas / vendidas</td></tr>
+    <tr><td class="sn">MAXCP / MINCP</td><td>Strike con máximo / mínimo flujo neto calls−puts del día</td></tr>
+  </table>
+  <div class="formula">inv_gex(K) = (gamma_long_calls(K) + gamma_long_puts(K)) − (gamma_short_calls(K) + gamma_short_puts(K))<br><em>Positivo: posiciones largas gamma dominan en ese strike</em></div>
+</section>
+
+<!-- CAPA 2 -->
+<section id="flow-tracker">
+  <h2>Capa 2 — Flow Tracker</h2>
+  <p>Calcula flujo incremental por ciclo usando <strong>su propio snapshot de volumen</strong> (independiente de InventoryTracker, corrige el bug v9 donde dvc era siempre 0).</p>
+  <table class="sig-table">
+    <tr><th>Métrica</th><th>Descripción</th><th>Interpretación</th></tr>
+    <tr><td class="sn">CallPremiumBuy/Sell</td><td>Σ(Δvol × precio × 100) acumulado sesión</td><td>$ de premium comprado / vendido en calls</td></tr>
+    <tr><td class="sn">PutPremiumBuy/Sell</td><td>Mismo para puts</td><td>$ de premium en puts</td></tr>
+    <tr><td class="sn" style="color:var(--accent)">NetDeltaFlow</td><td>Σ(Δ × (vol_buy − vol_sell))</td><td>Sesgo delta acumulado (positivo = alcista)</td></tr>
+    <tr><td class="sn" style="color:var(--mag)">NetGammaFlow</td><td>Σ(Γ × net_agg × 100)</td><td>Negativo = SHORT GAMMA amplificado</td></tr>
+    <tr><td class="sn" style="color:var(--cyan)">NetCharmFlow</td><td>Σ(charm × net_agg × 100)</td><td>Presión de decay temporal acumulada</td></tr>
+    <tr><td class="sn" style="color:var(--yellow)">FlowVelocity</td><td>Media del cycle_net_flow en ventana 5 ciclos</td><td>Ritmo actual de acumulación de premium</td></tr>
+    <tr><td class="sn">FlowAcceleration</td><td>Mitad reciente vs mitad antigua de la ventana</td><td>¿Está acelerando o desacelerando el flujo?</td></tr>
+    <tr><td class="sn" style="color:var(--green)">FlowImbalance</td><td>(CallBuy − PutBuy) / (CallBuy + PutBuy)</td><td>−1 bajista puro → +1 alcista puro</td></tr>
+  </table>
+  <h3>Métricas nuevas v15 y v16</h3>
+  <table class="sig-table">
+    <tr><th>Métrica</th><th>Versión</th><th>Descripción</th></tr>
+    <tr><td class="sn" style="color:var(--cyan)">FlowImbalance5m</td><td>v15</td><td>Imbalance rolling de los últimos 5 ciclos — detecta giros de flujo recientes (S15: IMBALANCE_REVERSAL)</td></tr>
+    <tr><td class="sn" style="color:var(--cyan)">FlowImbalanceCycle</td><td>v15</td><td>Imbalance del ciclo actual únicamente — señal más rápida de cambio de dirección</td></tr>
+    <tr><td class="sn" style="color:var(--mag)">CharmVelocity</td><td>v15</td><td>dCharm/dt — velocidad de cambio del charm acumulado</td></tr>
+    <tr><td class="sn" style="color:var(--mag)">CharmAcceleration</td><td>v15</td><td>d²Charm/dt² — aceleración del charm (activa S14: CHARM_MOMENTUM_EOD)</td></tr>
+    <tr><td class="sn" style="color:var(--yellow)">FlowImbalance1m_ts</td><td>v16</td><td>Imbalance rolling timestamp-based 1 minuto real (no ciclos nominales)</td></tr>
+    <tr><td class="sn" style="color:var(--yellow)">FlowImbalance5m_ts</td><td>v16</td><td>Imbalance rolling timestamp-based 5 minutos reales</td></tr>
+    <tr><td class="sn" style="color:var(--yellow)">FlowImbalance15m_ts</td><td>v16</td><td>Imbalance rolling timestamp-based 15 minutos reales</td></tr>
+    <tr><td class="sn" style="color:var(--yellow)">FlowImbalance30m_ts</td><td>v16</td><td>Imbalance rolling timestamp-based 30 minutos reales</td></tr>
+    <tr><td class="sn" style="color:var(--yellow)">NetDeltaFlow5m_ts</td><td>v16</td><td>Delta flow neto en ventana real de 5 minutos</td></tr>
+    <tr><td class="sn" style="color:var(--yellow)">NetDeltaFlow15m_ts</td><td>v16</td><td>Delta flow neto en ventana real de 15 minutos</td></tr>
+    <tr><td class="sn" style="color:var(--yellow)">NetGammaFlow5m_ts</td><td>v16</td><td>Gamma flow neto en ventana real de 5 minutos</td></tr>
+  </table>
+  <div class="callout info"><div>ℹ</div><div class="callout-body"><strong>v16 — Ventanas timestamp-based:</strong> Las métricas <code>_ts</code> usan timestamps reales para las ventanas rolling, eliminando el error cuando los ciclos tardan más o menos de 60 segundos nominales. Los campos <code>_5m</code> (v15) siguen disponibles como referencia basada en conteo de ciclos.</div></div>
+</section>
+
+<!-- CAPA 3 -->
+<section id="market-state">
+  <h2>Capa 3 — Market State Engine</h2>
+  <p>Detecta el <strong>régimen dominante</strong> combinando todas las métricas en 5 scores 0–100. Incluye detección de laddering (migración de strikes en escalera) y comparación con velocidad histórica.</p>
+  <div class="cols2">
+    <div class="sc"><div class="sc-title">BullishScore</div><div class="sc-desc">spot&gt;ZERO (+20), zero_rising (+15), imbalance&gt;0 (+25%), delta+ (+20), call_laddering (+15), flow acelerando alcista (+10)</div></div>
+    <div class="sc"><div class="sc-title">BearishScore</div><div class="sc-desc">spot&lt;ZERO (+20), not zero_rising (+15), imbalance&lt;0 (+25%), delta− (+20), put_laddering (+15), put_dominance (+10)</div></div>
+    <div class="sc"><div class="sc-title">VolatilityScore</div><div class="sc-desc">gamma negativo (+30), aceleración alta (+20), imbalance extremo (+20), charm elevado (×0.3)</div></div>
+    <div class="sc"><div class="sc-title">SqueezeScore</div><div class="sc-desc">call_dominance (+25), call_laddering (+25), charm+ (+15), spot&gt;ZERO (+15), MaxCallStrike&gt;spot (+10), flow acelerando (+10)</div></div>
+    <div class="sc"><div class="sc-title">PanicScore</div><div class="sc-desc">put_dominance (+25), put_laddering (+20), charm− (+15), spot&lt;ZERO (+15), gamma negativo + put_dom (+15), flow (+10)</div></div>
+  </div>
+  <h3>EMA Smoothing de scores (v15)</h3>
+  <div class="formula">score_smooth(t) = 0.35 × score_raw(t) + 0.65 × score_smooth(t−1)<br><em>Reduce ruido intrabar. Guardado en flow_history.csv con sufijo _ema</em></div>
+</section>
+
+<!-- CAPA 4 -->
+<section id="block-scanner">
+  <h2>Capa 4 — Premium Block Scanner</h2>
+  <p>Escanea cada strike buscando entradas de tamaño institucional usando las mismas fórmulas de tick que el InventoryTracker.</p>
+  <table class="sig-table">
+    <tr><th>Tipo de alerta</th><th>Condición</th><th>Señal</th></tr>
+    <tr><td class="sn" style="color:var(--green)">CALL_BLOCK_BUY</td><td>prem_buy_calls ≥ premium_block del activo</td><td>Gran comprador institucional de calls — alcista</td></tr>
+    <tr><td class="sn" style="color:var(--red)">CALL_BLOCK_SELL</td><td>prem_sell_calls ≥ premium_block</td><td>Venta masiva de calls — posible techo o hedge</td></tr>
+    <tr><td class="sn" style="color:var(--red)">PUT_BLOCK_BUY</td><td>prem_buy_puts ≥ premium_block</td><td>Compra de protección bajista — señal de riesgo</td></tr>
+    <tr><td class="sn" style="color:var(--green)">PUT_BLOCK_SELL</td><td>prem_sell_puts ≥ premium_block</td><td>Venta de puts — neutral-alcista o cierre de hedge</td></tr>
+    <tr><td class="sn" style="color:var(--text3)">UNUSUAL_VOL</td><td>contratos ≥ vol_unusual (sin clasificación clara)</td><td>Volumen alto sin dirección definida, monitorear</td></tr>
+  </table>
+</section>
+
+<!-- CAPA 5 -->
+<section id="normalization">
+  <h2>Capa 5 — Normalization Engine</h2>
+  <p>Normaliza métricas cross-asset para que SPY y SPX sean comparables en los mismos z-scores. <strong>v16:</strong> añade percentiles rolling (P80/P90/P95) como escala adaptativa, reemplazando la normalización <code>abs(x)/max(abs(x),1)</code> que colapsaba a 1.</p>
+  <table class="sig-table">
+    <tr><th>Métrica</th><th>Ventana</th><th>Uso principal</th></tr>
+    <tr><td class="sn">premium_zscore</td><td>30m</td><td>¿Es el flujo actual estadísticamente inusual?</td></tr>
+    <tr><td class="sn">gamma_flow_zscore</td><td>30m</td><td>HedgeEngine + GAMMA_FLOW_DIVERGENCE (S16)</td></tr>
+    <tr><td class="sn">delta_flow_zscore</td><td>30m</td><td>DELTA_DIVERGENCE_BULL/BEAR (S13) — activa si |z|&gt;1.5</td></tr>
+    <tr><td class="sn">velocity_zscore</td><td>15m</td><td>Componente volatility_expansion en quality score</td></tr>
+    <tr><td class="sn">imbalance_percentile</td><td>sesión</td><td>¿En qué percentil histórico está el imbalance?</td></tr>
+    <tr><td class="sn">ema_net_prem_5m/15m</td><td>—</td><td>EMA adaptativo del premium neto de sesión</td></tr>
+    <tr><td class="sn">normalized_notional</td><td>p95 sesión</td><td>premium / percentil95 → comparable cross-asset</td></tr>
+    <tr><td class="sn" style="color:var(--yellow)">premium_pctile_5m/15m/30m</td><td>rolling</td><td><strong>v16</strong> — percentil rolling de premium en ventanas 5/15/30m (salida en norm_met)</td></tr>
+  </table>
+  <h3>Corrección v16 — Normalización Percentile Adaptativa</h3>
+  <div class="formula">v15: delta_conviction = abs(delta_flow) / max(abs(delta_flow), 1.0) → siempre = 1.0 (bug)<br>v16: _df_p90 = np.percentile(delta_hist, 90) si len ≥ 5 else max(abs(delta_flow), 1.0)<br>      delta_conviction = min(1.0, abs(delta_flow) / _df_p90) → normalización real</div>
+  <p>El mismo fix aplica a <strong>HedgeEngine</strong>: hedge_pressure usa P80 del historial de delta (30 ciclos) como escala. Los scores resultantes son consistentes entre activos y sesiones de diferente actividad.</p>
+</section>
+
+<!-- CAPA 6 -->
+<section id="dealer-pos">
+  <h2>Capa 6 — Dealer Position Engine</h2>
+  <p>Infiere la <strong>posición del market maker</strong> sin acceso a sus libros, combinando 5 señales secundarias con memoria rolling.</p>
+  <div class="cols2">
+    <div class="sc"><div class="sc-title">dealer_gamma_position</div><div class="sc-val" style="font-size:12px">LONG / SHORT / NEUTRAL</div><div class="sc-desc">SHORT (≥0.55): GEX+, flujo call, OI calls↑, IV calls↑, call skew. LONG (≤0.30): señales opuestas. EMA de gamma_score sobre 10 ciclos.</div></div>
+    <div class="sc"><div class="sc-title">hedge_pressure</div><div class="sc-val" style="font-size:12px">$ de delta-hedge</div><div class="sc-desc">= Σ(Γ × OI × 100 × SPOT). Cuantifica la presión de rebalanceo delta en dólares.</div></div>
+    <div class="sc"><div class="sc-title">hedge_rebalance</div><div class="sc-val" style="font-size:12px">contratos/punto</div><div class="sc-desc">= Σ(Γ × OI × 100). Rebalanceo estimado por cada punto de movimiento del activo.</div></div>
+    <div class="sc"><div class="sc-title">skew_shift</div><div class="sc-val" style="font-size:12px">IV_put − IV_call</div><div class="sc-desc">Positivo = put skew dominante (miedo). Negativo = call skew (codicia). Promedio de todos los strikes.</div></div>
+  </div>
+</section>
+
+<!-- CAPA 7 -->
+<section id="charm-engine">
+  <h2>Capa 7 — True Charm Exposure Engine</h2>
+  <p>El charm mide la velocidad de decay del delta con el tiempo. Cerca del cierre, se acelera exponencialmente y fuerza dehedging del dealer.</p>
+  <div class="formula">charm_exposure(K) = charm(K) × OI(K) × 100 × dealer_sign<br>EOD_factor = 1/√(t_hours/6.5) cuando t &lt; 2 horas → crece exponencialmente<br>charm_decay_pressure = total_charm_exposure × EOD_factor</div>
+  <div class="csv-grid">
+    <div class="csv-key">total_charm_exposure</div><div class="csv-val">Presión de decay temporal total de la sesión</div>
+    <div class="csv-key">eod_charm_acceleration</div><div class="csv-val">Factor multiplicador EOD (sube cuando T→0, máximo 10×)</div>
+    <div class="csv-key">overnight_decay_proj</div><div class="csv-val">Proyección de decay overnight (factor 16h/6.5h)</div>
+    <div class="csv-key">atm_charm_exposure</div><div class="csv-val">Solo strikes ATM — los más críticos para el dealer al cierre</div>
+  </div>
+</section>
+
+<!-- CAPA 8 -->
+<section id="sweep-detector">
+  <h2>Capa 8 — Sweep Detector</h2>
+  <p>Detecta <strong>sweeps institucionales multi-strike</strong>: órdenes grandes que barren ≥3 strikes en escalera en el mismo ciclo. Umbral = 50% del premium_block del activo.</p>
+  <div class="module open">
+    <div class="module-head" onclick="this.parentElement.classList.toggle('open')"><div class="mod-dot" style="background:#22c55e"></div><span class="mod-name">BULLISH_CALL_SWEEP — Escalera alcista de calls</span><span class="mod-chev">▾</span></div>
+    <div class="module-body"><p>≥3 strikes de calls compradas en escalera ascendente (≥66% de los strikes subiendo). El comprador está recorriendo el libro hacia arriba. Señal de posicionamiento alcista urgente o cobertura delta corto.</p></div>
+  </div>
+  <div class="module">
+    <div class="module-head" onclick="this.parentElement.classList.toggle('open')"><div class="mod-dot" style="background:#ef4444"></div><span class="mod-name">BEARISH_PUT_SWEEP — Escalera bajista de puts</span><span class="mod-chev">▾</span></div>
+    <div class="module-body"><p>≥3 strikes de puts compradas en escalera descendente. La contraparte del mercado vende delta agresivamente. Suele preceder aceleraciones bajistas.</p></div>
+  </div>
+  <div class="module">
+    <div class="module-head" onclick="this.parentElement.classList.toggle('open')"><div class="mod-dot" style="background:#eab308"></div><span class="mod-name">VOL_CRUSH_SWEEP — Venta coordinada bilateral</span><span class="mod-chev">▾</span></div>
+    <div class="module-body"><p>≥2 strikes calls vendidas + ≥2 strikes puts vendidas en el mismo ciclo. Alguien vende premium en ambos lados esperando que el mercado se consolide → señal de range inminente.</p></div>
+  </div>
+  <div class="module">
+    <div class="module-head" onclick="this.parentElement.classList.toggle('open')"><div class="mod-dot" style="background:#22d3ee"></div><span class="mod-name">HEDGE_CHASE_SWEEP — MaxFlowStrike migrando</span><span class="mod-chev">▾</span></div>
+    <div class="module-body"><p>MaxFlowStrike migra en la dirección del spot durante 3 ciclos consecutivos. El dealer está persiguiendo su cobertura delta — amplificador de momentum. Combinado con SHORT GAMMA = señal de continuación poderosa.</p></div>
+  </div>
+</section>
+
+<!-- CAPA 9 -->
+<section id="absorption">
+  <h2>Capa 9 — Absorption Engine</h2>
+  <p>Detecta <strong>premium elevado sin movimiento de spot</strong> — señal de acumulación o distribución silenciosa por el dealer o institucionales.</p>
+  <div class="cols2">
+    <div class="sc"><div class="sc-title">BULLISH_ABSORPTION</div><div class="sc-desc">Calls compradas agresivamente (call_flow_norm &gt; 0.5 y &gt;1.5× put flow) pero spot no sube. Acumulación invisible. El spot debería subir cuando se desahogue.</div></div>
+    <div class="sc"><div class="sc-title">BEARISH_ABSORPTION</div><div class="sc-desc">Puts compradas agresivamente pero spot no cae. Distribución silenciosa. Sesgo: el spot debería caer eventualmente.</div></div>
+    <div class="sc"><div class="sc-title">DEALER_ABSORPTION</div><div class="sc-desc">Flujo alto en ambos lados (ambos flow_norm &gt; 0.3) sin direccionalidad clara. El dealer absorbe flujo bilateral → régimen range consolidación.</div></div>
+    <div class="sc"><div class="sc-title">TRAPPED_POSITIONING</div><div class="sc-desc">El spot se movió en contra del flujo dominante. Hay posiciones atrapadas → gamma squeeze o stop cascade cuando rompan.</div></div>
+  </div>
+</section>
+
+<!-- CAPA 10 -->
+<section id="regime-persist">
+  <h2>Capa 10 — Regime Persistence Engine</h2>
+  <p>Evita el flip-flop de regímenes usando hysteresis y pesos exponenciales.</p>
+  <div class="formula">score_ponderado(régimen) = Σ(exp(−0.3×(n−1−i)) × confianza(i))<br>v15: CONFIRMATION_CYCLES = 2 (antes 3) — reacción más ágil sin perder estabilidad</div>
+  <div class="csv-grid">
+    <div class="csv-key">persistent_regime</div><div class="csv-val">Régimen estable actual (sin flip-flop)</div>
+    <div class="csv-key">regime_age</div><div class="csv-val">Ciclos consecutivos en el régimen actual (use ≥3 para operar)</div>
+    <div class="csv-key">regime_pending</div><div class="csv-val">Régimen candidato en transición (si None: régimen estable)</div>
+    <div class="csv-key">transition_progress</div><div class="csv-val">0.0–1.0: qué tan cerca está del cambio (1.0 = próximo ciclo cambia)</div>
+    <div class="csv-key">persistent_confidence</div><div class="csv-val">Confianza ponderada y decaída del régimen actual</div>
+  </div>
+</section>
+
+<!-- CAPA 11 -->
+<section id="signal-quality">
+  <h2>Capa 11 — Signal Quality Engine</h2>
+  <p>Asigna score 0–100 a cada señal combinando <strong>13 factores independientes</strong> (v16 añade 2 nuevos: <code>dealer_regime_conf</code> y <code>trade_score_align</code>). Los pesos originales se recalibraron para ceder espacio a los nuevos outputs del DealerRegimeEngine y TradeScoringEngine.</p>
+  <table class="sig-table">
+    <tr><th>Factor</th><th>Peso</th><th>Condición de máxima puntuación</th><th>Cambio</th></tr>
+    <tr><td>flow_confirmation</td><td>10</td><td>Imbalance y velocity alineados con la dirección de la señal</td><td style="color:var(--text3)">−2 v16</td></tr>
+    <tr><td>gamma_regime_align</td><td>11</td><td>BULLISH + POSITIVE gamma / BEARISH + NEGATIVE gamma</td><td style="color:var(--text3)">−4 v16</td></tr>
+    <tr><td>persistence_factor</td><td>6</td><td>Régimen estable ≥10 ciclos con confianza alta</td><td style="color:var(--text3)">−6 v16</td></tr>
+    <tr><td>sweep_confirmation</td><td>5</td><td>Sweep en la misma dirección que la señal</td><td style="color:var(--text3)">−1 v16</td></tr>
+    <tr><td>block_confirmation</td><td>7</td><td>CALL_BLOCK_BUY (bull) / PUT_BLOCK_BUY (bear)</td><td style="color:var(--text3)">−1 v16</td></tr>
+    <tr><td>vix_regime_align</td><td>6</td><td>VIX LONG GAMMA + señal BULL / VIX SHORT GAMMA + señal BEAR</td><td style="color:var(--text3)">−2 v16</td></tr>
+    <tr><td>dealer_stress</td><td>8</td><td>dealer_stress_score &gt; 50 con señal direccional</td><td style="color:var(--text3)">−2 v16</td></tr>
+    <tr><td>absorption_quality</td><td>12</td><td>Señal ABSORPTION_REVERSAL/FAILED_SQUEEZE con absorción activa</td><td style="color:var(--text3)">−4 v16</td></tr>
+    <tr><td>volatility_expansion</td><td>5</td><td>velocity_zscore &gt; 1.0 (vol expandiéndose)</td><td style="color:var(--text3)">sin cambio</td></tr>
+    <tr><td>liquidity_structure</td><td>4</td><td>NEUTRAL: pin_prob alta / Direccional: void_score alto</td><td style="color:var(--text3)">sin cambio</td></tr>
+    <tr><td>hedge_pressure</td><td>2</td><td>hedge_pressure_score proporcional al máximo</td><td style="color:var(--text3)">sin cambio</td></tr>
+    <tr><td style="color:var(--yellow)">dealer_regime_conf</td><td style="color:var(--yellow)">12</td><td>regime_confidence del DealerRegimeEngine &gt; 70 coherente con señal</td><td style="color:var(--yellow)">NUEVO v16</td></tr>
+    <tr><td style="color:var(--yellow)">trade_score_align</td><td style="color:var(--yellow)">8</td><td>LongScore/ShortScore del TradeScoringEngine coherente con dirección de señal</td><td style="color:var(--yellow)">NUEVO v16</td></tr>
+  </table>
+  <div class="callout tip"><div>💡</div><div class="callout-body"><strong>Guía práctica de score:</strong> ≥70 = alta convicción (operar con tamaño completo). 55–70 = señal válida (tamaño reducido). 40–55 = referencia (esperar confirmación adicional). &lt;40 = informativa únicamente.</div></div>
+  <div class="callout info"><div>ℹ</div><div class="callout-body"><strong>v16:</strong> Las señales de régimen estructural (S18: REGIME_TRADE_CONFIRM) se benefician directamente de los 20 puntos adicionales de <code>dealer_regime_conf</code> + <code>trade_score_align</code>, ya que ambas condiciones son requisito de disparo. Las señales de flujo (S1–S12) también reciben estos puntos cuando el régimen coincide.</div></div>
+</section>
+
+<!-- CAPA 12 -->
+<section id="backtest">
+  <h2>Capa 12 — Backtest Layer</h2>
+  <p>Registra cada señal y la actualiza con el <strong>outcome real</strong> a 5m, 15m, 30m y 1h, incluyendo MAE/MFE intrabar. Actualiza en cada ciclo hasta completar el horizonte de 1h.</p>
+  <div class="csv-grid">
+    <div class="csv-key">Move_5m/15m/30m/1h</div><div class="csv-val">Movimiento de precio desde la señal al horizonte</div>
+    <div class="csv-key">Win_5m/15m/30m/1h</div><div class="csv-val">1 si fue en la dirección correcta, 0 si no</div>
+    <div class="csv-key">MAE</div><div class="csv-val">Maximum Adverse Excursion — máximo dolor antes del target</div>
+    <div class="csv-key">MFE</div><div class="csv-val">Maximum Favorable Excursion — máximo beneficio alcanzable</div>
+    <div class="csv-key">DealerStress / AbsorptionScore / PinProbability</div><div class="csv-val">Contexto institucional en el momento exacto de la señal</div>
+  </div>
+  <div class="callout info"><div>ℹ</div><div class="callout-body">Las señales se purgan después de 65 ciclos si no completaron el tracking. El outcome de 1h se registra en el ciclo 60 exacto. Usa <code>signals_performance.csv</code> para filtrar señales por win_rate o MAE/MFE ratio.</div></div>
+</section>
+
+<!-- HEDGE ENGINE -->
+<section id="hedge-engine">
+  <h2>Hedge Engine — Estrés del Dealer</h2>
+  <p>Modela la mecánica de hedging del market maker calculando un <strong>Dealer Stress Index 0–100</strong> compuesto.</p>
+  <table class="sig-table">
+    <tr><th>Componente</th><th>Peso máx</th><th>Condición</th></tr>
+    <tr><td>gamma_instability</td><td>30</td><td>NetGammaFlow negativo (dealer SHORT GAMMA amplificador) + gamma_flow_zscore</td></tr>
+    <tr><td>iv_expansion</td><td>20</td><td>Cambio neto de IV (iv_change_calls − iv_change_puts) × 1000</td></tr>
+    <tr><td>sweep_aggression</td><td>20</td><td>Número de sweeps detectados × 7 puntos cada uno</td></tr>
+    <tr><td>hedge_acceleration</td><td>15</td><td>|hedge_acceleration| / |hedge_raw| × 100 — cambio brusco en presión</td></tr>
+    <tr><td>vix_divergence</td><td>15</td><td>VIX subiendo mientras SPOT también sube (señal de stress oculto)</td></tr>
+  </table>
+  <p><strong>hedge_exhaustion_flag:</strong> True cuando la velocidad de hedge cayó ≥50% en 5 ciclos Y premium_zscore sigue elevado. El dealer terminó su rebalanceo — posible reversión.</p>
+</section>
+
+<!-- ABSORB EXHAUST -->
+<section id="absorb-exhaust">
+  <h2>Absorption-Exhaustion Engine</h2>
+  <p>Versión cuantitativa continua (0–100) de la Capa 9. Detecta el <strong>fallo de continuación direccional</strong>.</p>
+  <div class="cols2">
+    <div class="sc"><div class="sc-title">absorption_score (0–100)</div><div class="sc-desc">+40 premium elevado (prem_z&gt;1.5) + spot no se mueve. +30 imbalance alto + spot en dirección opuesta. +15 hedge_exhaustion activo.</div></div>
+    <div class="sc"><div class="sc-title">exhaustion_score (0–100)</div><div class="sc-desc">+35 velocity cayó &gt;60% en 5 ciclos. +25 sweeps declinando (primeros 2 vs últimos 2). +25 premium declinando &gt;50%.</div></div>
+    <div class="sc"><div class="sc-title">failed_squeeze_flag</div><div class="sc-desc">True cuando: imbalance&gt;0.3 + exhaustion&gt;50 + absorption&gt;40. El squeeze alcista fracasó → posible FAILED_SQUEEZE señal (S9).</div></div>
+    <div class="sc"><div class="sc-title">dealer_absorption</div><div class="sc-desc">True cuando: absorption&gt;60 + dealer_stress&gt;50. El dealer mismo está absorbiendo el flujo agresivamente.</div></div>
+  </div>
+</section>
+
+<!-- SURFACE DYNAMICS -->
+<section id="surface-dynamics">
+  <h2>Surface Dynamics Engine</h2>
+  <p>Analiza la dinámica de la <strong>superficie de volatilidad implícita</strong> para anticipar expansiones, compresiones y cascadas de charm.</p>
+  <div class="csv-grid">
+    <div class="csv-key">surface_instability_score</div><div class="csv-val">0–100: IV rising (+40), curvatura &gt;0.05 (+30), gamma comprimido (+20), EOD &lt;1h (+10)</div>
+    <div class="csv-key">volatility_expansion_probability</div><div class="csv-val">0–1: probabilidad de expansión de vol. IV rising (+0.40), curvatura (+0.20), gamma comprimido (+0.20)</div>
+    <div class="csv-key">gamma_compression_score</div><div class="csv-val">0–100: gamma ATM cayó &gt;30% en 5 ciclos. "Spring cargado" para breakout.</div>
+    <div class="csv-key">iv_curvature</div><div class="csv-val">IV_OTM_avg − IV_ATM. Positivo = smile pronunciado (miedo en extremos)</div>
+    <div class="csv-key">atm_iv_trend</div><div class="csv-val">RISING/FALLING/STABLE según velocidad de ATM IV en últimos 5 ciclos (umbral ±0.5%)</div>
+    <div class="csv-key">charm_cascade_flag</div><div class="csv-val">True cuando charm total &gt;2× del inicio de ventana con T&lt;2h — EOD dehedging acelerado</div>
+  </div>
+</section>
+
+<!-- MICROSTRUCTURE -->
+<section id="microstructure">
+  <h2>Microstructure Engine</h2>
+  <p>Modela la <strong>estructura de liquidez a nivel de strike</strong> para identificar muros de OI, zonas de vacío, probabilidades de pin y trampas del dealer.</p>
+  <div class="csv-grid">
+    <div class="csv-key">pin_probability</div><div class="csv-val">0–1: dist_to_wall ≤ ATM_W (+0.40), T&lt;2h (+0.25), T&lt;4h (+0.10), imbalance bajo (+0.15)</div>
+    <div class="csv-key">liquidity_void_score</div><div class="csv-val">0–100: OI ATM &lt;30% del promedio → el precio puede moverse rápido sin resistencia</div>
+    <div class="csv-key">dealer_trap_score</div><div class="csv-val">0–100: spot aceleró &gt;ATM_W con muro de OI en el lado opuesto</div>
+    <div class="csv-key">nearest_wall_strike</div><div class="csv-val">Strike con mayor OI más cercano al spot</div>
+    <div class="csv-key">magnet_strike</div><div class="csv-val">max(OI/distancia) — strike con mayor "gravedad" sobre el precio</div>
+    <div class="csv-key">wall_above / wall_below</div><div class="csv-val">Strikes con mayor OI por encima y debajo del spot — resistencia/soporte estructural</div>
+  </div>
+</section>
+
+<!-- GREEK CACHE -->
+<section id="greek-cache">
+  <h2>GreekCache — Optimización de Cómputo Griego (v16)</h2>
+  <p>Elimina el cálculo redundante de IV y greeks cuando múltiples engines visitan el mismo strike en el mismo ciclo. Una instancia por activo, reseteada al inicio de cada fase de compute.</p>
+  <div class="formula">Key = (strike, round(spot/0.5)×0.5, round(T/0.0001)×0.0001, round(iv_raw/0.001)×0.001, es_call)<br>Retorna: (iv, gamma, charm, vanna)<br>Cache miss → computa Newton-Raphson + greeks → almacena<br>Cache hit → retorna resultado previo sin recomputo</div>
+  <div class="callout info"><div>ℹ</div><div class="callout-body"><strong>Impacto:</strong> TrueCharmEngine y TrueVannaExposureEngine iteran el mismo DataFrame de strikes. Sin cache, cada engine ejecuta Newton-Raphson independientemente. Con GreekCache, el primer engine computa y el segundo reutiliza. Speedup estimado: 40–60% en ciclos con cadenas de &gt;50 strikes.</div></div>
+  <div class="callout warn"><div>⚠</div><div class="callout-body"><code>greek_cache.reset()</code> se llama al inicio de <code>_worker_compute_activo()</code>, antes de cualquier engine. Si no se resetea, los greeks del ciclo anterior contaminan el ciclo actual.</div></div>
+</section>
+
+<!-- VANNA ENGINE -->
+<section id="vanna-engine">
+  <h2>True Vanna Exposure Engine (v16)</h2>
+  <p>Calcula la exposición real del dealer al <strong>vanna</strong> (∂Delta/∂IV) usando OI por strike. Cuando la IV se mueve, el dealer debe rehedgear delta proporcionalmente al vanna acumulado.</p>
+  <div class="formula">vanna_exposure(K) = vanna(K) × OI(K) × MULT × dealer_sign<br>Calls: dealer_sign = +1 (dealer short calls → long gamma)<br>Puts: signo opuesto a las calls (posición dealer en puts)</div>
+  <table class="sig-table">
+    <tr><th>Output</th><th>Rango</th><th>Interpretación</th></tr>
+    <tr><td class="sn" style="color:var(--cyan)">total_vanna_exposure</td><td>$·delta / 1% IV</td><td>Cuánto delta cambia el dealer si IV sube 1%</td></tr>
+    <tr><td class="sn" style="color:var(--cyan)">atm_vanna_exposure</td><td>$·delta</td><td>Vanna solo en strikes ATM — el más crítico para rebalanceo inmediato</td></tr>
+    <tr><td class="sn" style="color:var(--yellow)">vanna_pressure</td><td>0–100</td><td>abs(total_vanna) / ref_scale × 100. ref_scale: SPY=$5M, SPX=$50M, etc.</td></tr>
+    <tr><td class="sn" style="color:var(--red)">vanna_flip_probability</td><td>0–1</td><td>Probabilidad de cambio de signo en 5 ciclos. Boost +0.25 si IV expanding (&gt;0.5%)</td></tr>
+    <tr><td class="sn">vanna_acceleration</td><td>Δ$/ciclo</td><td>Cambio de total_vanna_exposure vs hace 2 ciclos — detecta cascadas</td></tr>
+    <tr><td class="sn">dominant_side</td><td>texto</td><td>CALLS / PUTS / BALANCED (ratio &gt;1.5× para definir dominancia)</td></tr>
+  </table>
+  <div class="callout tip"><div>💡</div><div class="callout-body"><strong>Uso en TradeScoringEngine (15%):</strong> vanna_pressure alimenta directamente el componente vanna del score. Alta vanna_flip_probability aplica un penalty de hasta 30 puntos en ambas direcciones (incertidumbre de signo). Cuando vanna domina sobre charm, DealerRegimeEngine puede asignar estado VANNA_DOMINATED.</div></div>
+</section>
+
+<!-- DEALER REGIME ENGINE -->
+<section id="dealer-regime">
+  <h2>Dealer Regime Engine — 7 Estados Estructurales (v16)</h2>
+  <p>Reemplaza la clasificación de 5 regímenes de MarketStateEngine con una taxonomía de <strong>7 estados ortogonales</strong> basada en GEX, vanna, charm, flow, microestructura y surface dynamics. Usa hysteresis de 2 ciclos para evitar flip-flop.</p>
+
+  <div class="arch">
+    <div class="arch-title">Los 7 estados del DealerRegimeEngine</div>
+    <div class="arch-layers">
+      <div class="arch-layer al5"><span class="arch-num">1</span><span class="arch-name">LONG_GAMMA_PINNING</span><span class="arch-desc">GEX&gt;0 + pin_prob alto + spot velocity bajo + imbalance neutral → dealer ancla el precio, mean reversion pura</span></div>
+      <div class="arch-layer al4"><span class="arch-num">2</span><span class="arch-name">LONG_GAMMA_TREND</span><span class="arch-desc">GEX&gt;0 + velocity clara + imbalance direccional → el dealer tiene gamma pero el flujo fuerza tendencia controlada</span></div>
+      <div class="arch-layer al3"><span class="arch-num">3</span><span class="arch-name">SHORT_GAMMA_SQUEEZE</span><span class="arch-desc">GEX&lt;0 + imbalance alcista (&gt;0.3) + velocity positiva → amplificación de rally, dealer compra delta</span></div>
+      <div class="arch-layer al1"><span class="arch-num">4</span><span class="arch-name">SHORT_GAMMA_PANIC</span><span class="arch-desc">GEX&lt;0 + imbalance bajista (&lt;−0.3) + velocity negativa → cascada bajista, dealer vende delta</span></div>
+      <div class="arch-layer al8"><span class="arch-num">5</span><span class="arch-name">CHARM_DOMINATED</span><span class="arch-desc">|charm_exp| &gt; |vanna_exp| × 1.5 → fuerza EOD de decay temporal dominante sobre señales de flujo</span></div>
+      <div class="arch-layer al6"><span class="arch-num">6</span><span class="arch-name">VANNA_DOMINATED</span><span class="arch-desc">|vanna_exp| &gt; |charm_exp| × 1.5 → IV en movimiento fuerza rehedge de delta sistemático</span></div>
+      <div class="arch-layer al12"><span class="arch-num">7</span><span class="arch-name">LIQUIDITY_VACUUM</span><span class="arch-desc">void_score alto + |imbalance|&lt;0.1 + velocity baja → sin régimen claro, movimientos rápidos posibles sin resistencia</span></div>
+    </div>
+  </div>
+
+  <h3>Mecanismo de Hysteresis</h3>
+  <div class="formula">CONFIRMATION_CYCLES = 2 (igual que RegimePersistenceEngine)<br>CONFIDENCE_DECAY = 0.03 por ciclo sin confirmación<br>Transición: el estado candidato debe ganar 2 ciclos consecutivos para activarse<br>Confianza: min(100, best_score × 0.6 + gap_vs_segundo × 0.4)</div>
+
+  <h3>Outputs por ciclo</h3>
+  <div class="csv-grid">
+    <div class="csv-key">regime</div><div class="csv-val">Estado actual (uno de los 7 arriba)</div>
+    <div class="csv-key">regime_confidence</div><div class="csv-val">0–100: certeza del estado. &gt;55 = confirmado para S18</div>
+    <div class="csv-key">regime_duration</div><div class="csv-val">Ciclos consecutivos en el estado actual</div>
+    <div class="csv-key">regime_transition_probability</div><div class="csv-val">0–1: probabilidad de cambio en próximos 3 ciclos</div>
+    <div class="csv-key">regime_scores</div><div class="csv-val">Score 0–100 de cada estado candidato (para debug)</div>
+    <div class="csv-key">pending_regime</div><div class="csv-val">Estado candidato en transición (None si estable)</div>
+  </div>
+
+  <div class="callout info"><div>ℹ</div><div class="callout-body"><strong>Diferencia con RegimePersistenceEngine:</strong> RegimePersistenceEngine filtra los 5 estados de MarketStateEngine (basados en BullishScore, BearishScore, etc.). DealerRegimeEngine es un sistema paralelo e independiente basado directamente en GEX, vanna, charm y microestructura — captura dimensiones estructurales que los score-based no detectan (CHARM_DOMINATED, VANNA_DOMINATED, LIQUIDITY_VACUUM).</div></div>
+</section>
+
+<!-- TRADE SCORING ENGINE -->
+<section id="trade-scoring">
+  <h2>Trade Scoring Engine — LongScore / ShortScore (v16)</h2>
+  <p>Produce una <strong>convicción compuesta 0–100</strong> para posiciones largas y cortas en cada ciclo, integrando los outputs de todos los engines v16. Es el primer engine que sintetiza visión transversal de régimen, flujo, charm, vanna, microestructura y sweeps en un solo número accionable.</p>
+
+  <div class="cols3">
+    <div class="sc"><div class="sc-title">Dealer Regime (30%)</div><div class="sc-desc">SHORT_GAMMA_SQUEEZE → LongScore=80. SHORT_GAMMA_PANIC → ShortScore=80. LONG_GAMMA_TREND → dirección del imbalance. Ponderado por regime_confidence.</div></div>
+    <div class="sc"><div class="sc-title">Flow (25%)</div><div class="sc-desc">50 + imbalance×50 + vel_z×5 + prem_z×5. Absorción activa boost ±20% del absorption_score.</div></div>
+    <div class="sc"><div class="sc-title">Charm (15%)</div><div class="sc-desc">Dirección de charm_exp × EOD_factor. Si charm&gt;0 y EOD cerca → LongScore+. Si charm&lt;0 → ShortScore+.</div></div>
+    <div class="sc"><div class="sc-title">Vanna (15%)</div><div class="sc-desc">vanna_pressure × dirección de vanna_exp. vanna_flip_probability aplica penalty de hasta 30 pts en ambos lados.</div></div>
+    <div class="sc"><div class="sc-title">Microstructure (10%)</div><div class="sc-desc">Proximidad a wall_above (short bias) vs wall_below (long bias). Pin reduce momentum ±pin×10. Void penaliza ambos lados.</div></div>
+    <div class="sc"><div class="sc-title">Sweep (5%)</div><div class="sc-desc">+15 por cada BULLISH_CALL_SWEEP (long), +15 por BEARISH_PUT_SWEEP (short).</div></div>
+  </div>
+
+  <h3>TradeBias y TradeConfidence</h3>
+  <div class="formula">diff = LongScore − ShortScore<br>TradeBias = 'LONG' si diff &gt; 8, 'SHORT' si diff &lt; −8, 'NEUTRAL' si |diff| ≤ 8<br>TradeConfidence = min(100, |diff| × 2)</div>
+
+  <div class="callout tip"><div>💡</div><div class="callout-body"><strong>S18 — REGIME_TRADE_CONFIRM</strong> se dispara cuando: DealerRegimeEngine conf ≥ 55 + duración ≥ 2 + |LongScore−ShortScore| &gt; 15 + coherencia entre régimen y TradeBias. Es la señal de entrada estructural más robusta — captura situaciones donde múltiples greeks y flujo apuntan en la misma dirección.</div></div>
+</section>
+
+<!-- SIGNAL PERFORMANCE ENGINE -->
+<section id="signal-perf">
+  <h2>Signal Performance Engine (v16)</h2>
+  <p>Tracking en tiempo real de estadísticas por tipo de señal. Se alimenta automáticamente desde BacktestLayer cada vez que un outcome completa sus 4 horizontes (5m/15m/30m/1h).</p>
+  <table class="sig-table">
+    <tr><th>Stat</th><th>Descripción</th></tr>
+    <tr><td class="sn" style="color:var(--green)">win_rate</td><td>Proporción de señales que movieron en la dirección correcta (Win_1h si disponible, else Win_5m)</td></tr>
+    <tr><td class="sn" style="color:var(--accent)">expectancy</td><td>E[Move] promedio ponderado — positive = señal con edge real</td></tr>
+    <tr><td class="sn" style="color:var(--red)">mae</td><td>Maximum Adverse Excursion promedio — cuánto duele antes del target</td></tr>
+    <tr><td class="sn" style="color:var(--cyan)">mfe</td><td>Maximum Favorable Excursion promedio — cuánto se puede capturar</td></tr>
+    <tr><td class="sn" style="color:var(--violet)">sharpe_like</td><td>expectancy / std(moves) — consistencia de la señal. &gt;0.5 = señal consistente</td></tr>
+    <tr><td class="sn">n</td><td>Número de observaciones del día (reset diario)</td></tr>
+  </table>
+  <div class="csv-grid">
+    <div class="csv-key">Reset</div><div class="csv-val">Diario (las stats son intradiarias — el comportamiento de señales cambia día a día)</div>
+    <div class="csv-key">Export</div><div class="csv-val">signal_performance_summary.csv — escrito al cierre del día (cuando BacktestLayer purga pendientes)</div>
+    <div class="csv-key">Uso</div><div class="csv-val">Filtrar señales con win_rate &lt;40% o sharpe_like &lt;0 en días similares para evitar señales que no funcionan en el contexto actual</div>
+  </div>
+</section>
+
+<!-- SIGNALS OVERVIEW -->
+<section id="signals-overview">
+  <h2>Resumen de las 18 Señales</h2>
+  <p>Todas las señales incluyen: Time, Activo, Direction (BULLISH/BEARISH/NEUTRAL), SPOT, quality_score (0–100), Probability (0–1), ExpectedVol, Invalidation y Note descriptivo. Se exportan a <code>signals.json</code> cada ciclo.</p>
+  <table class="sig-table">
+    <tr><th>#</th><th>Señal</th><th>Dir</th><th>Motor disparador</th><th>Cooldown</th></tr>
+    <tr><td>S1</td><td class="sn" style="color:var(--yellow)">ZERO_CROSS_UP</td><td>BULL</td><td>SignalEngine — SPOT cruza ZERO hacia arriba</td><td>5</td></tr>
+    <tr><td>S1</td><td class="sn" style="color:var(--red)">ZERO_CROSS_DOWN</td><td>BEAR</td><td>SignalEngine — SPOT cruza ZERO hacia abajo</td><td>5</td></tr>
+    <tr><td>S2</td><td class="sn" style="color:var(--green)">CALL_SURGE</td><td>BULL</td><td>FlowTracker — velocity &gt; umbral + imbalance &gt; 0.3</td><td>3</td></tr>
+    <tr><td>S2</td><td class="sn" style="color:var(--red)">PUT_SURGE</td><td>BEAR</td><td>FlowTracker — velocity &lt; −umbral + imbalance &lt; −0.3</td><td>3</td></tr>
+    <tr><td>S3</td><td class="sn" style="color:var(--text2)">APPROACHING_GEX_WALL</td><td>NEU</td><td>Inventory — SPOT dentro de 2×ATM del LONGGAMMA strike</td><td>2</td></tr>
+    <tr><td>S4</td><td class="sn" style="color:var(--cyan)">EOD_PIN_LIKELY</td><td>NEU</td><td>TrueCharm — charm_ratio &gt; 15% con T &lt; 2h</td><td>10</td></tr>
+    <tr><td>S5</td><td class="sn" style="color:var(--accent)">VIX_REGIME_CONFIRM</td><td>DIR</td><td>Cross-asset — VIX dealer_state confirma bias local</td><td>5</td></tr>
+    <tr><td>S6</td><td class="sn" style="color:var(--orange)">HEDGE_PANIC</td><td>DIR</td><td>HedgeEngine — stress &gt; 80 + pressure &gt; 70</td><td>4</td></tr>
+    <tr><td>S7</td><td class="sn" style="color:var(--yellow)">SWEEP_ACCELERATION</td><td>DIR</td><td>HedgeEngine — sweep_aggression ≥ 14 (≥2 sweeps en ciclo)</td><td>3</td></tr>
+    <tr><td>S8</td><td class="sn" style="color:var(--green)">ABSORPTION_REVERSAL</td><td>DIR</td><td>AbsorbExhaust — absorption_score ≥ 60 con absorción activa</td><td>5</td></tr>
+    <tr><td>S9</td><td class="sn" style="color:var(--red)">FAILED_SQUEEZE</td><td>BEAR</td><td>AbsorbExhaust — failed_squeeze_flag True</td><td>5</td></tr>
+    <tr><td>S10</td><td class="sn" style="color:var(--violet)">DEALER_UNWIND</td><td>DIR</td><td>HedgeEngine — stress cayó &gt;30% desde avg_10c con exhaustion</td><td>6</td></tr>
+    <tr><td>S11</td><td class="sn" style="color:var(--mag)">GAMMA_COMPRESSION_BREAKOUT</td><td>DIR</td><td>SurfaceDyn — gamma_compression ≥ 60 + vol_exp_prob ≥ 0.6</td><td>4</td></tr>
+    <tr><td>S12</td><td class="sn" style="color:var(--cyan)">CHARM_CASCADE</td><td>NEU</td><td>SurfaceDyn — charm_cascade_flag activo + T &lt; 2h</td><td>8</td></tr>
+    <tr><td style="color:var(--yellow)">S13</td><td class="sn" style="color:var(--accent)">DELTA_DIVERGENCE_BULL</td><td>BULL</td><td><strong>v15</strong> — delta_zscore &lt; −1.5 + spot &gt; ZERO + bias bull</td><td>6</td></tr>
+    <tr><td style="color:var(--yellow)">S13</td><td class="sn" style="color:var(--red)">DELTA_DIVERGENCE_BEAR</td><td>BEAR</td><td><strong>v15</strong> — delta_zscore &gt; 1.5 + spot &lt; ZERO + bias bear</td><td>6</td></tr>
+    <tr><td style="color:var(--yellow)">S14</td><td class="sn" style="color:var(--mag)">CHARM_MOMENTUM_EOD</td><td>DIR</td><td><strong>v15</strong> — CharmVelocity &gt; 0 acelerando + T &lt; 2h</td><td>5</td></tr>
+    <tr><td style="color:var(--yellow)">S15</td><td class="sn" style="color:var(--orange)">IMBALANCE_REVERSAL</td><td>DIR</td><td><strong>v15</strong> — sesión y rolling 5m en direcciones opuestas</td><td>4</td></tr>
+    <tr><td style="color:var(--yellow)">S16</td><td class="sn" style="color:var(--violet)">GAMMA_FLOW_DIVERGENCE</td><td>BULL</td><td><strong>v15</strong> — gamma_zscore &lt; −1 + spot subiendo + SHORT GAMMA</td><td>5</td></tr>
+    <tr><td style="color:var(--yellow)">S17</td><td class="sn" style="color:var(--cyan)">PINNING_RISK</td><td>NEU</td><td><strong>v15</strong> — triple conf: pin_prob + charm_cascade + flow_neutral + T&lt;2h</td><td>8</td></tr>
+    <tr><td style="color:var(--orange)">S18</td><td class="sn" style="color:var(--green)">REGIME_TRADE_CONFIRM</td><td>DIR</td><td><strong>v16</strong> — DealerRegimeEngine conf≥55 + dur≥2 + |LongScore−ShortScore|&gt;15 + coherencia</td><td>4</td></tr>
+  </table>
+</section>
+
+<!-- SIGNALS BASE -->
+<section id="signals-base">
+  <h2>Señales Base S1–S5</h2>
+
+  <div class="sig-card sc-yellow">
+    <div class="sig-card-head"><span class="sig-card-name" style="color:var(--yellow)">S1 — ZERO_CROSS_UP / DOWN</span><div class="sig-card-badges"><span class="badge by">S1</span><span class="badge bg">Cambio de régimen</span></div></div>
+    <p><strong>La señal macro más importante.</strong> Usa <code>prev_spot</code> para detectar cruces reales entre ciclos (fix v11 — elimina falsos cruces). ZERO_CROSS_UP: el mercado pasa de SHORT a LONG gamma; el dealer deja de amplificar caídas. ZERO_CROSS_DOWN: lo contrario — el mercado pasa a SHORT gamma, dealer amplifica movimientos.</p>
+    <div class="callout tip"><div>💡</div><div class="callout-body"><strong>Setup ideal BULL:</strong> ZERO_CROSS_UP + VIX_REGIME_CONFIRM + CALL_SURGE en el mismo o siguiente ciclo + quality_score &gt; 65.</div></div>
+  </div>
+
+  <div class="sig-card sc-green">
+    <div class="sig-card-head"><span class="sig-card-name" style="color:var(--green)">S2 — CALL_SURGE / PUT_SURGE</span><div class="sig-card-badges"><span class="badge bg">S2</span><span class="badge by">Momentum</span></div></div>
+    <p>FlowVelocity supera el umbral del activo (SPY: $500K/min, SPX: $5M/min, QQQ: $300K/min) Y el imbalance confirma la dirección (|imbalance| &gt; 0.3). Señal de flujo institucional genuino distinguible del ruido. El umbral asegura que solo se activa con entradas de tamaño relevante para el activo.</p>
+  </div>
+
+  <div class="sig-card sc-cyan">
+    <div class="sig-card-head"><span class="sig-card-name" style="color:var(--cyan)">S4 — EOD_PIN_LIKELY</span><div class="sig-card-badges"><span class="badge bc">S4</span><span class="badge by">EOD</span></div></div>
+    <p>charm_total / premium_total &gt; 15% con T &lt; 2 horas. El decay del delta está acelerando y el precio tenderá a magnetizarse hacia el strike de máximo OI (LONGGAMMA o magnet_strike). Suele ir acompañada de Pin Probability &gt; 50% en el Microstructure Engine.</p>
+  </div>
+
+  <div class="sig-card sc-blue">
+    <div class="sig-card-head"><span class="sig-card-name" style="color:var(--accent)">S5 — VIX_REGIME_CONFIRM</span><div class="sig-card-badges"><span class="badge bb">S5</span><span class="badge bc">Cross-asset</span></div></div>
+    <p>Única señal cross-asset: lee el <code>dealer_state</code> del activo VIX. Si VIX dealer = LONG_GAMMA y el activo tiene bias BULLISH → la señal refuerza el rally (volatilidad anclada = baja presión vendedora). Si VIX = SHORT_GAMMA y bias BEARISH → expansión de vol confirmada. Cooldown 5 ciclos para no saturar el panel de señales.</p>
+  </div>
+</section>
+
+<!-- SIGNALS V12 -->
+<section id="signals-v12">
+  <h2>Señales v12 S6–S12</h2>
+
+  <div class="sig-card sc-orange">
+    <div class="sig-card-head"><span class="sig-card-name" style="color:var(--orange)">S6 — HEDGE_PANIC</span><div class="sig-card-badges"><span class="badge bo">v12 S6</span></div></div>
+    <p>dealer_stress_score &gt; 80 Y hedge_pressure_score &gt; 70. El dealer está en modo pánico de rebalanceo. La dirección sigue el FlowImbalance del ciclo (si imbalance &gt; 0.2 → BULLISH, &lt; −0.2 → BEARISH, neutro → NEUTRAL). ExpectedVol: HIGH. Invalidación: stress_score &lt; 60.</p>
+  </div>
+
+  <div class="sig-card sc-red">
+    <div class="sig-card-head"><span class="sig-card-name" style="color:var(--red)">S9 — FAILED_SQUEEZE</span><div class="sig-card-badges"><span class="badge br" style="color:var(--red);border-color:#ef444440;background:#ef44440c">v12 S9</span></div></div>
+    <p>failed_squeeze_flag = True (imbalance &gt; 0.3 + exhaustion_score &gt; 50 + absorption_score &gt; 40). Los compradores de calls perdieron momentum y el mercado los tiene atrapados. Dirección BEARISH: el precio subirá menos de lo que pagaron los call buyers. Invalidación: si el imbalance vuelve a subir sobre 0.5.</p>
+  </div>
+
+  <div class="sig-card sc-mag">
+    <div class="sig-card-head"><span class="sig-card-name" style="color:var(--mag)">S11 — GAMMA_COMPRESSION_BREAKOUT</span><div class="sig-card-badges"><span class="badge bm">v12 S11</span></div></div>
+    <p>gamma_compression_score ≥ 60 (gamma ATM cayó &gt;30% en 5 ciclos) Y volatility_expansion_probability ≥ 0.6. La superficie de gamma está comprimida como un spring — alta energía potencial lista para liberar. La dirección sigue el FlowImbalance actual. ExpectedVol: HIGH.</p>
+  </div>
+</section>
+
+<!-- SIGNALS V15 -->
+<section id="signals-v15">
+  <h2>Señales v15 S13–S17 — QUANT Patch</h2>
+
+  <div class="sig-card sc-blue">
+    <div class="sig-card-head"><span class="sig-card-name" style="color:var(--accent)">S13 — DELTA_DIVERGENCE_BULL / BEAR</span><div class="sig-card-badges"><span class="badge bb">v15 S13</span><span class="badge by">Divergencia</span></div></div>
+    <p><strong>BULL:</strong> delta_flow_zscore &lt; −1.5 (mucho más delta negativo de lo histórico) pero spot está sobre ZERO y bias es BULLISH. Esta divergencia indica coberturas siendo cerradas → demanda oculta. El spot debería subir cuando se deshagan las posiciones defensivas.</p>
+    <p><strong>BEAR:</strong> La lógica inversa: delta_zscore &gt; 1.5 + spot bajo ZERO + bias BEARISH. Hay demasiado delta positivo acumulado en un entorno bajista → cuando liquiden, el precio caerá.</p>
+    <div class="formula">Condición BULL: delta_zscore &lt; −1.5 AND spot &gt; ZERO AND bias == 'BULLISH'<br>Invalidación BULL: delta_flow_zscore &gt; −0.5 OR spot &lt; ZERO</div>
+  </div>
+
+  <div class="sig-card sc-mag">
+    <div class="sig-card-head"><span class="sig-card-name" style="color:var(--mag)">S14 — CHARM_MOMENTUM_EOD</span><div class="sig-card-badges"><span class="badge bm">v15 S14</span><span class="badge bc">EOD táctico</span></div></div>
+    <p>CharmVelocity &gt; 0 Y CharmAcceleration &gt; 0 Y T &lt; 2h Y |charm_vel| &gt; 2% del charm acumulado. El charm está acelerando activamente → dealers están deshaciendo delta hedges en tiempo real. Si spot está sobre ZERO, esta presión de dehedging impulsa el precio hacia arriba durante la última hora.</p>
+    <p>Es la señal táctica más precisa para el último tramo del día. Especialmente efectiva en viernes de expiración 0DTE donde el charm es máximo.</p>
+    <div class="formula">prob = min(0.85, (charm_accel / |charm_now|) × 5 + 0.40)</div>
+  </div>
+
+  <div class="sig-card sc-orange">
+    <div class="sig-card-head"><span class="sig-card-name" style="color:var(--orange)">S15 — IMBALANCE_REVERSAL</span><div class="sig-card-badges"><span class="badge bo">v15 S15</span><span class="badge by">Short-term reversal</span></div></div>
+    <p><strong>BEARISH:</strong> imbalance_sesión &gt; 0.3 (sesión alcista) PERO FlowImbalance5m &lt; −0.2 Y FlowImbalanceCycle &lt; −0.15 (flujo reciente bajista). Los compradores de la sesión están frenando → techo de corto plazo dentro de tendencia alcista.</p>
+    <p><strong>BULLISH:</strong> Inverso — sesión bajista pero flujo 5m y ciclo giran positivos → rebote técnico. Probability = min(0.75, |imb_5m − imb_sesión|).</p>
+    <div class="callout warn"><div>⚠</div><div class="callout-body">Es señal de <strong>corrección de corto plazo</strong>, no de reversión de tendencia. La tendencia de sesión sigue vigente hasta que el ZERO cruce.</div></div>
+  </div>
+
+  <div class="sig-card sc-violet">
+    <div class="sig-card-head"><span class="sig-card-name" style="color:var(--violet)">S16 — GAMMA_FLOW_DIVERGENCE</span><div class="sig-card-badges"><span class="badge bv">v15 S16</span><span class="badge bo">Amplificación</span></div></div>
+    <p>NetGammaFlow negativo (gamma_zscore &lt; −1.0) con spot subiendo (&gt;+0.05%) y dealer_state = SHORT_GAMMA. En SHORT GAMMA el dealer compra cuando el spot sube → amplifica el rally. Un gamma flow más negativo con spot ya subiendo señala que la amplificación está activa.</p>
+    <p>No es señal de entrada por sí sola — es señal de <strong>momentum acelerado</strong>. Combinar con CALL_SURGE o ZERO_CROSS_UP para trade de continuación.</p>
+  </div>
+
+  <div class="sig-card sc-cyan">
+    <div class="sig-card-head"><span class="sig-card-name" style="color:var(--cyan)">S17 — PINNING_RISK</span><div class="sig-card-badges"><span class="badge bc">v15 S17</span><span class="badge bg">Triple confirmación</span></div></div>
+    <p>Requiere <strong>tres evidencias convergentes</strong> con T &lt; 2h: (1) pin_probability ≥ 0.5 del Microstructure Engine, (2) charm_cascade_flag activo desde Surface Dynamics, (3) FlowImbalance entre −0.2 y +0.2 (flujo neutro).</p>
+    <div class="formula">prob_compuesta = pin_prob × 0.45 + charm_score × 0.35 + flow_score × 0.20<br>Activación: prob ≥ 0.45 AND (pin_prob ≥ 0.45 OR charm_cascade)</div>
+    <p>Dirección NEUTRAL: el mercado convergerá al magnet_strike. Estrategia: venta de premium ATM o iron condor estrecho centrado en nearest_wall_strike.</p>
+  </div>
+</section>
+
+<!-- SIGNALS V16 -->
+<section id="signals-v16">
+  <h2>Señal v16 — S18: REGIME_TRADE_CONFIRM</h2>
+
+  <div class="sig-card sc-green">
+    <div class="sig-card-head"><span class="sig-card-name" style="color:var(--green)">S18 — REGIME_TRADE_CONFIRM</span><div class="sig-card-badges"><span class="badge bg">v16 S18</span><span class="badge bc">Estructural</span></div></div>
+    <p>La señal de entrada estructural más robusta del engine. Requiere tres condiciones simultáneas:</p>
+    <p><strong>(1) Régimen confirmado:</strong> DealerRegimeEngine con <code>regime_confidence ≥ 55</code> y <code>regime_duration ≥ 2</code> ciclos — el estado dealer está establecido, no en transición.</p>
+    <p><strong>(2) TradeScoringEngine decisivo:</strong> <code>|LongScore − ShortScore| &gt; 15</code> — múltiples greeks y flujo apuntan en la misma dirección.</p>
+    <p><strong>(3) Coherencia régimen/score:</strong> SHORT_GAMMA_SQUEEZE o LONG_GAMMA_TREND + TradeBias LONG → coherente. SHORT_GAMMA_PANIC + TradeBias SHORT → coherente. LONG_GAMMA_PINNING + LongScore &gt; 55 → coherente con cautela.</p>
+    <div class="formula">prob = min(1.0, (regime_confidence / 100) × (score_gap / 50))<br>Direction = BULLISH si TradeBias LONG, BEARISH si TradeBias SHORT<br>Cooldown = 4 ciclos</div>
+    <div class="callout tip"><div>💡</div><div class="callout-body"><strong>Diferencia con otras señales:</strong> S1–S17 se disparan por eventos de flujo (cruces, sweeps, absorción). S18 se dispara por estado estructural sostenido — es la señal de "el contexto global justifica operar ahora". Especialmente útil en sesiones donde las señales de flujo son contradictorias pero el régimen dealer es claro.</div></div>
+    <h4>Campos extra en signals.json</h4>
+    <div class="csv-grid">
+      <div class="csv-key">DealerRegime</div><div class="csv-val">Estado del DealerRegimeEngine en el momento de disparo</div>
+      <div class="csv-key">RegimeConfidence</div><div class="csv-val">Confianza del régimen 0–100</div>
+      <div class="csv-key">RegimeDuration</div><div class="csv-val">Ciclos en el régimen actual</div>
+      <div class="csv-key">LongScore / ShortScore</div><div class="csv-val">Scores del TradeScoringEngine</div>
+      <div class="csv-key">TradeBias / TradeConfidence</div><div class="csv-val">Dirección y convicción del TradeScoringEngine</div>
+    </div>
+  </div>
+</section>
+
+<!-- SIGNAL SCORING -->
+<section id="signal-scoring">
+  <h2>Análisis del Quality Score</h2>
+  <p>El quality_breakdown se guarda en signals.json para cada señal. Permite identificar qué factores están débiles y cuáles confirman.</p>
+  <div class="callout tip"><div>💡</div><div class="callout-body"><strong>Señal ideal:</strong> flow_confirmation ≥ 15 + gamma_regime_align ≥ 12 + sweep_confirmation ≥ 6 + persistence_factor ≥ 8 + al menos 2 componentes v12 activos (dealer_stress + absorption_quality o hedge_pressure). Total esperado: &gt;70.</div></div>
+  <div class="callout info"><div>ℹ</div><div class="callout-body"><strong>Anti-patrón de baja calidad:</strong> flow_confirmation = 10 (imbalance contrario) + persistence_factor = 0 (régimen inestable) + sweep = 0. Score total: ~25. Estos son casos donde el motor detecta la condición técnica pero el contexto no confirma. Ignorar o esperar.</div></div>
+</section>
+
+<!-- REGIMES V16 -->
+<section id="regimes">
+  <h2>Los 7 Regímenes Dealer — DealerRegimeEngine v16</h2>
+  <p>El DealerRegimeEngine clasifica el estado estructural del dealer en 7 categorías ortogonales basadas en GEX neto, vanna exposure, charm exposure, flow, microestructura y surface. Estos 7 estados son la base del TradeScoringEngine y de la señal S18.</p>
+  <div class="callout info"><div>ℹ</div><div class="callout-body">Los 7 regímenes del DealerRegimeEngine son <strong>paralelos</strong> a los 5 regímenes de MarketStateEngine (DEALER_LONG_GAMMA, DEALER_SHORT_GAMMA, CALL_SQUEEZE, PUT_PANIC, NEUTRAL). Ambos sistemas corren simultáneamente. Los 5 de MarketStateEngine siguen siendo el filtro principal para señales S1–S17; los 7 de DealerRegimeEngine son el input de S18 y TradeScoringEngine.</div></div>
+  <div class="cols2">
+    <div class="scenario">
+      <div class="scenario-title" style="color:var(--accent)">📌 LONG_GAMMA_PINNING</div>
+      <p>GEX positivo + pin_prob alta + spot con baja velocidad + imbalance neutro. El dealer tiene gamma positiva y el precio está anclado al strike de máximo OI. Régimen de venta de premium — el spot convergerá al magnet_strike.</p>
+    </div>
+    <div class="scenario">
+      <div class="scenario-title" style="color:var(--green)">📈 LONG_GAMMA_TREND</div>
+      <p>GEX positivo pero velocity clara y imbalance direccional. El dealer tiene gamma pero el flujo fuerza una tendencia controlada. Diferente a PINNING: hay dirección, no consolidación. Estrategia: momentum contenido.</p>
+    </div>
+    <div class="scenario">
+      <div class="scenario-title" style="color:var(--yellow)">🚀 SHORT_GAMMA_SQUEEZE</div>
+      <p>GEX negativo + imbalance &gt; 0.3 + velocity positiva. El dealer vende delta al subir (amplifica el rally). Equivale al CALL_SQUEEZE de MarketStateEngine pero con criterios más precisos. Máxima amplificación alcista.</p>
+    </div>
+    <div class="scenario">
+      <div class="scenario-title" style="color:var(--red)">🔻 SHORT_GAMMA_PANIC</div>
+      <p>GEX negativo + imbalance &lt; −0.3 + velocity negativa. El dealer compra delta al caer (amplifica la caída). Equivale al PUT_PANIC de MarketStateEngine. Máxima amplificación bajista.</p>
+    </div>
+    <div class="scenario">
+      <div class="scenario-title" style="color:var(--mag)">⏳ CHARM_DOMINATED</div>
+      <p>|charm_exp| &gt; |vanna_exp| × 1.5. El decay temporal es la fuerza dominante — típicamente en las últimas 2h del día. Rehedging del dealer se mueve por deterioro del delta, no por flujo. Buscar S4 / S14 / S17.</p>
+    </div>
+    <div class="scenario">
+      <div class="scenario-title" style="color:var(--orange)">⚡ VANNA_DOMINATED</div>
+      <p>|vanna_exp| &gt; |charm_exp| × 1.5. La IV en movimiento fuerza rehedge sistemático de delta. Ocurre en expansiones o compresiones rápidas de IV (datos macro, eventos). Alta vanna_flip_probability = máxima inestabilidad.</p>
+    </div>
+    <div class="scenario">
+      <div class="scenario-title" style="color:var(--text3)">🕳️ LIQUIDITY_VACUUM</div>
+      <p>void_score alto + |imbalance| &lt; 0.1 + velocity baja. No hay régimen claro pero tampoco hay resistencia — el precio puede moverse rápido sin amortiguación de OI. Reducir tamaño; los stops normales se activan más fácil.</p>
+    </div>
+  </div>
+</section>
+
+<!-- REGIMES V15 (5 estados MarketStateEngine) -->
+<section id="regimes-v15">
+  <h2>Los 5 Regímenes — MarketStateEngine (v15)</h2>
+  <p>Los 5 regímenes originales del MarketStateEngine siguen siendo el filtro principal para las señales S1–S17. Están basados en BullishScore, BearishScore, VolatilityScore, SqueezeScore y PanicScore calculados en la Capa 3.</p>
+
+  <div class="module open">
+    <div class="module-head" onclick="this.parentElement.classList.toggle('open')">
+      <div class="mod-dot" style="background:#22c55e"></div>
+      <span class="mod-name">DEALER_LONG_GAMMA — Entorno de mean reversion</span>
+      <span class="mod-chev">▾</span>
+    </div>
+    <div class="module-body">
+      <p><strong>El dealer tiene gamma positiva.</strong> Cuando el spot baja, el dealer compra para cubrir su delta → soporte natural. Cuando sube, vende → resistencia natural. El mercado tiende al rango.</p>
+      <p><strong>Condiciones:</strong> NetGammaFlow positivo + spot sobre ZERO + flujo decelerando + imbalance bajo + aceleración ≤ 0.</p>
+      <p><strong>Características visuales:</strong> SPOT respeta el ZERO como soporte fuerte. BAC/BAP en los mismos strikes repetidamente. FlowVelocity bajo y estable.</p>
+      <p><strong>Estrategia:</strong> Venta de spreads y straddles en strikes de máximo OI. Compra en extremos del rango con stop bajo ZERO. Evitar breakouts sin confirmación de sweep o bloque.</p>
+      <div class="callout tip"><div>💡</div><div class="callout-body">En SPY: LONG GAMMA + VIX LONG GAMMA raramente produce cierres por debajo del rango del día. Los movimientos bajistas son oportunidades de compra si el ZERO no cede.</div></div>
+    </div>
+  </div>
+
+  <div class="module">
+    <div class="module-head" onclick="this.parentElement.classList.toggle('open')">
+      <div class="mod-dot" style="background:#ef4444"></div>
+      <span class="mod-name">DEALER_SHORT_GAMMA — Entorno de tendencia y breakout</span>
+      <span class="mod-chev">▾</span>
+    </div>
+    <div class="module-body">
+      <p><strong>El dealer tiene gamma negativa.</strong> Cuando el spot baja, el dealer también vende → amplifica la caída. Cuando sube, compra → amplifica el rally. Los movimientos se retroalimentan.</p>
+      <p><strong>Condiciones:</strong> NetGammaFlow negativo + volatilidad alta + spot bajo ZERO o con aceleración positiva alta.</p>
+      <p><strong>Características visuales:</strong> SPOT cruza el ZERO y no lo recupera. FlowVelocity creciente. VolatilityScore &gt; 50. hedge_acceleration positivo.</p>
+      <p><strong>Estrategia:</strong> Momentum trades con tamaño. Breakout plays en la dirección del flujo. Dejar correr las posiciones. Stops amplios porque la volatilidad realizada es mayor.</p>
+      <div class="callout warn"><div>⚠</div><div class="callout-body">En SHORT GAMMA, los stops normales se activan con más frecuencia por la amplificación. Considera usar opciones para definir el riesgo máximo.</div></div>
+    </div>
+  </div>
+
+  <div class="module">
+    <div class="module-head" onclick="this.parentElement.classList.toggle('open')">
+      <div class="mod-dot" style="background:#22d3ee"></div>
+      <span class="mod-name">CALL_SQUEEZE — Rally con combustible forzado</span>
+      <span class="mod-chev">▾</span>
+    </div>
+    <div class="module-body">
+      <p><strong>Compra agresiva de calls en escalera alcista.</strong> El dealer está obligado a comprar delta continuamente para cubrir las calls vendidas → combustible adicional para el rally que no viene del mercado primario sino del hedging forzado.</p>
+      <p><strong>Condiciones:</strong> call_dominance + call_laddering + charm positivo + spot sobre ZERO + SqueezeScore &gt; 70.</p>
+      <p><strong>Características visuales:</strong> MaxCallFlowStrike migrando hacia arriba ciclo a ciclo. BAC en strikes cada vez más altos. INV_BAC acelerando vs INV_SAC estancado.</p>
+      <p><strong>Estrategia:</strong> Entrar en pullbacks del rally, especialmente si MaxCallFlowStrike avanza y el SqueezeScore sigue alto. Target: siguiente wall de OI (wall_above). Salida cuando SqueezeScore empieza a caer o aparece IMBALANCE_REVERSAL BEARISH.</p>
+    </div>
+  </div>
+
+  <div class="module">
+    <div class="module-head" onclick="this.parentElement.classList.toggle('open')">
+      <div class="mod-dot" style="background:#f97316"></div>
+      <span class="mod-name">PUT_PANIC — Cascada bajista con amplificación</span>
+      <span class="mod-chev">▾</span>
+    </div>
+    <div class="module-body">
+      <p><strong>Compra masiva de puts en cascada bajista.</strong> El dealer tiene que vender delta aceleradamente → amplifica la caída. Suele verse en datos macro negativos, eventos de riesgo y flash crashes.</p>
+      <p><strong>Condiciones:</strong> put_dominance + put_laddering + charm negativo + spot bajo ZERO + PanicScore &gt; 70.</p>
+      <p><strong>Características visuales:</strong> MaxPutFlowStrike migrando hacia abajo. PanicScore en máximos de sesión. HedgeEngine: stress &gt; 70 con gamma_instability dominando.</p>
+      <p><strong>Estrategia:</strong> No comprar puts en el pico del pánico (IV alta + precio de opción máximo). Esperar IMBALANCE_REVERSAL o caída del PanicScore &gt; 20 puntos para fade. Si el PanicScore cae de 80 a 50 con spot estabilizado → oportunidad de compra.</p>
+      <div class="callout danger"><div>⚠</div><div class="callout-body">PUT_PANIC puede durar múltiples ciclos en eventos de riesgo sistémico. No intentar coger el cuchillo hasta que hedge_exhaustion_flag = True.</div></div>
+    </div>
+  </div>
+
+  <div class="module">
+    <div class="module-head" onclick="this.parentElement.classList.toggle('open')">
+      <div class="mod-dot" style="background:#6b7280"></div>
+      <span class="mod-name">NEUTRAL — Sin régimen dominante</span>
+      <span class="mod-chev">▾</span>
+    </div>
+    <div class="module-body">
+      <p>Ningún score supera un umbral claro. Ocurre típicamente en la apertura, pre-datos macro, días de baja liquidez o en transiciones entre regímenes.</p>
+      <p><strong>Estrategia:</strong> Reducir tamaño. Esperar que regime_age ≥ 3 y persistent_confidence &gt; 0.4 antes de operar con tamaño. Las señales en NEUTRAL tienen quality_score reducido por el factor persistence_factor = 0.</p>
+    </div>
+  </div>
+</section>
+
+<!-- EJEMPLOS PRÁCTICOS -->
+<section id="regime-examples">
+  <h2>Ejemplos Prácticos de Regímenes</h2>
+
+  <div class="scenario">
+    <div class="scenario-title" style="color:var(--green)">🟢 Setup Alcista de Alta Convicción</div>
+    <div class="csv-grid">
+      <div class="csv-key">Régimen</div><div class="csv-val">DEALER_LONG_GAMMA (age=8) → CALL_SQUEEZE en transición (progress=0.5)</div>
+      <div class="csv-key">VIX</div><div class="csv-val">LONG_GAMMA (vol anclada, VIX dealer no está cubriendo)</div>
+      <div class="csv-key">Señales</div><div class="csv-val">ZERO_CROSS_UP (quality 74) + VIX_REGIME_CONFIRM (71) + CALL_SURGE (68)</div>
+      <div class="csv-key">INST</div><div class="csv-val">Dealer Stress: 22 (bajo). Absorption: BULLISH_ABSORPTION score 58. Pin Prob: 12%.</div>
+      <div class="csv-key">Acción</div><div class="csv-val">Calls 1-2 strikes OTM, vencimiento HOY. Stop si SPOT vuelve bajo ZERO.</div>
+      <div class="csv-key">Target</div><div class="csv-val">wall_above_strike (nearest wall de OI) o hasta que SqueezeScore empiece a caer.</div>
+    </div>
+  </div>
+
+  <div class="scenario">
+    <div class="scenario-title" style="color:var(--orange)">🟠 Setup de Pin EOD (Venta de Premium)</div>
+    <div class="csv-grid">
+      <div class="csv-key">Régimen</div><div class="csv-val">DEALER_LONG_GAMMA, T = 1.5h restantes</div>
+      <div class="csv-key">Señales</div><div class="csv-val">EOD_PIN_LIKELY + CHARM_MOMENTUM_EOD + PINNING_RISK (todos NEUTRAL)</div>
+      <div class="csv-key">Microstructure</div><div class="csv-val">pin_probability = 72%. magnet_strike = 560 (SPY). liquidity_void = 8 (baja).</div>
+      <div class="csv-key">Surface</div><div class="csv-val">charm_cascade activo. atm_iv_trend = FALLING. gamma_compression = 45.</div>
+      <div class="csv-key">Acción</div><div class="csv-val">Iron condor estrecho (±2 strikes) centrado en magnet_strike 560. Vencimiento HOY.</div>
+      <div class="csv-key">Target</div><div class="csv-val">Expiración al precio del pin. Stop si SPOT se aleja &gt;1% del magnet_strike.</div>
+    </div>
+  </div>
+
+  <div class="scenario">
+    <div class="scenario-title" style="color:var(--red)">🔴 Cobertura Institucional + Short GAMMA</div>
+    <div class="csv-grid">
+      <div class="csv-key">Régimen</div><div class="csv-val">NEUTRAL → SHORT_GAMMA (transition_progress = 0.5, pending = SHORT_GAMMA)</div>
+      <div class="csv-key">Señales</div><div class="csv-val">BEARISH_PUT_SWEEP + HEDGE_PANIC (BEARISH, quality 78) + FAILED_SQUEEZE (quality 71)</div>
+      <div class="csv-key">INST</div><div class="csv-val">Dealer Stress: 84. Absorption: BULLISH_ABSORPTION score 73 (alcistas atrapados).</div>
+      <div class="csv-key">Flow</div><div class="csv-val">FlowImbalance: −0.42. MaxPutFlowStrike migrando hacia abajo 3 ciclos consecutivos.</div>
+      <div class="csv-key">Acción</div><div class="csv-val">Puts OTM (2-4 strikes bajo SPOT). Stop si dealer_stress cae bajo 60.</div>
+      <div class="csv-key">Target</div><div class="csv-val">MINGEX (strike de mínimo GEX = máxima amplificación bajista).</div>
+    </div>
+  </div>
+
+  <div class="scenario">
+    <div class="scenario-title" style="color:var(--violet)">🟣 Divergencia Delta v15 — Acumulación Silenciosa</div>
+    <div class="csv-grid">
+      <div class="csv-key">Régimen</div><div class="csv-val">DEALER_LONG_GAMMA, bias BULLISH, SqueezeScore = 48</div>
+      <div class="csv-key">Señal v15</div><div class="csv-val">DELTA_DIVERGENCE_BULL — delta_zscore = −2.1, spot sobre ZERO +0.8%</div>
+      <div class="csv-key">Interpretación</div><div class="csv-val">El delta flow es muy negativo para el entorno alcista: coberturas siendo cerradas = demanda real oculta.</div>
+      <div class="csv-key">Confirmación</div><div class="csv-val">Esperar que FlowImbalanceCycle gire positivo en el ciclo siguiente antes de entrar.</div>
+      <div class="csv-key">Acción</div><div class="csv-val">Calls ATM vencimiento 15-30 min después de la señal. Stop si delta_zscore vuelve a 0.</div>
+    </div>
+  </div>
+
+  <div class="scenario">
+    <div class="scenario-title" style="color:var(--mag)">🟣 Gamma Compression Breakout</div>
+    <div class="csv-grid">
+      <div class="csv-key">Señal</div><div class="csv-val">GAMMA_COMPRESSION_BREAKOUT — gamma_compression=72, vol_exp_prob=0.74, direction=BULLISH</div>
+      <div class="csv-key">Surface</div><div class="csv-val">ATM gamma cayó 38% en 5 ciclos. IV curvature = 0.07. atm_iv_trend = STABLE.</div>
+      <div class="csv-key">Contexto</div><div class="csv-val">FlowImbalance = +0.31. hedge_pressure = 62. Dealer en SHORT GAMMA leve.</div>
+      <div class="csv-key">Lógica</div><div class="csv-val">La superficie de gamma está comprimida como un spring — cualquier catalizador libera la energía. El imbalance positivo indica la dirección probable.</div>
+      <div class="csv-key">Acción</div><div class="csv-val">Straddle o strangle ATM para capturar la expansión independientemente de la dirección. O calls si el imbalance es fuerte.</div>
+    </div>
+  </div>
+</section>
+
+<!-- DASHBOARD OVERVIEW -->
+<section id="dashboard-overview">
+  <h2>Dashboard GEX History v21</h2>
+  <p>Interfaz web autoactualizable cada 60s que integra todos los outputs del engine. Soporta zoom/cursor sincronizado entre gráfico principal y panel FLOW, heatmaps de superficie, señales con scoring y estado institucional en tiempo real.</p>
+  <div class="cols2">
+    <div class="sc"><div class="sc-title">Gráfico Principal</div><div class="sc-desc">Serie temporal de strikes clave + heatmap de superficie opcional. Zoom persistido en localStorage. Sincronización X con panel FLOW.</div></div>
+    <div class="sc"><div class="sc-title">Panel FLOW</div><div class="sc-desc">8 sub-gráficos de flow history + stat bar con valores del último ciclo. X axis sincronizado con el gráfico principal via plotly_relayout.</div></div>
+    <div class="sc"><div class="sc-title">Panel SIGNALS</div><div class="sc-desc">Tarjetas de señales activas con quality_score, probability y contexto. Ordenadas por score descendente. Badge especial para S18 (REGIME_TRADE_CONFIRM).</div></div>
+    <div class="sc"><div class="sc-title">Panel INST</div><div class="sc-desc">Estado en vivo de Hedge Engine, Absorption, Surface Dynamics y Microstructure para el activo activo. v21: +VannaState y +DealerRegime panel.</div></div>
+  </div>
+  <h3>Novedades v21 (sobre v19)</h3>
+  <div class="csv-grid">
+    <div class="csv-key">DealerRegime panel</div><div class="csv-val">Muestra regime actual, confidence, duration y pending_regime del DealerRegimeEngine (v16)</div>
+    <div class="csv-key">TradeScore panel</div><div class="csv-val">LongScore / ShortScore con barras visuales + TradeBias badge. Actualiza cada ciclo.</div>
+    <div class="csv-key">VannaState panel</div><div class="csv-val">vanna_pressure, vanna_flip_probability, dominant_side y atm_vanna_exposure</div>
+    <div class="csv-key">S18 badge</div><div class="csv-val">Las señales REGIME_TRADE_CONFIRM tienen badge naranja diferenciado en el panel SIGNALS</div>
+    <div class="csv-key">Generation counter</div><div class="csv-val">Cada key del heatmap tiene un contador de generación para forzar reload correcto sin race conditions</div>
+    <div class="csv-key">Regime lines</div><div class="csv-val">Botón REG.LINES superpone líneas verticales en cambios de régimen (del flow_history.csv)</div>
+    <div class="csv-key">Tab-switch async</div><div class="csv-val">switchTab() captura el activo en el closure — evita race conditions al cambiar de tab rápidamente</div>
+  </div>
+</section>
+
+<!-- MAIN CHART -->
+<section id="main-chart">
+  <h2>Gráfico Principal — Señales Visualizadas</h2>
+  <table class="sig-table">
+    <tr><th>Señal</th><th>Símbolo</th><th>Color default</th><th>Grupo</th></tr>
+    <tr><td>SPOT</td><td>Línea continua</td><td>Blanco</td><td>SPOT</td></tr>
+    <tr><td>MAXGEX / MINGEX</td><td>Cuadrado abierto grande</td><td>Rojo / Verde</td><td>GEX</td></tr>
+    <tr><td>MAXVEX / MINVEX</td><td>Cuadrado abierto pequeño</td><td>Rojo / Verde</td><td>VEX</td></tr>
+    <tr><td>ZERO</td><td>Círculo abierto</td><td>Amarillo</td><td>ZERO</td></tr>
+    <tr><td>ZERO_OI</td><td>Línea horizontal (line-ew)</td><td>Gris</td><td>ZERO_OI</td></tr>
+    <tr><td>MAXCP / MINCP</td><td>Círculo pequeño abierto</td><td>Rojo / Verde</td><td>CP</td></tr>
+    <tr><td>BAC / SAC</td><td>▲ triángulo up filled/open</td><td>Cyan / Violeta</td><td>FLOW</td></tr>
+    <tr><td>BAP / SAP</td><td>▼ triángulo down filled/open</td><td>Cyan / Violeta</td><td>FLOW</td></tr>
+    <tr><td>LONGGAMMA / SHORTGAMMA</td><td>Cruz (+) filled/open</td><td>Cyan / Violeta</td><td>GAMMA</td></tr>
+    <tr><td>LONGCALLS / SHORTCALLS</td><td>△ triángulo up-open</td><td>Cyan / Violeta</td><td>INV</td></tr>
+    <tr><td>LONGPUTS / SHORTPUTS</td><td>▽ triángulo down-open</td><td>Cyan / Violeta</td><td>INV</td></tr>
+    <tr><td>MAXDEX / MINDEX</td><td>Hexágono abierto</td><td>Rojo / Verde (25% opac.)</td><td>DEX</td></tr>
+  </table>
+
+  <h3>Controles del toolbar de señales</h3>
+  <div class="csv-grid">
+    <div class="csv-key">ALL / NONE</div><div class="csv-val">Mostrar u ocultar todas las señales de una vez</div>
+    <div class="csv-key">HIDE / SHOW</div><div class="csv-val">Ocultar temporalmente todas (preserva tu selección previa). Útil durante análisis)</div>
+    <div class="csv-key">HOVER ○/●</div><div class="csv-val">Activa tooltips al pasar el cursor (off mejora el rendimiento en sesiones largas)</div>
+    <div class="csv-key">↺ Refresh</div><div class="csv-val">Fuerza recarga: vacía caché de heatmap + recarga todos los CSVs</div>
+    <div class="csv-key">Right-click en señal</div><div class="csv-val">Editor de estilo: color, tamaño, opacidad — persistidos en localStorage entre sesiones</div>
+    <div class="csv-key">Clic en señal</div><div class="csv-val">Toggle individual de visibilidad (si HIDE está activo, sale del modo HIDE primero)</div>
+  </div>
+
+  <h3>Zoom y cursor sincronizados (v19)</h3>
+  <p>Al hacer zoom en el gráfico principal, el panel FLOW se ajusta al mismo rango X automáticamente y viceversa. El crosshair también se sincroniza: al pasar el cursor sobre cualquiera de los dos gráficos, aparece una línea vertical punteada en el otro en el mismo timestamp.</p>
+  <p>El zoom se persiste en <code>zoomState[activo]</code> y se restaura al cambiar de tab y volver, o al hacer refresh de datos.</p>
+</section>
+
+<!-- FLOW PANEL -->
+<section id="flow-panel">
+  <h2>Panel FLOW — Historial de Flujo</h2>
+  <p>Lee <code>&lt;activo&gt;_flow_history.csv</code> y permite explorar el flujo en 8 perspectivas. El eje X está sincronizado con el gráfico principal.</p>
+  <table class="sig-table">
+    <tr><th>Sub-gráfico</th><th>Qué muestra</th><th>Qué buscar</th></tr>
+    <tr><td>PREMIUM</td><td>CallBuy/Sell, PutBuy/Sell + Net (línea blanca)</td><td>Divergencias Net vs SPOT, aceleraciones de call_buy</td></tr>
+    <tr><td>IMBALANCE</td><td>Barras verdes/rojas por ciclo ± líneas ±0.3</td><td>Cruces de ±0.3 — activan CALL/PUT_SURGE</td></tr>
+    <tr><td>Δ FLOW</td><td>NetDeltaFlow acumulado de sesión</td><td>Tendencia del sesgo delta — creciente=bull, decreciente=bear</td></tr>
+    <tr><td>γ FLOW</td><td>NetGammaFlow acumulado</td><td>Cruce de cero = cambio de régimen gamma</td></tr>
+    <tr><td>CHARM</td><td>NetCharmFlow acumulado</td><td>Aceleración EOD (últimas 2h) — activa señales S4/S14</td></tr>
+    <tr><td>VELOCITY</td><td>FlowVelocity + FlowAcceleration (eje dual)</td><td>Picos de velocity = momentos de señal CALL/PUT_SURGE</td></tr>
+    <tr><td>SCORES</td><td>Bull/Bear/Volatility/Squeeze/Panic 0-100</td><td>Cruces de scores — Bull&gt;Bear=sesgo long, Squeeze&gt;70=squeeze</td></tr>
+    <tr><td>REGIME</td><td>Código de régimen (barras) + Confidence (línea, eje dual)</td><td>Estabilidad: confidence alto + barras del mismo color</td></tr>
+  </table>
+
+  <h3>Stat Bar</h3>
+  <p>Siempre visible sobre el panel FLOW: CallPrem acumulado, PutPrem acumulado, Imbalance actual, Velocity, ΔFlow, badge de Régimen, Bias, Risk y Confidence %. Los valores se colorean automáticamente (verde/rojo/gris según su valor).</p>
+</section>
+
+<!-- SIGNALS PANEL -->
+<section id="signals-panel">
+  <h2>Panel SIGNALS</h2>
+  <p>Lee <code>signals.json</code> y renderiza tarjetas ordenadas por quality_score descendente. Se actualiza en cada refresh automático o al abrir el panel.</p>
+  <div class="cols2">
+    <div class="sc"><div class="sc-title">Borde izquierdo</div><div class="sc-desc">Verde = BULLISH, Rojo = BEARISH, Amarillo = NEUTRAL</div></div>
+    <div class="sc"><div class="sc-title">Badge quality score</div><div class="sc-desc">Verde ≥70 (alta convicción), Amarillo 50–70, Gris &lt;50</div></div>
+    <div class="sc"><div class="sc-title">Campos mostrados</div><div class="sc-desc">Hasta 5 campos clave + Note (máx 80 chars). ExpectedVol, Invalidation si relevantes.</div></div>
+    <div class="sc"><div class="sc-title">Orden</div><div class="sc-desc">Descendente por quality_score. Las señales más accionables siempre primero.</div></div>
+  </div>
+</section>
+
+<!-- INST PANEL -->
+<section id="inst-panel">
+  <h2>Panel INST — Estado Institucional</h2>
+  <p>Muestra métricas de las 4 capas avanzadas para el activo activo, leídas de <code>dashboard_strikes.json</code>.</p>
+  <div class="cols2">
+    <div class="sc"><div class="sc-title">Hedge Engine</div><div class="sc-desc">Stress (rojo &gt;75, amarillo 50-75, verde &lt;50). Pressure, Velocity, Exhaustion flag. Alto stress = potencial señal S6/S10.</div></div>
+    <div class="sc"><div class="sc-title">Absorption</div><div class="sc-desc">Type (BULLISH/BEARISH/DEALER/TRAPPED). Score con colores. Absorbed $ acumulado. Trapped flag = posiciones atrapadas.</div></div>
+    <div class="sc"><div class="sc-title">Surface</div><div class="sc-desc">Instability score (rojo &gt;70). Vol Expansion Prob %. ATM IV Trend. Charm Cascade (⚡ cuando activo) — activa S12/S14/S17.</div></div>
+    <div class="sc"><div class="sc-title">Microstructure</div><div class="sc-desc">Pin Probability % (rojo &gt;70). Trap Score. Wall Above/Below (strikes con mayor OI en cada lado del spot).</div></div>
+  </div>
+</section>
+
+<!-- HEATMAP -->
+<section id="heatmap">
+  <h2>Surface Heatmap</h2>
+  <p>Superpone la superficie griega histórica del día sobre el gráfico de strikes. Lee CSVs generados por <code>GEX_Surface.py</code>: filas = strikes, columnas = minutos desde el cierre.</p>
+  <h3>Superficies disponibles</h3>
+  <div class="cols2">
+    <div class="sc"><div class="sc-title">GEX</div><div class="sc-desc">Gamma Exposure por strike × tiempo. Zonas verdes = dealer long gamma (soporte). Zonas rojas = dealer short gamma (amplificación).</div></div>
+    <div class="sc"><div class="sc-title">VEX</div><div class="sc-desc">Vanna Exposure. Sensibilidad del delta del dealer a cambios en IV implícita.</div></div>
+    <div class="sc"><div class="sc-title">DEX</div><div class="sc-desc">Delta Exposure acumulado por strike. Muestra dónde está el sesgo direccional neto.</div></div>
+    <div class="sc"><div class="sc-title">CEX (Charm)</div><div class="sc-desc">Exposición al decay temporal. Zonas calientes = máxima presión de dehedging EOD.</div></div>
+    <div class="sc"><div class="sc-title">COLOR</div><div class="sc-desc">Cambio de gamma con el tiempo (∂Γ/∂t). Predice rebalanceos futuros del dealer.</div></div>
+    <div class="sc"><div class="sc-title">SPEED</div><div class="sc-desc">Cambio de gamma con el precio (∂Γ/∂S). Alta speed = respuesta no lineal del dealer al movimiento.</div></div>
+    <div class="sc"><div class="sc-title">VOMMA</div><div class="sc-desc">Sensibilidad de vega a cambios en IV. Clave en entornos de expansión de volatilidad.</div></div>
+    <div class="sc"><div class="sc-title">ZOMMA</div><div class="sc-desc">Cambio de gamma con IV (∂Γ/∂σ). Muestra dónde el dealer es más vulnerable a moves de vol.</div></div>
+  </div>
+
+  <h3>Controles del heatmap</h3>
+  <div class="csv-grid">
+    <div class="csv-key">HM ON/OFF</div><div class="csv-val">Activar/desactivar capa de heatmap sobre el gráfico</div>
+    <div class="csv-key">INV mode</div><div class="csv-val">Alterna entre *_heatmap_* (flujo real) y *_HEATMAP_INV_* (inventario acumulado)</div>
+    <div class="csv-key">OPAC slider</div><div class="csv-val">Transparencia 5–100%. Usar 20–30% para no tapar las señales del gráfico</div>
+    <div class="csv-key">R/G R/B PLASMA</div><div class="csv-val">Paleta de colores. R/G (default), R/B, o Plasma (para daltónicos)</div>
+    <div class="csv-key">CLOSE time</div><div class="csv-val">Hora LOCAL de cierre para anclar el eje X del heatmap correctamente</div>
+    <div class="csv-key">NEXT DAY</div><div class="csv-val">Desplaza el cierre +24h — útil para futuros ES/NQ con sesión nocturna</div>
+    <div class="csv-key">Líneas de sesión</div><div class="csv-val">Línea verde punteada = apertura estimada. Línea roja = cierre definido. Calculadas desde los datos del CSV.</div>
+  </div>
+
+  <div class="callout warn"><div>⚠</div><div class="callout-body"><strong>Alineación temporal:</strong> El heatmap usa hora LOCAL del browser. Si el CSV fue generado en otra zona horaria ajusta CLOSE time hasta que las líneas verde (apertura) y roja (cierre) coincidan con el inicio y fin de la sesión en el gráfico principal.</div></div>
+</section>
+
+<!-- CSV FILES -->
+<section id="csv-files">
+  <h2>Archivos CSV / JSON Generados</h2>
+  <h3>Por activo (reemplaza &lt;activo&gt; por spy, qqq, spx, etc.)</h3>
+  <div class="callout info"><div>ℹ</div><div class="callout-body"><strong>v16:</strong> <code>dashboard_strikes.json</code> incluye los nuevos campos: <code>charm_state</code>, <code>vanna_state</code> (TrueVannaExposureEngine), <code>dealer_regime</code> (DealerRegimeEngine), <code>trade_score</code> (TradeScoringEngine) para todos los activos.</div></div>
+  <table class="sig-table">
+    <tr><th>Archivo</th><th>Contenido</th><th>Modo</th></tr>
+    <tr><td><code>&lt;activo&gt;_gex_history.csv</code></td><td>MAXGEX MINGEX MAXVEX MINVEX MAXDEX MINDEX ZERO ZERO_OI BAC SAC BAP SAP MAXCP MINCP LONGGAMMA SHORTGAMMA LONGCALLS SHORTCALLS LONGPUTS SHORTPUTS INV_BAC INV_SAC INV_BAP INV_SAP NET_CALL/PUT_FLOW SPOT</td><td>Append</td></tr>
+    <tr><td><code>&lt;activo&gt;_flow_history.csv</code></td><td>Premium Buy/Sell calls/puts, Delta/Gamma/Charm Flow, Velocity, Acceleration, Imbalance, FlowImbalance5m, CharmVelocity, CharmAccel (v15), EMA scores, Regime, Bias, Risk, Confidence, Scores</td><td>Append</td></tr>
+    <tr><td><code>&lt;activo&gt;_flow_profile.json</code></td><td>Premium, gamma_flow, charm_flow, delta_flow, net_call/put_prem por strike</td><td>Sobreescribe</td></tr>
+    <tr><td><code>&lt;activo&gt;_gex_data.csv</code></td><td>strike, vex o gex exposure (según EXPORT_MODE), para heatmap externo</td><td>Sobreescribe</td></tr>
+    <tr><td><code>&lt;activo&gt;_inv_profile.csv</code></td><td>inv_gex, inv_vex_call, inv_vex_put, inv_net, long/short calls/puts por strike</td><td>Sobreescribe</td></tr>
+    <tr><td><code>&lt;activo&gt;_block_alerts.csv</code></td><td>Bloques institucionales: Type, Strike, Contracts, Premium, Price, IV, Delta, Gamma, DealerState, SPOT</td><td>Append</td></tr>
+    <tr><td><code>&lt;activo&gt;_sweep_alerts.csv</code></td><td>Sweeps: Type, Direction, NumStrikes, TotalContracts, TotalPremium, IsLadder, SPOT</td><td>Append</td></tr>
+    <tr><td><code>&lt;activo&gt;_hedge_state.csv</code></td><td>hedge_pressure_score, hedge_velocity, hedge_exhaustion_flag, dealer_stress_score, stress_breakdown (5 componentes)</td><td>Append</td></tr>
+    <tr><td><code>&lt;activo&gt;_absorption.csv</code></td><td>absorption_score, exhaustion_score, failed_squeeze_flag, bullish/bearish/dealer_absorption, absorbed_premium</td><td>Append</td></tr>
+    <tr><td><code>&lt;activo&gt;_microstructure.csv</code></td><td>pin_probability, liquidity_void_score, dealer_trap_score, nearest_wall_strike, magnet_strike, wall_above/below</td><td>Append</td></tr>
+    <tr><td><code>&lt;activo&gt;_dashboard.csv</code></td><td>OI, VOL, GEX, VEX, DEX, INV_GEX, INV_VEX_CALL/PUT por strike</td><td>Sobreescribe</td></tr>
+  </table>
+
+  <h3>Archivos globales</h3>
+  <table class="sig-table">
+    <tr><th>Archivo</th><th>Contenido</th></tr>
+    <tr><td><code>dashboard_strikes.json</code></td><td>Snapshot completo de todos los activos: spot, flow metrics, state, hedge, absorb, surface, micro, signals activas, data por strike</td></tr>
+    <tr><td><code>signals.json</code></td><td>Señales activas del ciclo con quality_score completo, quality_breakdown, todos los campos de contexto</td></tr>
+    <tr><td><code>alerts.json</code></td><td>Bloques institucionales del ciclo actual (todos los activos)</td></tr>
+    <tr><td><code>signals_performance.csv</code></td><td>Backtest: outcome 5m/15m/30m/1h + Win_* + MAE + MFE + contexto institucional en momento de disparo</td></tr>
+    <tr><td><code style="color:var(--yellow)">signal_performance_summary.csv</code></td><td><strong>v16</strong> — Estadísticas por tipo de señal: win_rate, expectancy, MAE, MFE, sharpe_like, n. Escrito al cierre del día.</td></tr>
+  </table>
+</section>
+
+<!-- WORKFLOW -->
+<section id="workflow">
+  <h2>Proceso de Lectura Recomendado</h2>
+  <p>Orden óptimo para leer el dashboard en cada ciclo de 60 segundos:</p>
+  <div class="steps">
+    <div class="step"><div class="step-num">1</div><div><div class="step-title">Régimen y contexto macro (FLOW → sub-gráfico REGIME)</div><div class="step-desc">¿Cuál es el persistent_regime? ¿Cuántos ciclos lleva (regime_age)? Si age &lt; 3 o transition_progress &gt; 0.5, el régimen está cambiando — reducir tamaño. Revisar la stat bar: Bias (BULL/BEAR/NEUTRAL), Risk (HIGH/MEDIUM/LOW), Confidence %.</div></div></div>
+    <div class="step"><div class="step-num">2</div><div><div class="step-title">Lectura del ZERO y estructura de OI (gráfico principal)</div><div class="step-desc">¿Está SPOT (línea blanca) sobre o bajo ZERO (puntos amarillos)? ¿Cuánto margen hay? ¿Está LONGGAMMA (cyan+) siendo testado? ¿Los muros wall_above/wall_below del panel INST coinciden con MAXGEX/MINGEX visibles?</div></div></div>
+    <div class="step"><div class="step-num">3</div><div><div class="step-title">Estado institucional (Panel INST)</div><div class="step-desc">¿Dealer Stress &gt; 50? (potencial señal S6/S10). ¿Absorption activa con score &gt; 60? (evaluar S8/S9). ¿Charm Cascade = ⚡? (buscar S4/S14/S17 si T &lt; 2h). ¿Pin Probability &gt; 50%? (evaluar S17 EOD).</div></div></div>
+    <div class="step"><div class="step-num">4</div><div><div class="step-title">Señales activas (Panel SIGNALS)</div><div class="step-desc">Solo considerar quality_score ≥ 60. Verificar que la Direction coincida con el régimen y el bias del paso 1. Leer el campo Invalidation — si la condición de invalidación ya está cerca, no entrar.</div></div></div>
+    <div class="step"><div class="step-num">5</div><div><div class="step-title">Confirmación de flow (FLOW → PREMIUM + IMBALANCE)</div><div class="step-desc">¿CallPremiumBuy o PutPremiumBuy está acelerando en la dirección de la señal? ¿El imbalance del último ciclo cruzó ±0.3? ¿FlowVelocity está en los máximos de la sesión (percentil 80+)?</div></div></div>
+    <div class="step"><div class="step-num">6</div><div><div class="step-title">Entrada y gestión</div><div class="step-desc">Entrar cerca del strike BAC/BAP más reciente. Stop: cruce del ZERO en dirección contraria, o sweep en dirección opuesta &gt; 3 strikes, o cuando la señal activadora quede invalidada. Target: wall_above (bull) o wall_below (bear) del Microstructure Engine.</div></div></div>
+  </div>
+</section>
+
+<!-- SCENARIOS -->
+<section id="scenarios">
+  <h2>Escenarios de Trading Intradiario</h2>
+
+  <h3>A. Breakout de LONG GAMMA a SHORT GAMMA</h3>
+  <p>El mercado está en rango (LONG GAMMA, age=12). Dato macro negativo. El SPOT baja 0.8% y cruza el ZERO → <code>ZERO_CROSS_DOWN</code> se dispara (quality=71). En los 2 ciclos siguientes el Regime Persistence Engine confirma SHORT_GAMMA (age=2, transition_progress=1.0). PanicScore sube de 30 a 65. dealer_stress sube a 58.</p>
+  <p><strong>Acción:</strong> Puts OTM (2-3 strikes bajo el ZERO). Target: MINGEX. Stop: si el precio recupera el ZERO en cierre de ciclo.</p>
+
+  <h3>B. Squeeze Alcista — Entrada y Salida con IMBALANCE_REVERSAL</h3>
+  <p>CALL_SQUEEZE activo (age=6), SqueezeScore=78, MaxCallFlowStrike migrando arriba ciclo a ciclo. El precio se acerca al MAXGEX. En FLOW → IMBALANCE aparece una barra roja (FlowImbalanceCycle = −0.22, FlowImbalance5m = −0.18 cuando la sesión tiene imbalance = +0.41). El engine dispara <code>IMBALANCE_REVERSAL BEARISH</code> (quality=61).</p>
+  <p><strong>Acción:</strong> Cerrar la posición alcista. Evaluar pequeño fade (venta de calls OTM) si el SqueezeScore cae debajo de 60 en el siguiente ciclo.</p>
+
+  <h3>C. EOD Pin con Triple Confirmación</h3>
+  <p>15:15 (45 min al cierre). Panel INST: Pin Probability = 74%, Charm Cascade = ⚡, FlowImbalance = +0.08. El engine dispara simultáneamente <code>PINNING_RISK</code> (quality=77) y <code>CHARM_MOMENTUM_EOD</code> (quality=65). magnet_strike = 560 (SPY).</p>
+  <p><strong>Acción:</strong> Iron condor 559/560/561, vencimiento HOY. Máximo beneficio en el cierre. Stop si el SPOT se aleja más de 1.5 strikes del magnet antes de las 15:45.</p>
+
+  <h3>D. Hedge Panic + Gamma Compression simultáneos</h3>
+  <p>Datos de empleo peores de lo esperado. En 2 ciclos: dealer_stress sube de 35 a 87. gamma_compression_score sube a 74, vol_expansion_prob = 0.79. El engine dispara <code>HEDGE_PANIC BEARISH</code> (quality=82) y <code>GAMMA_COMPRESSION_BREAKOUT BEARISH</code> (quality=75) en el mismo ciclo. BEARISH_PUT_SWEEP detectado (4 strikes, $3.2M premium).</p>
+  <p><strong>Acción:</strong> Puts OTM agresivas (3-5 strikes, vencimiento 30-60 min). El sweep confirma la dirección. Stop si dealer_stress cae bajo 60 o si el SPOT recupera el ZERO.</p>
+
+  <h3>E. Divergencia Delta v15 — Entrada táctica</h3>
+  <p>10:45 AM. LONG GAMMA (age=15), bias BULLISH. delta_zscore = −2.3 (extremo, muy negativo para el contexto alcista). FlowImbalance = +0.28. El engine dispara <code>DELTA_DIVERGENCE_BULL</code> (quality=68). Panel INST: Absorption = BULLISH_ABSORPTION score=61 (hay acumulación silenciosa).</p>
+  <p><strong>Acción:</strong> Calls ATM con vencimiento 30-60 min. Esperar que FlowImbalanceCycle gire positivo en el siguiente ciclo como confirmación adicional. Stop si delta_zscore vuelve a −0.5 o el SPOT cede el ZERO.</p>
+
+  <div class="scenario">
+    <div class="scenario-title" style="color:var(--orange)">🟠 REGIME_TRADE_CONFIRM — Entrada Estructural v16</div>
+    <div class="csv-grid">
+      <div class="csv-key">DealerRegime</div><div class="csv-val">SHORT_GAMMA_SQUEEZE, confidence=71, duration=4 ciclos</div>
+      <div class="csv-key">TradeScore</div><div class="csv-val">LongScore=72, ShortScore=31, TradeBias=LONG, TradeConfidence=82</div>
+      <div class="csv-key">Señal v16</div><div class="csv-val">REGIME_TRADE_CONFIRM BULLISH — quality 79 (dealer_regime_conf=12 + trade_score_align=8 completos)</div>
+      <div class="csv-key">Contexto</div><div class="csv-val">FlowImbalance=+0.41. VannaState: vanna_pressure=55, dominant_side=CALLS. CharmState: eod_factor=1.2.</div>
+      <div class="csv-key">Acción</div><div class="csv-val">Calls ATM+1, vencimiento 45-90 min. El régimen estructural supera el ruido de señales individuales contradictorias.</div>
+      <div class="csv-key">Stop</div><div class="csv-val">regime_confidence &lt; 40 o score_gap &lt; 8. Si DealerRegime pasa a SHORT_GAMMA_PANIC → salida inmediata.</div>
+    </div>
+  </div>
+
+  <div class="scenario">
+    <div class="scenario-title" style="color:var(--mag)">🟣 VANNA_DOMINATED — Sesión con expansión de IV</div>
+    <div class="csv-grid">
+      <div class="csv-key">DealerRegime v16</div><div class="csv-val">VANNA_DOMINATED, confidence=64, duration=3 ciclos</div>
+      <div class="csv-key">VannaState</div><div class="csv-val">vanna_pressure=78, vanna_flip_probability=0.35, dominant_side=PUTS</div>
+      <div class="csv-key">TradeScore</div><div class="csv-val">LongScore=38, ShortScore=62, TradeBias=SHORT (IV expansion + put vanna dominante)</div>
+      <div class="csv-key">Contexto</div><div class="csv-val">FOMC en 30 min. atm_iv_trend=RISING. surface_instability=72. FlowImbalance=−0.28.</div>
+      <div class="csv-key">Acción</div><div class="csv-val">Puts OTM defensivas o strangle si vanna_flip_probability baja de 0.25 (señal de dirección clara). No entrar con flip_prob &gt;0.4.</div>
+    </div>
+  </div>
+
+  <div class="callout danger"><div>⚠</div><div class="callout-body"><strong>Disclaimer importante:</strong> Este sistema es una herramienta de análisis cuantitativo, no un sistema de trading automatizado. Las señales son probabilísticas y retrospectivas. Siempre usa gestión de riesgo definida y nunca operes sin un stop claro. Los mercados pueden divergir de cualquier modelo en eventos de riesgo extremo.</div></div>
+</section>
+
+</main>
+</div>
+
+<script>
+const links = document.querySelectorAll('.sidebar-link');
+const sections = [...document.querySelectorAll('section[id]')];
+
+function updateActive() {
+  let cur = '';
+  for (const s of sections) {
+    if (s.getBoundingClientRect().top <= 90) cur = s.id;
+  }
+  links.forEach(l => {
+    l.classList.toggle('active', l.getAttribute('href') === '#' + cur);
+  });
+}
+
+window.addEventListener('scroll', updateActive, { passive: true });
+updateActive();
+
+document.querySelectorAll('.module-head').forEach(h => {
+  h.addEventListener('click', () => h.parentElement.classList.toggle('open'));
+});
+</script>
+</body>
+</html>
