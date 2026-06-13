@@ -2780,6 +2780,14 @@ function buildTabs(activos) {
     b.onclick = () => switchTab(a);
     nav.appendChild(b);
   });
+  // ── BIAS tab fijo al final ──────────────────────────────────────────────
+  const biasBtn = document.createElement('button');
+  biasBtn.className = 'tab' + (currentTab === 'BIAS' ? ' active' : '');
+  biasBtn.id        = 'tab-btn-BIAS';
+  biasBtn.textContent = '● BIAS';
+  biasBtn.style.cssText = 'color:var(--accent);border-color:var(--accent);';
+  biasBtn.onclick = () => switchTab('BIAS');
+  nav.appendChild(biasBtn);
 }
 
 function buildPanels(activos) {
@@ -2795,6 +2803,15 @@ function buildPanels(activos) {
     div.innerHTML = `<div class="chart-wrapper"><div id="chart-${a}" class="plotly-chart"></div><svg id="profile-svg-${a}" class="profile-svg-layer"></svg></div>`;
     c.appendChild(div);
   });
+  // ── BIAS panel (estático, sin Plotly) ─────────────────────────────────────
+  if (!document.getElementById('panel-BIAS')) {
+    const bd = document.createElement('div');
+    bd.className = 'panel';
+    bd.id = 'panel-BIAS';
+    bd.style.cssText = 'overflow-y:auto;padding:10px 14px;';
+    bd.innerHTML = '<div id="bias-root"></div>';
+    c.appendChild(bd);
+  }
   requestAnimationFrame(fixChartHeights);
 }
 
@@ -4482,6 +4499,14 @@ function _needsDualAxis(chartName) {
 
 // ── CANONICAL TAB SWITCH — single function, no double-definition issues ─
 async function switchTab(a) {
+  // ── BIAS: activar panel y cargar datos, sin tocar Plotly ──────────────────
+  if (a === 'BIAS') {
+    currentTab = 'BIAS';
+    activateTabDOM('BIAS');
+    loadBiasPanel();
+    return;
+  }
+
   const tabChanged = (a !== currentTab);
 
   // ── 1. Update DOM tab state ──────────────────────────────────────
@@ -4775,5 +4800,416 @@ restoreProfileUI();
 
 loadAll();
 </script>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     MARKET BIAS PANEL  v18  —  SessionPlaybook + NarrativeEngine
+     Consumes bias.json (CSV_FOLDER) and renders the BIAS tab
+ ══════════════════════════════════════════════════════════════════════════ -->
+<style>
+#bias-root { font-family:var(--mono); font-size:11px; color:var(--text); }
+.bias-grid {
+  display:grid;
+  grid-template-columns:260px 1fr;
+  gap:10px;
+  max-width:1440px;
+}
+.bias-main-card, .bias-playbook-card, .bias-narrative-card, .bias-assets-card {
+  background:var(--bg2); border:1px solid var(--border2);
+  border-radius:3px; padding:14px;
+}
+.bias-main-card { grid-column:1; grid-row:1/4; display:flex; flex-direction:column; gap:6px; }
+.bias-playbook-card  { grid-column:2; grid-row:1; }
+.bias-narrative-card { grid-column:2; grid-row:2; }
+.bias-assets-card    { grid-column:1/3; grid-row:4; }
+
+.bias-label-big { font-size:28px; font-weight:700; letter-spacing:.06em; text-align:center; }
+.bias-conf-line { font-size:10px; color:var(--text2); text-align:center; margin-top:-4px; }
+.bias-regime-pill {
+  font-size:9px; font-weight:600; letter-spacing:.08em; text-align:center;
+  padding:4px 10px; border:1px solid var(--border2); border-radius:2px; color:var(--accent);
+}
+.b-sec { font-size:8px; font-weight:600; letter-spacing:.14em; color:var(--text3);
+         margin-top:6px; padding-bottom:2px; border-bottom:1px solid var(--border); }
+.b-kv { display:flex; justify-content:space-between; margin-bottom:2px; }
+.b-kv .k { font-size:9px; color:var(--text3); }
+.b-kv .v { font-size:9px; font-weight:600; }
+.b-kv .v.bull { color:var(--green); }
+.b-kv .v.bear { color:var(--red);   }
+.b-kv .v.warn { color:var(--orange);}
+.b-kv .v.info { color:var(--accent);}
+.b-kv .v.neut { color:var(--text2); }
+
+.dim-row-b { margin-bottom:6px; }
+.dim-row-b .dh { display:flex; justify-content:space-between; margin-bottom:2px; }
+.dim-row-b .dh .dn { font-size:8px; color:var(--text3); font-weight:600; letter-spacing:.1em; }
+.dim-row-b .dh .dl { font-size:9px; font-weight:600; }
+.dim-row-b .dh .ds { font-size:9px; color:var(--text2); }
+.dim-bar { height:4px; background:var(--bg4); border-radius:2px; overflow:hidden; }
+.dim-bar-fill { height:100%; border-radius:2px; transition:width .5s ease; }
+
+/* Playbook */
+.pb-title { font-size:10px; font-weight:700; letter-spacing:.12em; color:var(--accent); margin-bottom:10px; }
+.pb-grid {
+  display:grid; grid-template-columns:1fr 1fr 1fr;
+  gap:6px 14px; margin-bottom:10px;
+}
+.pb-cell .pk { font-size:8px; color:var(--text3); letter-spacing:.08em; margin-bottom:1px; }
+.pb-cell .pv { font-size:12px; font-weight:700; }
+.pb-levels {
+  display:grid; grid-template-columns:repeat(5,1fr);
+  gap:4px; margin-bottom:8px;
+}
+.pb-level {
+  background:var(--bg3); border:1px solid var(--border);
+  border-radius:2px; padding:5px 7px; text-align:center;
+}
+.pb-level .pl { font-size:8px; color:var(--text3); }
+.pb-level .pv { font-size:12px; font-weight:700; }
+.pb-level .ps { font-size:8px; color:var(--text3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pb-invalidation { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+.pb-behavior { font-size:9.5px; color:var(--text2); line-height:1.55;
+  border-left:2px solid var(--accent); padding-left:8px; margin-bottom:5px; }
+.pb-warning-line { font-size:9px; color:var(--orange); line-height:1.4;
+  border-left:2px solid var(--orange); padding-left:8px; }
+
+/* Narrative */
+.nar-full { font-size:10.5px; color:var(--text); line-height:1.65; margin-bottom:10px; }
+.nar-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.nar-section .ns-t { font-size:8px; font-weight:700; letter-spacing:.12em;
+  color:var(--accent); margin-bottom:3px; text-transform:uppercase; }
+.nar-section .ns-b { font-size:9px; color:var(--text2); line-height:1.55; }
+
+/* Per-asset */
+.assets-row { display:flex; gap:8px; flex-wrap:wrap; }
+.asset-mini {
+  background:var(--bg3); border:1px solid var(--border);
+  border-radius:2px; padding:7px 10px; min-width:130px;
+}
+.asset-mini .am-n { font-size:11px; font-weight:700; letter-spacing:.06em; margin-bottom:2px; }
+.asset-mini .am-b { font-size:13px; font-weight:700; }
+.asset-mini .am-r { font-size:8px; color:var(--text3); margin-bottom:3px; }
+.s-bar-m { height:3px; background:var(--bg4); border-radius:1px; overflow:hidden; margin-bottom:1px; }
+.s-fill-m { height:100%; border-radius:1px; transition:width .4s; }
+
+/* Warnings row */
+.warn-row { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:8px; }
+.w-pill { font-size:9px; padding:3px 8px; border-radius:2px; border:1px solid; white-space:nowrap; }
+.w-pill.high { border-color:var(--red);    color:var(--red);    background:#ef444410; }
+.w-pill.med  { border-color:var(--yellow); color:var(--yellow); background:#eab30810; }
+.w-pill.info { border-color:var(--cyan);   color:var(--cyan);   background:#06b6d410; }
+
+/* Label color helpers */
+.c-bull { color:var(--green); }
+.c-bear { color:var(--red);   }
+.c-neut { color:var(--text2); }
+.c-conf { color:var(--yellow);}
+.c-risk { color:var(--orange);}
+.c-acc  { color:var(--accent);}
+.c-err  { color:var(--red); font-size:10px; }
+</style>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════
+//  MARKET BIAS PANEL — JavaScript
+// ═══════════════════════════════════════════════════════════════════════
+const BIAS_REFRESH_MS = 60_000;
+let   _biasLoading    = false;
+
+// ── Helpers ─────────────────────────────────────────────────────────────────
+function _lc(lbl) {              // label → CSS class
+  if (!lbl) return 'c-neut';
+  const u = lbl.toUpperCase();
+  if (u.includes('BULL'))    return 'c-bull';
+  if (u.includes('BEAR'))    return 'c-bear';
+  if (u.includes('CONFLICT'))return 'c-conf';
+  if (u.includes('RISK'))    return 'c-risk';
+  return 'c-neut';
+}
+
+function _dimColor(name, score) {
+  if (name === 'risk') {
+    if (score > 75) return 'var(--red)';
+    if (score > 55) return 'var(--orange)';
+    if (score > 35) return 'var(--yellow)';
+    return 'var(--green)';
+  }
+  if (name === 'timing') {
+    if (score > 65) return 'var(--green)';
+    if (score > 50) return '#86efac';
+    if (score < 30) return 'var(--red)';
+    if (score < 45) return 'var(--yellow)';
+    return 'var(--text2)';
+  }
+  if (score > 68) return 'var(--green)';
+  if (score > 58) return '#86efac';
+  if (score < 32) return 'var(--red)';
+  if (score < 42) return '#fca5a5';
+  return 'var(--text2)';
+}
+
+function _warnClass(txt) {
+  const t = txt.toUpperCase();
+  if (t.includes('EXTREME')||t.includes('PANIC')||t.includes('BEAR_ALIGN')) return 'high';
+  if (t.includes('VIX')||t.includes('SPLIT')||t.includes('TIMING')||t.includes('HIGH')) return 'med';
+  return 'info';
+}
+
+function _srcLabel(s) {
+  if (!s) return '';
+  return s.replace(/_/g,' ')
+          .replace('MAXGEX','MaxGEX').replace('MINGEX','MinGEX')
+          .replace('ZERO VOL','ZERO').replace('CHARM MAGNET UP','Charm↑')
+          .replace('CHARM MAGNET DOWN','Charm↓').replace('VANNA ACCEL UP','Vanna↑')
+          .replace('VANNA ACCEL DOWN','Vanna↓').replace('SHORT CALL WALL','S.Call Wall')
+          .replace('SHORT PUT WALL','S.Put Wall').replace('LONG CALL WALL','L.Call Wall')
+          .replace('LONG PUT WALL','L.Put Wall').replace('WALL ABOVE','Wall↑')
+          .replace('WALL BELOW','Wall↓').replace('SYNTHETIC','~synth');
+}
+
+function _timingScore(lbl) {
+  return lbl==='FAVORABLE'?78:lbl==='NEUTRAL'?55:lbl==='CAUTIOUS'?38:22;
+}
+
+// ── Main load ────────────────────────────────────────────────────────────────
+async function loadBiasPanel() {
+  if (_biasLoading) return;
+  _biasLoading = true;
+  const root = document.getElementById('bias-root');
+  if (!root) { _biasLoading=false; return; }
+
+  try {
+    const r = await fetch(CSV_FOLDER + 'bias.json?_=' + Date.now());
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const bv = await r.json();
+    renderBiasPanel(bv, root);
+  } catch(e) {
+    root.innerHTML = `<div style="padding:30px;color:var(--red);font-size:11px;">
+      <b>bias.json no disponible</b> — ${e.message}<br>
+      <span style="color:var(--text3);font-size:9px;">
+        Verifica que el engine esté corriendo y bias.json esté en la misma carpeta que el HTML.
+      </span>
+    </div>`;
+  } finally {
+    _biasLoading = false;
+  }
+}
+
+// ── Render ───────────────────────────────────────────────────────────────────
+function renderBiasPanel(bv, root) {
+  const pb  = bv.SessionPlaybook || {};
+  const nar = bv.Narrative       || {};
+  const tgt = bv.Targets         || {};
+  const sup = bv.Supports        || {};
+  const lbl = bv.MarketBias || 'NEUTRAL';
+  const lc  = _lc(lbl);
+
+  const DIMS = [
+    {id:'directional', name:'DIRECTIONAL', score: bv.DirectionalScore||50},
+    {id:'regime',      name:'REGIME',      score: bv.RegimeScore||50},
+    {id:'momentum',    name:'MOMENTUM',    score: bv.MomentumScore||50},
+    {id:'risk',        name:'RISK',        score: bv.RiskScore||50},
+    {id:'timing',      name:'TIMING',      score: _timingScore(bv.TimingScore), label: bv.TimingScore||''},
+  ];
+
+  // ── Header row (warnings) ─────────────────────────────────────────────────
+  const warnHtml = (bv.Warnings||[]).length
+    ? `<div class="warn-row">${(bv.Warnings||[]).map(w=>
+        `<span class="w-pill ${_warnClass(w)}">${w}</span>`).join('')}</div>`
+    : '';
+
+  // ── Main card ─────────────────────────────────────────────────────────────
+  const setupKvs = [
+    ['GammaZeroState',  (bv.GammaZeroState||'—').replace(/_/g,' '),
+                        bv.GammaZeroState?.includes('BULL')?'bull':'bear'],
+    ['Positioning',     (bv.Positioning||'—').replace(/_/g,' '), 'info'],
+    ['GammaAlign',      (bv.GammaAlignmentScore||0).toFixed(0)+'/100', ''],
+    ['Confluence',      (bv.ConfluenceScore||0).toFixed(1)+'/10', ''],
+    ['ExpectedMove',    bv.ExpectedMove||'—', ''],
+    ['Strategy',        pb.Execution||bv.Strategy||'—', 'info'],
+    ['Risk',            bv.Risk||'—',
+                        bv.Risk==='LOW'?'bull':bv.Risk==='EXTREME'||bv.Risk==='HIGH'?'bear':'warn'],
+    ['SqueezeImm.',     bv.SqueezeImminent?'YES':'no',
+                        bv.SqueezeImminent?'warn':'neut'],
+    ['PanicImm.',       bv.PanicImminent?'YES':'no',
+                        bv.PanicImminent?'bear':'neut'],
+  ];
+
+  const multiKvs = [
+    ['CORE (SPX/ES/SPY)', bv.CoreMarketBias||'—'],
+    ['TECH (NDX/NQ/QQQ)', bv.TechMarketBias||'—'],
+    ['GLOBAL',            bv.GlobalMarketBias||'—'],
+    ['VIX',               bv.VIXConfirmation||'—'],
+    ['CONFLICT',          bv.Conflict?'YES':'NO'],
+  ];
+
+  const mainCard = `
+  <div class="bias-main-card">
+    <div class="b-sec">OVERALL BIAS</div>
+    <div class="bias-label-big ${lc}">${lbl}</div>
+    <div class="bias-conf-line">conf ${(bv.Confidence||0).toFixed(0)}%
+      &nbsp;·&nbsp; consensus ${((bv.Consensus||0)*100).toFixed(0)}%</div>
+    <div class="bias-regime-pill">${bv.DealerRegime||'—'}</div>
+
+    <div class="b-sec">SETUP</div>
+    ${setupKvs.map(([k,v,c])=>`
+      <div class="b-kv">
+        <span class="k">${k}</span>
+        <span class="v ${c||''}">${v}</span>
+      </div>`).join('')}
+
+    <div class="b-sec" style="margin-top:8px;">5 DIMENSIONS</div>
+    ${DIMS.map(d=>{
+      const color = _dimColor(d.id, d.score||50);
+      return `<div class="dim-row-b">
+        <div class="dh">
+          <span class="dn">${d.name}</span>
+          <span class="dl" style="color:${color}">${d.label||''}</span>
+          <span class="ds">${(d.score||0).toFixed(0)}</span>
+        </div>
+        <div class="dim-bar">
+          <div class="dim-bar-fill" style="width:${Math.min(100,d.score||0)}%;background:${color}"></div>
+        </div>
+      </div>`;
+    }).join('')}
+
+    <div class="b-sec" style="margin-top:8px;">MULTI-ASSET</div>
+    ${multiKvs.map(([k,v])=>`
+      <div class="b-kv">
+        <span class="k">${k}</span>
+        <span class="v ${_lc(v)}">${v}</span>
+      </div>`).join('')}
+
+    <div style="margin-top:auto;padding-top:8px;font-size:8px;color:var(--text3);">
+      updated ${bv.Timestamp||'—'}
+      <button onclick="loadBiasPanel()" style="
+        margin-left:8px;padding:1px 7px;font-family:var(--mono);font-size:8px;
+        background:transparent;border:1px solid var(--border2);
+        color:var(--text2);border-radius:2px;cursor:pointer;">↺</button>
+    </div>
+  </div>`;
+
+  // ── Playbook card ─────────────────────────────────────────────────────────
+  const pbTopCells = [
+    ['BIAS',        pb.Bias||'—',                          _lc(pb.Bias)],
+    ['EXECUTION',   pb.Execution||'—',                     'c-acc'],
+    ['STRUCTURE',   (pb.MarketStructure||'—').replace(/_/g,' '), ''],
+    ['CONFIDENCE',  pb.Confidence||'—',                    pb.Confidence==='HIGH'?'c-bull':pb.Confidence==='LOW'?'c-bear':''],
+    ['ENTRY ZONE',  pb.BestEntryZone||'—',                 'c-acc'],
+    ['R:R',         pb.RiskReward||'—',                    ''],
+  ];
+
+  const levelsHtml = ['T1','T2','T3'].map(k=>`
+    <div class="pb-level">
+      <div class="pl">${k}</div>
+      <div class="pv c-bull">${tgt[k]||'—'}</div>
+      <div class="ps" title="${tgt[k+'_source']||''}">${_srcLabel(tgt[k+'_source'])}</div>
+    </div>`).join('') + ['S1','S2'].map(k=>`
+    <div class="pb-level">
+      <div class="pl">${k}</div>
+      <div class="pv c-bear">${sup[k]||'—'}</div>
+      <div class="ps" title="${sup[k+'_source']||''}">${_srcLabel(sup[k+'_source'])}</div>
+    </div>`).join('');
+
+  const playbookCard = `
+  <div class="bias-playbook-card">
+    <div class="pb-title">📋 SESSION PLAYBOOK</div>
+    <div class="pb-grid">
+      ${pbTopCells.map(([k,v,c])=>`
+        <div class="pb-cell">
+          <div class="pk">${k}</div>
+          <div class="pv ${c||''}">${v}</div>
+        </div>`).join('')}
+    </div>
+    <div style="font-size:8px;color:var(--text3);letter-spacing:.1em;margin-bottom:4px;">KEY LEVELS</div>
+    <div class="pb-levels">${levelsHtml}</div>
+    <div class="pb-invalidation">
+      <span style="font-size:9px;color:var(--text3);">INVALIDATION</span>
+      <span style="font-size:14px;font-weight:700;color:var(--red)">${bv.Invalidation||'—'}</span>
+      <span style="font-size:9px;color:var(--text3)">${pb.Invalidation_label||''}</span>
+    </div>
+    ${pb.ExpectedBehavior
+      ? `<div class="pb-behavior">${pb.ExpectedBehavior}</div>` : ''}
+    ${pb.RiskWarning && pb.RiskWarning !== 'None.'
+      ? `<div class="pb-warning-line">⚠ ${pb.RiskWarning}</div>` : ''}
+  </div>`;
+
+  // ── Narrative card ────────────────────────────────────────────────────────
+  const narSections = [
+    ['REGIME',    nar.Regime],
+    ['STRUCTURE', nar.Structure],
+    ['LEVELS',    nar.Levels],
+    ['PLAN',      nar.Plan],
+    ['RISK',      nar.Risk],
+  ].filter(([,v])=>v);
+
+  const narrativeCard = `
+  <div class="bias-narrative-card">
+    <div class="pb-title">📖 INSTITUTIONAL PLAYBOOK</div>
+    ${nar.Full ? `<div class="nar-full">${nar.Full}</div>` : ''}
+    <div class="nar-grid">
+      ${narSections.map(([t,v])=>`
+        <div class="nar-section">
+          <div class="ns-t">${t}</div>
+          <div class="ns-b">${v}</div>
+        </div>`).join('')}
+    </div>
+  </div>`;
+
+  // ── Per-asset row ─────────────────────────────────────────────────────────
+  const ORDER = ['ES','SPX','SPY','NQ','NDX','QQQ','RTY'];
+  const pa = bv.per_asset || {};
+  const assets = [...ORDER.filter(a=>pa[a]),
+                  ...Object.keys(pa).filter(a=>!ORDER.includes(a))];
+
+  const assetsHtml = assets.map(a => {
+    const d = pa[a]; if (!d) return '';
+    const bc = d.bias==='BULLISH'?'var(--green)':d.bias==='BEARISH'?'var(--red)':'var(--text2)';
+    const rShort = (d.regime||'').replace('SHORT_GAMMA_','S.').replace('LONG_GAMMA_','L.')
+                                  .replace('_DOMINATED','_DOM').replace(/_/g,' ');
+    const gz = (d.gamma_zero_state||'').replace('ALIGNED_','').replace(/_/g,' ');
+    const ls=+(d.long_score||0).toFixed(0), ss=+(d.short_score||0).toFixed(0);
+    const cf=+(d.confidence||0).toFixed(0);
+    return `<div class="asset-mini">
+      <div class="am-n">${a}</div>
+      <div class="am-b" style="color:${bc}">${d.bias||'—'}</div>
+      <div class="am-r">${rShort} ${gz?'·'+gz:''}</div>
+      <div style="font-size:8px;color:var(--text3)">LONG ${ls}</div>
+      <div class="s-bar-m"><div class="s-fill-m" style="width:${ls}%;background:var(--green)"></div></div>
+      <div style="font-size:8px;color:var(--text3)">SHORT ${ss}</div>
+      <div class="s-bar-m"><div class="s-fill-m" style="width:${ss}%;background:var(--red)"></div></div>
+      <div style="font-size:8px;color:var(--text3)">CONF ${cf}%</div>
+      <div class="s-bar-m"><div class="s-fill-m" style="width:${cf}%;background:var(--accent)"></div></div>
+    </div>`;
+  }).join('');
+
+  const assetsCard = assets.length
+    ? `<div class="bias-assets-card">
+        <div class="b-sec" style="margin-bottom:6px;">PER-ASSET BIAS</div>
+        <div class="assets-row">${assetsHtml}</div>
+      </div>`
+    : '';
+
+  // ── Assemble ──────────────────────────────────────────────────────────────
+  root.innerHTML = `
+  ${warnHtml}
+  <div class="bias-grid">
+    ${mainCard}
+    ${playbookCard}
+    ${narrativeCard}
+    ${assetsCard}
+  </div>`;
+}
+
+// Auto-refresh solo cuando el panel está activo
+setInterval(() => {
+  if (typeof currentTab !== 'undefined' && currentTab === 'BIAS') loadBiasPanel();
+}, BIAS_REFRESH_MS);
+
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && typeof currentTab !== 'undefined' && currentTab === 'BIAS')
+    loadBiasPanel();
+});
+</script>
+
 </body>
 </html>

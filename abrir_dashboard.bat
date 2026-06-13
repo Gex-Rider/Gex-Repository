@@ -1,4 +1,4 @@
-﻿@echo off
+@echo off
 :: ─────────────────────────────────────────────────────
 ::  GEX DASHBOARD LAUNCHER
 ::  Abre los 3 dashboards en el navegador por defecto
@@ -25,20 +25,24 @@ for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":8080 " 2^>nul') do (
     taskkill /PID %%a /F >nul 2>&1
 )
 
-:: Esperar 1 segundo y abrir los 3 tabs
-timeout /t 1 /nobreak >nul
+:: Lanzar servidor en background ANTES de abrir tabs
+::  (sin servidor activo el fetch de dashboard_strikes.json falla en file://)
+start "GEX HTTP Server" /min python -m http.server 8080
+
+:: Esperar a que el servidor levante antes de abrir tabs
+timeout /t 2 /nobreak >nul
+
+:: Abrir los 3 tabs
 start "" "http://localhost:8080/gex_table.html"
 timeout /t 1 /nobreak >nul
 start "" "http://localhost:8080/gex_dashboard.html"
 timeout /t 1 /nobreak >nul
-start "" "http://localhost:8080/gex_history_v19.html"
+start "" "http://localhost:8080/gex_history_v23.html"
 
-
-:: Lanzar servidor (bloquea esta ventana — minimizala, no la cierres)
+:: Informar al usuario
 echo.
 echo  GEX Server corriendo en http://localhost:8080
-echo  Minimiza esta ventana. NO la cierres.
-echo  Para detener el servidor presiona Ctrl+C
+echo  La ventana del servidor se minimizo automaticamente.
+echo  Para detener el servidor: cierra la ventana "GEX HTTP Server"
 echo.
-python -m http.server 8080
-
+pause
