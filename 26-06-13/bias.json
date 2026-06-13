@@ -1,75 +1,83 @@
 {
-  "MarketBias": "NEUTRAL",
+  "Bias": "NEUTRAL",
   "Confidence": 55.0,
-  "DealerRegime": "LONG_GAMMA_PINNING",
-  "Positioning": "LONG_GAMMA_ACCUMULATION",
-  "GammaZeroState": "ALIGNED_BEAR",
-  "GammaAlignmentScore": 47.4,
-  "ConfluenceScore": 3.6,
-  "TradeBias": "NEUTRAL",
-  "TradeConfidence": 0.0,
-  "ExpectedMove": "PIN",
+  "MarketState": "PINNING",
   "Strategy": "FADE_BREAKOUTS",
-  "BestSignal": "",
-  "SqueezeImminent": false,
-  "PanicImminent": false,
-  "Targets": {
-    "T1": 7445.33,
-    "T1_source": "ZERO_OI_RESIST",
-    "T2": 7500.0,
-    "T2_source": "MAXGEX",
-    "T3": 7550.0,
-    "T3_source": "MAXCP"
-  },
-  "Supports": {
-    "S1": 7432.44,
-    "S1_source": "MAGNET",
-    "S2": 7403.75,
-    "S2_source": "WALL_BELOW",
-    "S3": 7350.0,
-    "S3_source": "MIN_vGEX"
-  },
-  "Invalidation": 0,
   "Risk": "LOW",
+  "EntryZone": null,
+  "Targets": [
+    {
+      "Level": 7445.36,
+      "Type": "ZERO_OI_RESIST"
+    },
+    {
+      "Level": 7500.0,
+      "Type": "MAXGEX"
+    },
+    {
+      "Level": 7550.0,
+      "Type": "MAXCP"
+    }
+  ],
+  "Invalidation": {
+    "Level": 0,
+    "Type": ""
+  },
+  "Narrative": "No directional bias. Range defined by 7419\u20137445. Fade extremes.",
   "Warnings": [
     "SPLIT MARKET 2 bull vs 4 bear"
   ],
-  "CoreMarketBias": "BEARISH",
-  "TechMarketBias": "BEARISH",
-  "GlobalMarketBias": "BEARISH",
-  "VIXConfirmation": "POSITIVE",
-  "DirectionalScore": 53.2,
-  "RegimeScore": 50.0,
-  "MomentumScore": 57.2,
-  "RiskScore": 18.1,
-  "TimingScore": "FAVORABLE",
-  "Consensus": 0.47,
-  "Conflict": false,
-  "SessionPlaybook": {
-    "Bias": "FLAT",
-    "Execution": "FADE_BREAKOUTS",
-    "MarketStructure": "RANGE_DAY",
-    "Confidence": "MEDIUM",
-    "BestEntryZone": "NO_TRADE",
-    "TargetZone1": 7445.33,
-    "TargetZone1_label": "ZERO_OI_RESIST",
-    "TargetZone2": 7500.0,
-    "TargetZone2_label": "MAXGEX",
-    "TargetZone3": 7550.0,
-    "TargetZone3_label": "MAXCP",
-    "Invalidation": 0,
-    "Invalidation_label": "Gamma Zero flip level",
-    "RiskReward": "\u2014",
-    "ExpectedBehavior": "Dealers long gamma. Spot likely to revert to pin/ZERO level.",
-    "RiskWarning": "Range-bound day \u2014 fade breakouts, target the mean."
+  "Drivers": {
+    "GammaState": "ALIGNED_BEAR",
+    "DealerRegime": "LONG_GAMMA_PINNING",
+    "Positioning": "NEUTRAL_POSITIONING",
+    "VIXConf": "POSITIVE",
+    "Confluence": 2.6,
+    "SqueezeImm": false,
+    "PanicImm": false,
+    "BestSignal": ""
   },
-  "Narrative": {
-    "Regime": "Dealers are long gamma \u2014 they absorb volatility and rebalance against the trend, creating a mean-reverting environment.",
-    "Structure": "Spot is below both GEX flip levels. Structure is fully bearish \u2014 dealers are short gamma on both measures, which amplifies downside.",
-    "Levels": "Resistance at 7445 (Zero Oi Resist). next level 7500 (Maxgex). support at 7432 (Magnet).",
-    "Plan": "No directional bias. Range defined by 7432\u20137445. Fade extremes.",
-    "Risk": "Risk is LOW \u2014 dealer stress contained and structure stable. VIX at 17.7 \u2014 normal regime.",
-    "Full": "Market is NEUTRAL. Regime: LONG GAMMA PINNING. Range 7432\u20137445. Fade extremes, buy support, sell resistance."
+  "Diagnostics": {
+    "DirectionalScore": 53.2,
+    "RegimeScore": 50.0,
+    "MomentumScore": 57.2,
+    "RiskScore": 18.2,
+    "TimingScore": "FAVORABLE",
+    "GammaAlign": 47.4,
+    "TradeBias": "NEUTRAL",
+    "TradeConf": 0.0,
+    "ExpectedMove": "PIN",
+    "CoreBias": "BEARISH",
+    "TechBias": "BEARISH",
+    "GlobalBias": "BEARISH",
+    "Consensus": 0.47,
+    "Conflict": false,
+    "NarrativeDetail": {
+      "Regime": "Dealers are long gamma \u2014 they absorb volatility and rebalance against the trend, creating a mean-reverting environment.",
+      "Structure": "Spot is below both GEX flip levels. Structure is fully bearish \u2014 dealers are short gamma on both measures, which amplifies downside.",
+      "Levels": "Resistance at 7445 (Zero Oi Resist). next level 7500 (Maxgex). support at 7419 (Wall Below).",
+      "Plan": "No directional bias. Range defined by 7419\u20137445. Fade extremes.",
+      "Risk": "Risk is LOW \u2014 dealer stress contained and structure stable. VIX at 17.7 \u2014 normal regime.",
+      "Full": "Market is NEUTRAL. Regime: LONG GAMMA PINNING. Range 7419\u20137445. Fade extremes, buy support, sell resistance."
+    },
+    "SessionPlaybook": {
+      "Bias": "FLAT",
+      "Execution": "FADE_BREAKOUTS",
+      "MarketStructure": "RANGE_DAY",
+      "Confidence": "MEDIUM",
+      "BestEntryZone": "NO_TRADE",
+      "TargetZone1": 7445.36,
+      "TargetZone1_label": "ZERO_OI_RESIST",
+      "TargetZone2": 7500.0,
+      "TargetZone2_label": "MAXGEX",
+      "TargetZone3": 7550.0,
+      "TargetZone3_label": "MAXCP",
+      "Invalidation": 0,
+      "Invalidation_label": "Gamma Zero flip level",
+      "RiskReward": "\u2014",
+      "ExpectedBehavior": "Dealers long gamma. Spot likely to revert to pin/ZERO level.",
+      "RiskWarning": "Range-bound day \u2014 fade breakouts, target the mean."
+    }
   },
-  "Timestamp": "08:18:16"
+  "Timestamp": "15:41:09"
 }
