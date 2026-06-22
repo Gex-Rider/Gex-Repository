@@ -2977,96 +2977,6 @@ function _applySavedZoom(activo) {
 //     Plotly.react(). We detect these by checking whether the range
 //     exactly matches what we just put in the layout (via _lastApplied).
 
-// ══════════════════════════════════════════════════════════════════════
-//  v28 ── EDGE AXIS ZOOM (chart principal)
-//  Hover sobre el borde INFERIOR (banda del eje X) → la rueda zoomea SOLO X.
-//  Hover sobre los bordes IZQ/DER (banda del eje Y) → la rueda zoomea SOLO Y.
-//  El zoom se centra en el cursor. El cursor cambia a ew-/ns-resize para
-//  señalizar la zona activa. Reusa el plotly_relayout existente → la
-//  sincronización con el flow, la persistencia (zoomState) y el redibujado
-//  del profile overlay ocurren automáticamente.
-// ══════════════════════════════════════════════════════════════════════
-const EDGE_BAND_PX = 28;    // grosor (px) de la banda sensible en cada borde
-const EDGE_ZOOM_IN = 0.82;  // factor por notch de rueda (hacia arriba = zoom in)
-
-function _linVal(ax, v) {
-  // Linealiza un valor de rango (date-string/ms/number) a número.
-  if (ax && typeof ax.r2l === 'function') { const n = +ax.r2l(v); if (!isNaN(n)) return n; }
-  if (typeof v === 'number') return v;
-  const t = Date.parse(v);
-  return isNaN(t) ? parseFloat(v) : t;
-}
-
-// Devuelve 'x', 'y' o null según en qué banda de borde está el cursor.
-function _edgeZoneFor(chartEl, e) {
-  const fl = chartEl && chartEl._fullLayout;
-  if (!fl || !fl.xaxis || !fl.yaxis) return null;
-  const xa = fl.xaxis, ya = fl.yaxis;
-  if (xa._offset == null || ya._offset == null) return null;
-  const rect = chartEl.getBoundingClientRect();
-  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
-  const xL = xa._offset, xR = xa._offset + xa._length;
-  const yT = ya._offset, yB = ya._offset + ya._length;
-  const inXspan = mx >= xL && mx <= xR;
-  const inYspan = my >= yT && my <= yB;
-  // Banda inferior (eje X): desde un poco arriba de la línea del eje hacia abajo.
-  if (inXspan && my >= yB - EDGE_BAND_PX) return 'x';
-  // Bandas laterales (eje Y): cerca del borde izquierdo o derecho del área de plot.
-  if (inYspan && (mx <= xL + EDGE_BAND_PX || mx >= xR - EDGE_BAND_PX)) return 'y';
-  return null;
-}
-
-// Zoomea un solo eje centrado en la posición del cursor (px dentro del elemento).
-function _zoomAxisAtCursor(chartEl, axisLetter, mousePx, factor) {
-  const fl = chartEl._fullLayout;
-  const ax = axisLetter === 'x' ? fl.xaxis : fl.yaxis;
-  if (!ax || !ax.range || ax._offset == null) return;
-  const r0 = _linVal(ax, ax.range[0]);
-  const r1 = _linVal(ax, ax.range[1]);
-  if (!isFinite(r0) || !isFinite(r1) || r1 === r0) return;
-  const frac = (mousePx - ax._offset) / ax._length;   // 0..1 a lo largo del eje
-  // Para X: 0=izq→r0, 1=der→r1.  Para Y: 0=arriba→r1, 1=abajo→r0.
-  const lc = axisLetter === 'x'
-    ? r0 + frac * (r1 - r0)
-    : r1 - frac * (r1 - r0);
-  let n0 = lc - (lc - r0) * factor;
-  let n1 = lc + (r1 - lc) * factor;
-  if (!isFinite(n0) || !isFinite(n1) || n1 <= n0) return;
-  // Para ejes de fecha, Plotly.relayout acepta ms numéricos sin problema.
-  const patch = {};
-  patch[axisLetter === 'x' ? 'xaxis.range' : 'yaxis.range'] = [n0, n1];
-  if (axisLetter === 'y') patch['yaxis.autorange'] = false;
-  Plotly.relayout(chartEl, patch);
-}
-
-function _attachEdgeAxisZoom(activo) {
-  const chartEl = document.getElementById('chart-' + activo);
-  if (!chartEl || chartEl._edgeZoomAttached) return;
-  chartEl._edgeZoomAttached = true;
-
-  // Feedback de cursor según la banda
-  chartEl.addEventListener('mousemove', e => {
-    const z = _edgeZoneFor(chartEl, e);
-    const dl = chartEl.querySelector('.nsewdrag') || chartEl;
-    if (z === 'x')      dl.style.cursor = 'ew-resize';
-    else if (z === 'y') dl.style.cursor = 'ns-resize';
-    else if (dl.style.cursor === 'ew-resize' || dl.style.cursor === 'ns-resize')
-      dl.style.cursor = '';   // restaura el cursor nativo de Plotly fuera de banda
-  });
-
-  // Rueda sobre la banda → zoom del eje correspondiente
-  chartEl.addEventListener('wheel', e => {
-    const z = _edgeZoneFor(chartEl, e);
-    if (!z) return;                 // fuera de banda → comportamiento normal
-    e.preventDefault();
-    e.stopPropagation();
-    const rect   = chartEl.getBoundingClientRect();
-    const factor = e.deltaY < 0 ? EDGE_ZOOM_IN : 1 / EDGE_ZOOM_IN;
-    const px     = z === 'x' ? (e.clientX - rect.left) : (e.clientY - rect.top);
-    _zoomAxisAtCursor(chartEl, z, px, factor);
-  }, { passive: false });
-}
-
 function _attachZoomListener(activo) {
   if (_zoomListeners.has(activo)) return;
   _zoomListeners.add(activo);
@@ -3313,11 +3223,11 @@ function replot() {
     displayModeBar: true,
     modeBarButtonsToRemove: ['toImage','sendDataToCloud'],
     displaylogo: false,
+    scrollZoom: true,   // v28b: zoom de rueda nativo de Plotly, idéntico al flow
   });
 
   // Attach relayout listener once per chart div
   _attachZoomListener(currentTab);
-  _attachEdgeAxisZoom(currentTab);   // v28: scroll en el borde → zoom de ese eje
   // Wire flow chart X-sync and cursor once both charts exist.
   // v28 FIX: solo enganchar si el flow YA está renderizado con datos. Durante
   // un cambio de asset el flow se purga (switchTab paso 2) y .on deja de existir;
