@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>GEX History v28c — Engine v20</title>
+<title>GEX History v29 — Engine v20</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.27.0/plotly.min.js"></script>
 <style>
@@ -704,7 +704,7 @@ main { flex:1; overflow:hidden; position:relative; min-height:0; }
 <header>
   <div style="display:flex;align-items:center;gap:10px">
     <div class="live-dot" id="ldot"></div>
-    <div class="logo">GEX <em>HISTORY</em> <span style="font-size:8px;color:#e879f9;border:1px solid #e879f940;border-radius:2px;padding:1px 5px;letter-spacing:.06em;">v28c</span> <span style="font-size:8px;color:#f59e0b;border:1px solid #f59e0b40;border-radius:2px;padding:1px 5px;letter-spacing:.06em;">engine v20</span></div>
+    <div class="logo">GEX <em>HISTORY</em> <span style="font-size:8px;color:#e879f9;border:1px solid #e879f940;border-radius:2px;padding:1px 5px;letter-spacing:.06em;">v29</span> <span style="font-size:8px;color:#f59e0b;border:1px solid #f59e0b40;border-radius:2px;padding:1px 5px;letter-spacing:.06em;">engine v20</span></div>
   </div>
   <div class="hdr-right">
     <a href="gex_table.html" target="_blank"
@@ -1253,7 +1253,8 @@ const SCALE_FALLBACK = {
   NDX:{ NQ:1,     QQQ:1/41 },
   NQ: { NDX:1,    QQQ:1/41 },
 };
-let scaleTarget = 'Nativo';        // 'Nativo' o un activo válido para currentTab
+let scaleTarget = 'Nativo';        // escala activa del activo actual (derivada de scaleByAsset)
+let scaleByAsset = {};             // v29: escala recordada POR ACTIVO { ES:'SPY', SPY:'ES', ... }
 let _scaleMult  = 1, _scaleOffset = 0;
 
 function _latestSpot(asset) {
@@ -1267,11 +1268,17 @@ function _latestSpot(asset) {
 }
 
 // Recalcula el factor de escala activo. Llamar al inicio de cada render.
+// v29: la selección se lee SIEMPRE de scaleByAsset[currentTab] (persistente por activo).
 function _refreshScale() {
   _scaleMult = 1; _scaleOffset = 0;
+  scaleTarget = scaleByAsset[currentTab] || 'Nativo';
   if (scaleTarget === 'Nativo') return;
   const targets = SCALE_TARGETS[currentTab];
-  if (!targets || !targets.includes(scaleTarget)) { scaleTarget = 'Nativo'; return; }
+  if (!targets || !targets.includes(scaleTarget)) {     // escala inválida para este activo
+    scaleTarget = 'Nativo';
+    scaleByAsset[currentTab] = 'Nativo';
+    return;
+  }
   const src = _latestSpot(currentTab);
   const dst = _latestSpot(scaleTarget);
   if (src && dst) _scaleMult = dst / src;                                    // auto-calibrado
@@ -1285,13 +1292,17 @@ function SY(v) {
 
 function _scaleActive() { return scaleTarget !== 'Nativo' && _scaleMult !== 1; }
 
-// Repuebla el selector de escala según el activo actual.
+// Repuebla el selector de escala según el activo actual (restaura su escala guardada).
 function _updateScaleSelector() {
   const sel = document.getElementById('scale-select');
   const lbl = document.getElementById('scale-label');
   if (!sel) return;
   const targets = SCALE_TARGETS[currentTab] || [];
-  if (scaleTarget !== 'Nativo' && !targets.includes(scaleTarget)) scaleTarget = 'Nativo';
+  // v29: restaurar la escala recordada de ESTE activo (si sigue siendo válida)
+  let tgt = scaleByAsset[currentTab] || 'Nativo';
+  if (tgt !== 'Nativo' && !targets.includes(tgt)) tgt = 'Nativo';
+  scaleByAsset[currentTab] = tgt;
+  scaleTarget = tgt;
   let html = '<option value="Nativo">NATIVO</option>';
   targets.forEach(t => { html += `<option value="${t}">→ ${t}</option>`; });
   sel.innerHTML = html;
@@ -1303,7 +1314,9 @@ function _updateScaleSelector() {
 
 function onScaleChange(val) {
   scaleTarget = val;
-  // El zoom de Y guardado está en unidades nativas → no aplica a la nueva escala.
+  scaleByAsset[currentTab] = val;   // v29: recordar la selección de este activo
+  saveSettings();                   // v29: persistir entre recargas
+  // El zoom de Y guardado está en unidades de la escala anterior → no aplica.
   if (zoomState[currentTab]) delete zoomState[currentTab].y;
   replot();
   if (!profileHidden) requestAnimationFrame(() => drawProfileOverlay(currentTab));
@@ -1417,6 +1430,7 @@ function saveSettings() {
       showRegimeLines,    // v17: persist regime lines toggle
       showSigChartLines,  // v27.3: persist signal chart lines toggle
       pbChartOn: _pbChartOn,         // v26.3: global chart overlay toggle
+      scaleByAsset,                  // v29: escala recordada por activo
       // v17: trace visibility — convert Sets (or arrays) to arrays for JSON
       flowTraceVisibility: Object.fromEntries(
         Object.entries(flowTraceVisibility).map(([k,v]) => [
@@ -1464,6 +1478,10 @@ function loadSettings() {
     if (typeof s.showSigChartLines === 'boolean') showSigChartLines = s.showSigChartLines;
     // v26.3: restore global chart overlay toggle
     if (typeof s.pbChartOn === 'boolean') _pbChartOn = s.pbChartOn;
+    // v29: restaurar escala por activo
+    if (s.scaleByAsset && typeof s.scaleByAsset === 'object') {
+      Object.assign(scaleByAsset, s.scaleByAsset);
+    }
     // legacy compat: if old per-asset state exists and any was true, enable global toggle
     else if (s.pbChartState && typeof s.pbChartState === 'object') {
       _pbChartOn = Object.values(s.pbChartState).some(Boolean);
