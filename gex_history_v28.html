@@ -3194,17 +3194,23 @@ function replot() {
   const el   = document.getElementById('chart-' + currentTab);
   if (!el) return;
 
-  // Snapshot current zoom from live Plotly layout BEFORE we overwrite it
-  // This is the most reliable source — works even if relayout event was missed
+  // Snapshot current zoom from live Plotly layout BEFORE we overwrite it.
+  // This is the most reliable source — works even if relayout event was missed.
+  //
+  // v28b FIX (autoscale): SOLO capturamos el eje X aquí. El eje Y del chart
+  // principal SIEMPRE se dibuja con un range explícito [yMin,yMax] (nunca
+  // autorange), por lo que _fullLayout.yaxis.autorange es siempre false y la
+  // guarda !yl.autorange capturaba zoomState.y en CADA replot —aunque el usuario
+  // nunca hiciera zoom en Y—, congelando el eje Y en el rango del primer frame y
+  // rompiendo el auto-ajuste a datos nuevos / el autoscale. El zoom real de Y ya
+  // se persiste vía el evento plotly_relayout (handler 'yaxis.range[0]'), que solo
+  // dispara ante una acción genuina del usuario. Sin zoom de Y → zoomState.y queda
+  // undefined → cada replot usa el [yMin,yMax] fresco → el eje Y vuelve a escalar.
   if (el._fullLayout) {
-    const xl = el._fullLayout.xaxis, yl = el._fullLayout.yaxis;
+    const xl = el._fullLayout.xaxis;
     if (xl && !xl.autorange && Array.isArray(xl.range) && xl.range.length === 2) {
       zoomState[currentTab] = zoomState[currentTab] || {};
       zoomState[currentTab].x = [...xl.range];
-    }
-    if (yl && !yl.autorange && Array.isArray(yl.range) && yl.range.length === 2) {
-      zoomState[currentTab] = zoomState[currentTab] || {};
-      zoomState[currentTab].y = [...yl.range];
     }
   }
 
