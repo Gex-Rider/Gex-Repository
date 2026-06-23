@@ -2608,12 +2608,17 @@ function _attachProfileTooltip(activo) {
       return;
     }
 
-    // Invert yToPx: mouseY → strike value
+    // Invert yToPx: mouseY → valor en unidades del EJE (puede estar escalado)
     const yAxis = layout.yaxis;
     if (!yAxis || !yAxis.range) return;
     const [yMin, yMax] = yAxis.range;
-    const frac   = (mouseY - pTop) / pHeight;          // 0=top, 1=bottom
-    const strike = yMax - frac * (yMax - yMin);
+    const frac        = (mouseY - pTop) / pHeight;          // 0=top, 1=bottom
+    const strikeAxis  = yMax - frac * (yMax - yMin);
+    // v29b: el eje puede estar escalado a otro activo; profileCache.strike está
+    // SIEMPRE en unidades nativas. Convertimos la posición del mouse de la escala
+    // del eje → strike nativo para hacer match (y mostrar el strike original).
+    const scaled       = _scaleActive() && _scaleMult !== 0;
+    const strikeNative = scaled ? (strikeAxis - _scaleOffset) / _scaleMult : strikeAxis;
 
     // Find closest row in profileCache
     const rows = profileCache[activo];
@@ -2623,7 +2628,7 @@ function _attachProfileTooltip(activo) {
     let closest = null, minDist = Infinity;
     rows.forEach(r => {
       const s = parseFloat(r.strike);
-      const d = Math.abs(s - strike);
+      const d = Math.abs(s - strikeNative);
       if (d < minDist) { minDist = d; closest = r; }
     });
     if (!closest) return;
@@ -2633,8 +2638,11 @@ function _attachProfileTooltip(activo) {
     const color   = val >= 0 ? cfg.posColor : cfg.negColor;
     const sign    = val >= 0 ? '+' : '';
 
+    // v29b: en modo escalado mostramos el strike NATIVO del activo original,
+    // etiquetado con el ticker para que quede claro (ej. "Strike SPY").
+    const strikeLabel = scaled ? `Strike ${activo}` : 'Strike';
     _profTip.innerHTML =
-      `<span style="color:#9fb3c8">Strike</span> <span style="color:#e2e8f0;font-weight:700">${parseFloat(closest.strike).toFixed(0)}</span>` +
+      `<span style="color:#9fb3c8">${strikeLabel}</span> <span style="color:#e2e8f0;font-weight:700">${parseFloat(closest.strike).toFixed(0)}</span>` +
       `&nbsp;&nbsp;<span style="color:#9fb3c8">${cfg.label}</span> <span style="color:${color};font-weight:700">${sign}${valFmt}</span>`;
     _profTip.style.display = 'block';
     _profTip.style.left = (e.clientX + 14) + 'px';
