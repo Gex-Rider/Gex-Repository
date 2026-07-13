@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Surface Relevance</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700;800&display=swap');
+
+:root {
+  --bg:      #050810;
+  --bg1:     #080c14;
+  --bg2:     #0b1018;
+  --bg3:     #0d141f;
+  --border:  #111b2a;
+  --border2: #1a2840;
+  --text:    #8aa0bc;
+  --text-hi: #c4d4e8;
+  --text-lo: #2d4058;
+  --text-lo2:#1a2636;
+  --alta:  #22c55e;
+  --media: #f59e0b;
+  --baja:  #2d4058;
+  --bull:  #22c55e;
+  --bear:  #ef4444;
+}
+
+* { box-sizing:border-box; margin:0; padding:0; }
+
+body {
+  font-family:'JetBrains Mono',monospace;
+  background:var(--bg); color:var(--text);
+  font-size:11px; min-height:100vh; overflow-x:hidden;
+}
+
+body::after {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:999;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.05) 2px,rgba(0,0,0,.05) 4px);
+}
+
+/* ── Topbar ── */
+.topbar {
+  display:flex; align-items:center; gap:14px;
+  padding:9px 20px;
+  background:var(--bg1); border-bottom:1px solid var(--border2);
+  position:sticky; top:0; z-index:100;
+}
+.tlogo { font-size:10px; font-weight:800; letter-spacing:.18em; color:var(--text-hi); text-transform:uppercase; }
+.tsep  { width:1px; height:16px; background:var(--border2); }
+.tsub  { font-size:9px; color:var(--text-lo); letter-spacing:.1em; }
+
+.tcontrols { display:flex; align-items:center; gap:8px; margin-left:auto; }
+
+.status-dot {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--text-lo2); transition:background .3s; flex-shrink:0;
+}
+.status-dot.live { background:#22c55e; box-shadow:0 0 6px #22c55e60; animation:blink 2s infinite; }
+.status-dot.err  { background:#ef4444; }
+
+.tstatus { font-size:9px; color:var(--text-lo); min-width:160px; }
+
+.btn {
+  padding:4px 10px;
+  background:var(--bg2); border:1px solid var(--border2); border-radius:3px;
+  font-size:9px; color:var(--text-lo); letter-spacing:.08em; text-transform:uppercase;
+  cursor:pointer; font-family:inherit; transition:all .15s;
+}
+.btn:hover { color:var(--text); border-color:var(--border2); }
+.btn.on { border-color:#22c55e50; color:#22c55e; }
+
+/* ── Content ── */
+.content { padding:14px 20px; display:flex; flex-direction:column; gap:10px; }
+
+/* ── State box ── */
+.state-box {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:10px; min-height:65vh; opacity:0; animation:fadeIn .4s .1s forwards;
+}
+.state-title { font-size:10px; color:var(--text-lo); letter-spacing:.12em; text-align:center; }
+.state-sub   { font-size:9px; color:var(--text-lo2); text-align:center; max-width:400px; line-height:1.7; }
+.spinner { display:flex; gap:5px; margin-bottom:4px; }
+.sp-dot { width:5px; height:5px; border-radius:50%; background:var(--border2); animation:spulse 1.2s infinite; }
+.sp-dot:nth-child(2) { animation-delay:.2s; }
+.sp-dot:nth-child(3) { animation-delay:.4s; }
+
+/* ── Activo block ── */
+.activo-block {
+  background:var(--bg1); border:1px solid var(--border); border-radius:6px;
+  overflow:hidden; opacity:0; animation:slideUp .25s forwards;
+}
+
+/* ── Block header ── */
+.block-head {
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  padding:9px 16px; background:var(--bg2); border-bottom:1px solid var(--border);
+}
+.bh-ticker { font-size:16px; font-weight:800; color:var(--text-hi); letter-spacing:.05em; }
+.bh-spot   { font-size:11px; font-weight:600; color:var(--text); }
+.bh-spot em { font-style:normal; font-size:8px; color:var(--text-lo); margin-right:3px; }
+.bh-meta   { font-size:8px; color:var(--text-lo); }
+.bh-right  { margin-left:auto; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+
+.lider-pill {
+  display:flex; align-items:center; gap:5px; padding:3px 9px; border-radius:3px;
+  font-size:8px; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
+}
+.inv-pill {
+  font-size:7px; font-weight:700; padding:2px 6px; border-radius:2px;
+  background:#e879f912; border:1px solid #e879f925; color:#e879f9; letter-spacing:.08em;
+}
+.ts-pill { font-size:8px; color:var(--text-lo); }
+
+/* ── Body ── */
+.block-body { padding:12px 16px; }
+
+/* ── Column header ── */
+.rank-header {
+  display:grid;
+  grid-template-columns: 20px 96px 1fr 58px 60px 60px 64px 48px 68px;
+  gap:6px; align-items:center;
+  padding:3px 8px 6px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:5px;
+}
+.rh { font-size:8px; color:var(--text-lo2); text-transform:uppercase; letter-spacing:.1em; }
+.rh.r { text-align:right; }
+.rh.c { text-align:center; }
+
+/* ── Rows ── */
+.rank-rows { display:flex; flex-direction:column; gap:3px; }
+
+.rr {
+  display:grid;
+  grid-template-columns: 20px 96px 1fr 58px 60px 60px 64px 48px 68px;
+  gap:6px; align-items:center;
+  padding:5px 8px;
+  background:var(--bg); border:1px solid var(--border); border-radius:4px;
+  cursor:default; transition:background .1s;
+}
+.rr:hover { background:var(--bg2); }
+.rr.is-leader { border-left-width:2px; }
+
+.rr-num  { font-size:8px; color:var(--text-lo); text-align:right; font-weight:700; }
+
+.rr-tag {
+  font-size:8px; font-weight:700; padding:2px 7px; border-radius:3px;
+  letter-spacing:.07em; text-align:center; white-space:nowrap;
+}
+
+.rr-bar-wrap { position:relative; height:4px; background:var(--bg3); border-radius:2px; overflow:hidden; }
+.rr-bar      { position:absolute; left:0; top:0; height:100%; border-radius:2px; }
+
+.rr-score { font-size:10px; font-weight:700; text-align:right; }
+.rr-conc  { font-size:9px; color:var(--text-lo); text-align:right; }
+.rr-grad  { font-size:9px; color:var(--text-lo); text-align:right; }
+
+.rr-val { font-size:9px; text-align:right; font-weight:600; }
+.rr-val.pos { color:#22c55e; }
+.rr-val.neg { color:#ef4444; }
+.rr-val.neu { color:var(--text-lo); }
+
+/* percentile mini */
+.rr-pct { display:flex; flex-direction:column; gap:2px; }
+.pct-bar-wrap { position:relative; height:3px; background:var(--bg3); border-radius:2px; }
+.pct-bar-fill { position:absolute; left:0; top:0; height:100%; border-radius:2px; opacity:.45; }
+.pct-needle   { position:absolute; top:-1px; width:2px; height:5px; border-radius:1px; transform:translateX(-50%); }
+.pct-label    { font-size:7px; color:var(--text-lo); text-align:right; }
+
+/* interp badge inside row */
+.rr-interp {
+  display:inline-block;
+  font-size:7px; font-weight:700; letter-spacing:.07em; text-align:center;
+  text-transform:uppercase; padding:2px 5px; border-radius:2px;
+}
+.rr-interp.alta  { background:#22c55e14; color:#22c55e; border:1px solid #22c55e30; }
+.rr-interp.media { background:#f59e0b14; color:#f59e0b; border:1px solid #f59e0b30; }
+.rr-interp.baja  { background:var(--bg3); color:var(--text-lo2); border:1px solid var(--border); }
+
+/* flip */
+.rr-flip { font-size:8px; text-align:center; }
+.rr-flip.yes { color:#ef4444; font-weight:700; }
+.rr-flip.no  { color:var(--text-lo2); }
+
+/* INV section divider */
+.inv-divider {
+  display:flex; align-items:center; gap:8px;
+  margin:8px 0 4px;
+  font-size:8px; color:#e879f950; letter-spacing:.1em; text-transform:uppercase;
+}
+.inv-divider::after { content:''; flex:1; height:1px; background:#e879f912; }
+
+/* Footer */
+.sfooter {
+  margin-top:8px; padding-top:6px; border-top:1px solid var(--border);
+  display:flex; justify-content:space-between;
+  font-size:8px; color:var(--text-lo2);
+}
+
+/* ── Animations ── */
+@keyframes fadeIn  { to { opacity:1 } }
+@keyframes slideUp { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:none } }
+@keyframes blink   { 0%,100% { opacity:1 } 50% { opacity:.4 } }
+@keyframes spulse  { 0%,100% { opacity:.3 } 50% { opacity:.8 } }
+
+::-webkit-scrollbar { width:3px; }
+::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="tlogo">Surface Relevance</span>
+  <div class="tsep"></div>
+  <span class="tsub">GEX_Surface v7 · 16 superficies</span>
+  <div class="tcontrols">
+    <div class="status-dot" id="statusDot"></div>
+    <span class="tstatus" id="statusText">inicializando…</span>
+    <button class="btn" onclick="manualRefresh()">↺ Refresh</button>
+    <button class="btn on" id="autoBtn" onclick="toggleAuto()">Auto ON</button>
+    <button class="btn" onclick="loadDemo()">Demo</button>
+  </div>
+</div>
+
+<div class="content" id="content">
+  <div class="state-box" id="stateBox">
+    <div class="spinner">
+      <div class="sp-dot"></div><div class="sp-dot"></div><div class="sp-dot"></div>
+    </div>
+    <div class="state-title" id="stateTitle">Buscando archivos *_relevancia.json…</div>
+    <div class="state-sub" id="stateSub">
+      El viewer intenta cargar automáticamente los JSON desde el mismo directorio.<br>
+      Asegúrate que <code>surface_relevance_viewer.html</code> esté junto a los CSV/JSON generados por GEX_Surface.py
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── Surface config ─────────────────────────────────────────────────────────
+const SC = {
+  gamma:     { label:'GEX',       color:'#22c55e', bg:'#22c55e14', bd:'#22c55e35' },
+  vanna:     { label:'VEX',       color:'#a78bfa', bg:'#a78bfa14', bd:'#a78bfa35' },
+  delta:     { label:'DEX',       color:'#38bdf8', bg:'#38bdf814', bd:'#38bdf835' },
+  charm:     { label:'CHARM',     color:'#22d3ee', bg:'#22d3ee14', bd:'#22d3ee35' },
+  color:     { label:'COLOR',     color:'#fb923c', bg:'#fb923c14', bd:'#fb923c35' },
+  speed:     { label:'SPEED',     color:'#e879f9', bg:'#e879f914', bd:'#e879f935' },
+  vomma:     { label:'VOMMA',     color:'#f59e0b', bg:'#f59e0b14', bd:'#f59e0b35' },
+  zomma:     { label:'ZOMMA',     color:'#f43f5e', bg:'#f43f5e14', bd:'#f43f5e35' },
+  inv_gamma: { label:'INV_GEX',   color:'#22c55e', bg:'#22c55e09', bd:'#22c55e20', inv:true },
+  inv_vanna: { label:'INV_VEX',   color:'#a78bfa', bg:'#a78bfa09', bd:'#a78bfa20', inv:true },
+  inv_delta: { label:'INV_DEX',   color:'#38bdf8', bg:'#38bdf809', bd:'#38bdf820', inv:true },
+  inv_charm: { label:'INV_CHARM', color:'#22d3ee', bg:'#22d3ee09', bd:'#22d3ee20', inv:true },
+  inv_color: { label:'INV_COLOR', color:'#fb923c', bg:'#fb923c09', bd:'#fb923c20', inv:true },
+  inv_speed: { label:'INV_SPEED', color:'#e879f9', bg:'#e879f909', bd:'#e879f920', inv:true },
+  inv_vomma: { label:'INV_VOMMA', color:'#f59e0b', bg:'#f59e0b09', bd:'#f59e0b20', inv:true },
+  inv_zomma: { label:'INV_ZOMMA', color:'#f43f5e', bg:'#f43f5e09', bd:'#f43f5e20', inv:true },
+};
+
+// ─── Tickers a buscar automáticamente ────────────────────────────────────────
+// Añadir o quitar según los activos que procesa GEX_Surface.py
+const TICKERS    = ['spy','qqq','spx','ndx','es','nq','iwm','dia','xlk','smh','spy0','qqq0'];
+const REFRESH_MS = 30_000;
+
+// ─── State ───────────────────────────────────────────────────────────────────
+let state     = {};
+let autoOn    = true;
+let timer     = null;
+let firstLoad = true;
+
+// ─── Base path (mismo directorio que el HTML) ─────────────────────────────────
+const BASE = (() => {
+  const h = window.location.href;
+  const i = h.lastIndexOf('/');
+  return i >= 0 ? h.slice(0, i + 1) : './';
+})();
+
+// ─── Fetch ────────────────────────────────────────────────────────────────────
+async function fetchTicker(t) {
+  try {
+    const r = await fetch(`${BASE}${t}_relevancia.json`, { cache: 'no-store' });
+    if (!r.ok) return null;
+    const d = await r.json();
+    return (d.activo && d.por_superficie) ? d : null;
+  } catch { return null; }
+}
+
+async function loadAll() {
+  setStatus('loading');
+  const results = await Promise.allSettled(TICKERS.map(t => fetchTicker(t)));
+  const newState = {};
+  results.forEach(r => {
+    if (r.status === 'fulfilled' && r.value) newState[r.value.activo] = r.value;
+  });
+
+  const found = Object.keys(newState).length;
+  if (found > 0) {
+    state = newState;
+    render();
+    setStatus('ok', found);
+  } else {
+    if (firstLoad) showEmpty();
+    else setStatus('warn');
+  }
+  firstLoad = false;
+}
+
+function manualRefresh() { loadAll(); }
+
+function toggleAuto() {
+  autoOn = !autoOn;
+  const btn = document.getElementById('autoBtn');
+  btn.textContent = autoOn ? 'Auto ON' : 'Auto OFF';
+  btn.classList.toggle('on', autoOn);
+  if (autoOn) schedule(); else clearTimeout(timer);
+}
+
+function schedule() {
+  clearTimeout(timer);
+  if (autoOn) timer = setTimeout(() => { loadAll(); schedule(); }, REFRESH_MS);
+}
+
+// ─── Status ───────────────────────────────────────────────────────────────────
+function setStatus(type, n) {
+  const dot = document.getElementById('statusDot');
+  const txt = document.getElementById('statusText');
+  dot.className = 'status-dot';
+  const hm = new Date().toLocaleTimeString('es-CO', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  if (type === 'loading') {
+    txt.textContent = 'actualizando…';
+  } else if (type === 'ok') {
+    dot.classList.add('live');
+    txt.textContent = `${n} activo${n !== 1 ? 's' : ''} cargado${n !== 1 ? 's' : ''} · ${hm}`;
+  } else {
+    dot.classList.add('err');
+    txt.textContent = `sin archivos · ${hm}`;
+  }
+}
+
+// ─── Empty ────────────────────────────────────────────────────────────────────
+function showEmpty() {
+  document.getElementById('stateTitle').textContent = 'No se encontraron archivos *_relevancia.json';
+  document.getElementById('stateSub').innerHTML =
+    `Coloca <strong>surface_relevance_viewer.html</strong> en el mismo directorio que los archivos generados por GEX_Surface.py<br>
+     o pulsa <strong>Demo</strong> para ver datos de ejemplo.`;
+  setStatus('warn');
+}
+
+// ─── Render ───────────────────────────────────────────────────────────────────
+function render() {
+  const content  = document.getElementById('content');
+  document.getElementById('stateBox').style.display = 'none';
+  [...content.querySelectorAll('.activo-block')].forEach(el => el.remove());
+
+  Object.values(state)
+    .sort((a, b) => a.activo.localeCompare(b.activo))
+    .forEach((data, i) => content.appendChild(buildBlock(data, i)));
+}
+
+// ─── Build block ──────────────────────────────────────────────────────────────
+function buildBlock(data, idx) {
+  const { activo, spot, generated_at, ranking, lider, por_superficie, tiene_inv, minutos_ahora, banda_pct } = data;
+
+  const block = document.createElement('div');
+  block.className = 'activo-block';
+  block.style.animationDelay = `${idx * 0.06}s`;
+
+  const lc  = SC[lider] || {};
+  const ts  = (generated_at || '').split(' ')[1] || generated_at || '—';
+  const oiKeys  = ranking.filter(k => !k.startsWith('inv_'));
+  const invKeys = ranking.filter(k => k.startsWith('inv_'));
+  const maxScore = Math.max(...ranking.map(k => por_superficie[k]?.score || 0), 0.001);
+
+  // Header
+  const head = document.createElement('div');
+  head.className = 'block-head';
+  head.innerHTML = `
+    <span class="bh-ticker">${activo}</span>
+    <span class="bh-spot"><em>SPOT</em>${fmtPrice(spot)}</span>
+    <span class="bh-meta">${minutos_ahora ? `T−${minutos_ahora}min` : ''} · ±${((banda_pct||.01)*100).toFixed(0)}% banda</span>
+    <div class="bh-right">
+      <span class="ts-pill">${ts}</span>
+      ${tiene_inv ? `<span class="inv-pill">⊕ INV</span>` : ''}
+      ${lider ? `<span class="lider-pill" style="background:${lc.bg};border:1px solid ${lc.bd};color:${lc.color}">★ ${SC[lider]?.label || lider}</span>` : ''}
+    </div>
+  `;
+
+  // Body
+  const body = document.createElement('div');
+  body.className = 'block-body';
+
+  // Column headers — single set for both OI and INV
+  const hdr = document.createElement('div');
+  hdr.className = 'rank-header';
+  hdr.innerHTML = `
+    <div class="rh">#</div>
+    <div class="rh">Superficie</div>
+    <div class="rh">Score relativo</div>
+    <div class="rh r">Score</div>
+    <div class="rh r">Conc.</div>
+    <div class="rh r">Grad.T</div>
+    <div class="rh r">Val@spot</div>
+    <div class="rh c">%ile</div>
+    <div class="rh c">Flip/nivel</div>
+  `;
+
+  const rows = document.createElement('div');
+  rows.className = 'rank-rows';
+
+  // OI rows
+  oiKeys.forEach((key, i) => {
+    const s = por_superficie[key];
+    if (s) rows.appendChild(buildRow(i + 1, key, s, maxScore, key === lider));
+  });
+
+  // INV divider + rows
+  if (invKeys.length > 0) {
+    const div = document.createElement('div');
+    div.className = 'inv-divider';
+    div.innerHTML = `<span>Inventario intraday (flujo neto)</span>`;
+    rows.appendChild(div);
+    invKeys.forEach((key, i) => {
+      const s = por_superficie[key];
+      if (s) rows.appendChild(buildRow(i + 1, key, s, maxScore, false));
+    });
+  }
+
+  // Footer
+  const footer = document.createElement('div');
+  footer.className = 'sfooter';
+  footer.innerHTML = `
+    <span>${oiKeys.length} OI${invKeys.length ? ` · ${invKeys.length} INV` : ''} · ${ranking.length} superficies</span>
+    <span>score = concentración × (1 + gradiente_T) · banda ±${((banda_pct||.01)*100).toFixed(0)}%</span>
+  `;
+
+  body.appendChild(hdr);
+  body.appendChild(rows);
+  body.appendChild(footer);
+  block.appendChild(head);
+  block.appendChild(body);
+  return block;
+}
+
+// ─── Build row ────────────────────────────────────────────────────────────────
+function buildRow(rank, key, s, maxScore, isLeader) {
+  const cfg    = SC[key] || { label:key, color:'#8aa0bc', bg:'#8aa0bc14', bd:'#8aa0bc30' };
+  const barPct = Math.min(100, (s.score / maxScore) * 100);
+  const ic     = interpClass(s.interpretacion);
+  const vc     = s.valor_spot_now > 0 ? 'pos' : s.valor_spot_now < 0 ? 'neg' : 'neu';
+  const pct    = s.percentil_spot ?? 50;
+
+  const row = document.createElement('div');
+  row.className = `rr${isLeader ? ' is-leader' : ''}`;
+  if (isLeader) row.style.borderLeftColor = cfg.color;
+
+  row.innerHTML = `
+    <span class="rr-num">${rank}</span>
+    <span class="rr-tag" style="background:${cfg.bg};color:${cfg.color};border:1px solid ${cfg.bd}">${cfg.label}</span>
+    <div class="rr-bar-wrap">
+      <div class="rr-bar" style="width:${barPct}%;background:${cfg.color}88"></div>
+    </div>
+    <span class="rr-score" style="color:${cfg.color}">${s.score.toFixed(3)}</span>
+    <span class="rr-conc">${s.concentracion.toFixed(3)}</span>
+    <span class="rr-grad">${s.gradiente_t.toFixed(3)}</span>
+    <span class="rr-val ${vc}">${fmtSci(s.valor_spot_now)}</span>
+    <div class="rr-pct">
+      <div class="pct-bar-wrap">
+        <div class="pct-bar-fill" style="width:${pct}%;background:${cfg.color}"></div>
+        <div class="pct-needle"   style="left:${pct}%;background:${cfg.color}"></div>
+      </div>
+      <div class="pct-label">${pct.toFixed(0)}p</div>
+    </div>
+    <span class="rr-flip ${s.flip_en_banda ? 'yes' : 'no'}">
+      ${s.flip_en_banda ? `⚠ ${s.nivel_flip ? s.nivel_flip.toFixed(1) : '—'}` : '—'}
+    </span>
+  `;
+  return row;
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function interpClass(interp) {
+  if (!interp) return 'baja';
+  const l = interp.toLowerCase();
+  if (l.startsWith('alta'))  return 'alta';
+  if (l.startsWith('media')) return 'media';
+  return 'baja';
+}
+function fmtPrice(n) {
+  if (n == null) return '—';
+  return n.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+}
+function fmtSci(n) {
+  if (n == null) return '—';
+  const a = Math.abs(n);
+  if (a === 0) return '0';
+  if (a < 0.01 || a >= 1e6) return n.toExponential(2);
+  return n.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+}
+
+// ─── Demo data ────────────────────────────────────────────────────────────────
+function loadDemo() {
+  const ts = new Date().toISOString().slice(0,19).replace('T',' ');
+  const ms = (score, conc, grad, val, pct, flip, nf) => ({
+    n_strikes_banda: 4 + Math.floor(Math.random()*6),
+    var_banda: +(conc*.004).toFixed(6), var_total:.005,
+    concentracion:conc, gradiente_t:grad, score,
+    flip_en_banda:flip, nivel_flip:flip?nf:null,
+    valor_spot_now:val, percentil_spot:pct,
+    interpretacion: score>=.6 ? 'ALTA — domina el comportamiento cerca del spot'
+                  : score>=.3 ? 'MEDIA — relevante, monitorear en conjunto'
+                  : 'BAJA — energía dispersa lejos del spot',
+  });
+
+  state = {
+    SPY: {
+      activo:'SPY', spot:567.84, banda_pct:.01, minutos_ahora:210,
+      generated_at:ts, tiene_inv:true, lider:'gamma',
+      ranking:['gamma','vomma','vanna','zomma','charm','delta','color','speed',
+               'inv_gamma','inv_vomma','inv_vanna','inv_zomma','inv_charm','inv_delta','inv_color','inv_speed'],
+      resumen:[],
+      por_superficie:{
+        gamma:    ms(.821,.734,.119, 4820, 72,false,null),
+        vomma:    ms(.593,.512,.159, 3850, 81,false,null),
+        vanna:    ms(.511,.478,.070,-1920, 28,true, 568.0),
+        zomma:    ms(.384,.354,.085, -580, 34,false,null),
+        charm:    ms(.341,.312,.095,  280, 55,false,null),
+        delta:    ms(.261,.248,.054,18420, 61,false,null),
+        color:    ms(.210,.198,.065,  120, 48,false,null),
+        speed:    ms(.183,.174,.053,  -84, 40,false,null),
+        inv_gamma:ms(.710,.628,.131, 2140, 68,true, 567.5),
+        inv_vomma:ms(.442,.381,.161, 1240, 59,false,null),
+        inv_vanna:ms(.291,.276,.054, -640, 32,true, 567.25),
+        inv_zomma:ms(.161,.154,.046, -210, 38,false,null),
+        inv_charm:ms(.142,.136,.044,   88, 52,false,null),
+        inv_delta:ms(.121,.118,.032, 4820, 57,false,null),
+        inv_color:ms(.094,.091,.033,   42, 45,false,null),
+        inv_speed:ms(.071,.069,.035,  -18, 43,false,null),
+      }
+    },
+    QQQ: {
+      activo:'QQQ', spot:476.22, banda_pct:.01, minutos_ahora:210,
+      generated_at:ts, tiene_inv:false, lider:'vomma',
+      ranking:['vomma','gamma','zomma','vanna','charm','delta','color','speed'],
+      resumen:[],
+      por_superficie:{
+        vomma:ms(.721,.654,.103, 2840, 76,false,null),
+        gamma:ms(.682,.624,.093, 3120, 70,true, 476.5),
+        zomma:ms(.544,.498,.092, -840, 30,false,null),
+        vanna:ms(.411,.384,.072,-1140, 26,true, 476.0),
+        charm:ms(.324,.306,.058,  180, 54,false,null),
+        delta:ms(.261,.248,.052,14220, 62,false,null),
+        color:ms(.194,.186,.043,   88, 48,false,null),
+        speed:ms(.144,.138,.044,  -52, 42,false,null),
+      }
+    }
+  };
+  document.getElementById('stateBox').style.display = 'none';
+  render();
+  setStatus('ok', 2);
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+loadAll();
+schedule();
+</script>
+</body>
+</html>
