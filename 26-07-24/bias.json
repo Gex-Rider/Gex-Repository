@@ -3,44 +3,47 @@
   "Confidence": 50.0,
   "MarketState": "PINNING",
   "Strategy": "STAY_FLAT",
-  "Risk": "LOW",
+  "Risk": "MODERATE",
   "EntryZone": null,
   "Targets": [
     {
-      "Level": 7435.6,
-      "Type": "ZERO_VOL"
-    },
-    {
-      "Level": 7470.7,
+      "Level": 7413.38,
       "Type": "ZERO_OI"
     },
     {
-      "Level": 7500.0,
-      "Type": "MAXCP"
+      "Level": 7447.75,
+      "Type": "MINGEX"
+    },
+    {
+      "Level": 7475.0,
+      "Type": "WALL_ABOVE"
     }
   ],
   "Invalidation": {
     "Level": 0,
     "Type": ""
   },
-  "Narrative": "No directional bias. Range defined by 7395\u20137436. Fade extremes.",
+  "Narrative": "No directional bias. Range defined by 7431\u20137413. Fade extremes.",
+  "Warnings": [
+    "TIMING DESFAVORABLE \u2014 EOD/pin zone"
+  ],
   "Drivers": {
     "GammaState": "ALIGNED_BEAR",
     "DealerRegime": "CHARM_DOMINATED",
     "Positioning": "NEUTRAL_POSITIONING",
     "VIXConf": "NEUTRAL",
-    "Confluence": 3.4,
+    "Confluence": 3.3,
     "SqueezeImm": false,
     "PanicImm": false,
     "BestSignal": ""
   },
   "Diagnostics": {
-    "DirectionalScore": 36.3,
+    "DirectionalScore": 35.7,
     "RegimeScore": 50.1,
-    "MomentumScore": 44.5,
-    "RiskScore": 26.2,
-    "TimingScore": "FAVORABLE",
-    "GammaAlign": 39.3,
+    "MomentumScore": 50.2,
+    "RiskScore": 47.0,
+    "TimingScore": "AVOID",
+    "GammaAlign": 40.9,
     "TradeBias": "NEUTRAL",
     "TradeConf": 0.0,
     "ExpectedMove": "PIN",
@@ -52,10 +55,10 @@
     "NarrativeDetail": {
       "Regime": "EOD charm decay is the dominant force \u2014 as time passes, dealers must re-hedge toward the high-charm strike.",
       "Structure": "Spot is below both GEX flip levels. Structure is fully bearish \u2014 dealers are short gamma on both measures, which amplifies downside.",
-      "Levels": "Resistance at 7436 (Zero Vol). next level 7471 (Zero Oi). support at 7395 (Min Vgex).",
-      "Plan": "No directional bias. Range defined by 7395\u20137436. Fade extremes.",
-      "Risk": "Risk is LOW \u2014 dealer stress contained and structure stable. VIX at 18.7 \u2014 watch for expansion.",
-      "Full": "Market is NEUTRAL. Regime: CHARM DOMINATED. Range 7395\u20137436. Fade extremes, buy support, sell resistance."
+      "Levels": "Resistance at 7413 (Zero Oi). next level 7448 (Mingex). support at 7431 (Min Vgex).",
+      "Plan": "No directional bias. Range defined by 7431\u20137413. Fade extremes.",
+      "Risk": "Risk is MODERATE \u2014 monitor dealer stress before adding size. VIX at 18.8 \u2014 watch for expansion. Charm acceleration active \u2014 EOD gamma decay distorting hedging.",
+      "Full": "Market is NEUTRAL. Regime: CHARM DOMINATED. Range 7431\u20137413. Fade extremes, buy support, sell resistance."
     },
     "SessionPlaybook": {
       "Bias": "FLAT",
@@ -63,71 +66,24 @@
       "MarketStructure": "EOD_DECAY_DAY",
       "Confidence": "MEDIUM",
       "BestEntryZone": "NO_TRADE",
-      "TargetZone1": 7435.6,
-      "TargetZone1_label": "ZERO_VOL",
-      "TargetZone2": 7470.7,
-      "TargetZone2_label": "ZERO_OI",
-      "TargetZone3": 7500.0,
-      "TargetZone3_label": "MAXCP",
+      "TargetZone1": 7413.38,
+      "TargetZone1_label": "ZERO_OI",
+      "TargetZone2": 7447.75,
+      "TargetZone2_label": "MINGEX",
+      "TargetZone3": 7475.0,
+      "TargetZone3_label": "WALL_ABOVE",
       "Invalidation": 0,
       "Invalidation_label": "Gamma Zero flip level",
       "RiskReward": "\u2014",
       "ExpectedBehavior": "EOD charm decay dominates. Expect drift toward highest charm strike.",
-      "RiskWarning": "Range-bound day \u2014 fade breakouts, target the mean."
+      "RiskWarning": "Charm acceleration active \u2014 avoid new positions into close. | Range-bound day \u2014 fade breakouts, target the mean."
     }
   },
   "AssetPlaybooks": {
-    "ES": {
-      "Ticker": "ES",
-      "Bias": "BEARISH",
-      "Confidence": 31.1,
-      "State": "PINNING",
-      "Strategy": "SCALP_RANGE",
-      "GammaState": "ALIGNED_BEAR",
-      "SqueezeImm": false,
-      "EntryZone": null,
-      "Targets": [
-        {
-          "Level": 7400.0,
-          "Type": "MIN_vGEX"
-        },
-        {
-          "Level": 7275.0,
-          "Type": "WALL_BELOW"
-        },
-        {
-          "Level": 7100.0,
-          "Type": "MINCP"
-        }
-      ],
-      "Supports": [
-        {
-          "Level": 7446.86,
-          "Type": "ZERO_OI"
-        },
-        {
-          "Level": 7475.0,
-          "Type": "MINGEX"
-        },
-        {
-          "Level": 7500.0,
-          "Type": "MAX_vGEX"
-        }
-      ],
-      "Invalidation": {
-        "Level": 7446.86,
-        "Type": "ZERO_OI"
-      },
-      "Narrative": "ES EOD charm decay dominant \u2014 spot drawn toward charm magnet at 7440.0.",
-      "Spot": 7437.75,
-      "Regime": "CHARM_DOMINATED",
-      "LongScore": 35.1,
-      "ShortScore": 50.8
-    },
     "SPY": {
       "Ticker": "SPY",
       "Bias": "BEARISH",
-      "Confidence": 19.6,
+      "Confidence": 39.3,
       "State": "PINNING",
       "Strategy": "SCALP_RANGE",
       "GammaState": "ALIGNED_BEAR",
@@ -135,549 +91,608 @@
       "EntryZone": null,
       "Targets": [
         {
-          "Level": 735.0,
+          "Level": 737.6,
           "Type": "MINCP"
+        },
+        {
+          "Level": 730.0,
+          "Type": "WALL_BELOW"
         }
       ],
       "Supports": [
         {
-          "Level": 740.59,
-          "Type": "MINGEX"
+          "Level": 739.48,
+          "Type": "ZERO_OI"
         },
         {
-          "Level": 745.0,
+          "Level": 743.33,
           "Type": "MAXCP"
         }
       ],
       "Invalidation": {
-        "Level": 745.0,
-        "Type": "MAXCP"
-      },
-      "Narrative": "SPY dealers long gamma absorbing vol \u2014 spot pinned near 740.08.",
-      "Spot": 737.98,
-      "Regime": "LONG_GAMMA_PINNING",
-      "LongScore": 39.6,
-      "ShortScore": 40.7
-    },
-    "QQQ": {
-      "Ticker": "QQQ",
-      "Bias": "BEARISH",
-      "Confidence": 36.1,
-      "State": "PINNING",
-      "Strategy": "SCALP_RANGE",
-      "GammaState": "ALIGNED_BEAR",
-      "SqueezeImm": false,
-      "EntryZone": null,
-      "Targets": [
-        {
-          "Level": 685.0,
-          "Type": "MINCP"
-        }
-      ],
-      "Supports": [
-        {
-          "Level": 690.0,
-          "Type": "MINGEX"
-        },
-        {
-          "Level": 692.88,
-          "Type": "ZERO_OI"
-        },
-        {
-          "Level": 695.0,
-          "Type": "MAX_vGEX"
-        }
-      ],
-      "Invalidation": {
-        "Level": 692.88,
+        "Level": 739.48,
         "Type": "ZERO_OI"
       },
-      "Narrative": "QQQ dealers long gamma absorbing vol \u2014 spot pinned near 692.82.",
-      "Spot": 689.77,
-      "Regime": "LONG_GAMMA_PINNING",
-      "LongScore": 39.6,
-      "ShortScore": 40.8
-    },
-    "SPX": {
-      "Ticker": "SPX",
-      "Bias": "BEARISH",
-      "Confidence": 33.6,
-      "State": "PINNING",
-      "Strategy": "SCALP_RANGE",
-      "GammaState": "ALIGNED_BEAR",
-      "SqueezeImm": false,
-      "EntryZone": null,
-      "Targets": [
-        {
-          "Level": 7392.73,
-          "Type": "MINGEX"
-        },
-        {
-          "Level": 7300.0,
-          "Type": "MINCP"
-        }
-      ],
-      "Supports": [
-        {
-          "Level": 7420.89,
-          "Type": "ZERO_VOL"
-        },
-        {
-          "Level": 7464.16,
-          "Type": "ZERO_OI"
-        },
-        {
-          "Level": 7500.0,
-          "Type": "MAXCP"
-        }
-      ],
-      "Invalidation": {
-        "Level": 7464.16,
-        "Type": "ZERO_OI"
-      },
-      "Narrative": "SPX EOD charm decay dominant \u2014 spot drawn toward charm magnet at 7400.0.",
-      "Spot": 7408.3,
+      "Narrative": "SPY EOD charm decay dominant \u2014 spot drawn toward charm magnet at 738.0.",
+      "Spot": 738.01,
       "Regime": "CHARM_DOMINATED",
-      "LongScore": 37.3,
-      "ShortScore": 47.7
+      "LongScore": 39.6,
+      "ShortScore": 49.8
     },
     "NQ": {
       "Ticker": "NQ",
       "Bias": "BEARISH",
-      "Confidence": 40.7,
+      "Confidence": 47.3,
       "State": "PINNING",
       "Strategy": "SCALP_RANGE",
       "GammaState": "ALIGNED_BEAR",
       "SqueezeImm": false,
       "EntryZone": {
-        "Low": 28458.94,
-        "High": 28565.58,
+        "Low": 28222.57,
+        "High": 28328.95,
         "Logic": "MIDPOINT_FADE"
       },
       "Targets": [
         {
-          "Level": 28501.82,
+          "Level": 28250.0,
           "Type": "MINGEX"
         },
         {
-          "Level": 28100.0,
+          "Level": 28000.0,
           "Type": "MINCP"
         },
         {
-          "Level": 27500.0,
+          "Level": 27040.0,
           "Type": "WALL_BELOW"
         }
       ],
       "Supports": [
         {
-          "Level": 28522.7,
-          "Type": "ZERO_OI"
+          "Level": 28301.52,
+          "Type": "ZERO_VOL"
         },
         {
-          "Level": 28800.0,
-          "Type": "MAX_vGEX"
+          "Level": 28500.0,
+          "Type": "WALL_ABOVE"
         },
         {
-          "Level": 29000.0,
+          "Level": 28650.0,
           "Type": "MAXCP"
         }
       ],
       "Invalidation": {
-        "Level": 28522.7,
-        "Type": "ZERO_OI"
+        "Level": 28301.52,
+        "Type": "ZERO_VOL"
       },
-      "Narrative": "NQ EOD charm decay dominant \u2014 spot drawn toward charm magnet at 28510.0.",
-      "Spot": 28510.0,
+      "Narrative": "NQ EOD charm decay dominant \u2014 spot drawn toward charm magnet at 28250.0.",
+      "Spot": 28255.25,
       "Regime": "CHARM_DOMINATED",
-      "LongScore": 35.5,
-      "ShortScore": 48.2
+      "LongScore": 29.4,
+      "ShortScore": 25.8
     },
-    "NDX": {
-      "Ticker": "NDX",
+    "SPX": {
+      "Ticker": "SPX",
       "Bias": "BEARISH",
-      "Confidence": 28.1,
+      "Confidence": 41.7,
       "State": "PINNING",
       "Strategy": "SCALP_RANGE",
       "GammaState": "ALIGNED_BEAR",
       "SqueezeImm": false,
-      "EntryZone": null,
+      "EntryZone": {
+        "Low": 7392.76,
+        "High": 7420.62,
+        "Logic": "MIDPOINT_FADE"
+      },
       "Targets": [
         {
-          "Level": 28416.67,
-          "Type": "MIN_vGEX"
+          "Level": 7400.0,
+          "Type": "MINGEX"
         },
         {
-          "Level": 28300.0,
+          "Level": 7300.0,
           "Type": "WALL_BELOW"
-        },
-        {
-          "Level": 27900.0,
-          "Type": "MINCP"
         }
       ],
       "Supports": [
         {
-          "Level": 28474.92,
+          "Level": 7413.38,
           "Type": "ZERO_OI"
         },
         {
-          "Level": 28692.0,
-          "Type": "MAXGEX"
+          "Level": 7450.0,
+          "Type": "MAXCP"
         },
         {
-          "Level": 28800.0,
+          "Level": 7500.0,
           "Type": "WALL_ABOVE"
         }
       ],
       "Invalidation": {
-        "Level": 28692.0,
-        "Type": "MAXGEX"
+        "Level": 7413.38,
+        "Type": "ZERO_OI"
       },
-      "Narrative": "NDX EOD charm decay dominant \u2014 spot drawn toward charm magnet at 28450.0.",
-      "Spot": 28454.81,
+      "Narrative": "SPX EOD charm decay dominant \u2014 spot drawn toward charm magnet at 7400.0.",
+      "Spot": 7402.66,
       "Regime": "CHARM_DOMINATED",
-      "LongScore": 34.6,
-      "ShortScore": 47.1
+      "LongScore": 39.3,
+      "ShortScore": 54.7
+    },
+    "ES": {
+      "Ticker": "ES",
+      "Bias": "BEARISH",
+      "Confidence": 37.5,
+      "State": "PINNING",
+      "Strategy": "SCALP_RANGE",
+      "GammaState": "VOL_BULL_OI_BEAR",
+      "SqueezeImm": false,
+      "EntryZone": null,
+      "Targets": [
+        {
+          "Level": 7430.71,
+          "Type": "MIN_vGEX"
+        },
+        {
+          "Level": 7275.0,
+          "Type": "WALL_BELOW"
+        }
+      ],
+      "Supports": [
+        {
+          "Level": 7447.21,
+          "Type": "MINGEX"
+        },
+        {
+          "Level": 7475.0,
+          "Type": "WALL_ABOVE"
+        },
+        {
+          "Level": 7500.0,
+          "Type": "MAXCP"
+        }
+      ],
+      "Invalidation": {
+        "Level": 7500.0,
+        "Type": "MAXCP"
+      },
+      "Narrative": "ES EOD charm decay dominant \u2014 spot drawn toward charm magnet at 7440.0.",
+      "Spot": 7439.25,
+      "Regime": "CHARM_DOMINATED",
+      "LongScore": 55.2,
+      "ShortScore": 38.8
+    },
+    "NDX": {
+      "Ticker": "NDX",
+      "Bias": "BEARISH",
+      "Confidence": 51.8,
+      "State": "PINNING",
+      "Strategy": "SCALP_RANGE",
+      "GammaState": "ALIGNED_BEAR",
+      "SqueezeImm": false,
+      "EntryZone": {
+        "Low": 28041.26,
+        "High": 28146.96,
+        "Logic": "MIDPOINT_FADE"
+      },
+      "Targets": [
+        {
+          "Level": 28025.0,
+          "Type": "MINCP"
+        },
+        {
+          "Level": 26790.0,
+          "Type": "WALL_BELOW"
+        }
+      ],
+      "Supports": [
+        {
+          "Level": 28163.22,
+          "Type": "MINGEX"
+        },
+        {
+          "Level": 28500.0,
+          "Type": "MAXCP"
+        },
+        {
+          "Level": 28680.0,
+          "Type": "WALL_ABOVE"
+        }
+      ],
+      "Invalidation": {
+        "Level": 28680.0,
+        "Type": "WALL_ABOVE"
+      },
+      "Narrative": "NDX EOD charm decay dominant \u2014 spot drawn toward charm magnet at 28100.0.",
+      "Spot": 28093.12,
+      "Regime": "CHARM_DOMINATED",
+      "LongScore": 29.6,
+      "ShortScore": 31.5
+    },
+    "QQQ": {
+      "Ticker": "QQQ",
+      "Bias": "BEARISH",
+      "Confidence": 43.6,
+      "State": "PINNING",
+      "Strategy": "SCALP_RANGE",
+      "GammaState": "ALIGNED_BEAR",
+      "SqueezeImm": false,
+      "EntryZone": {
+        "Low": 682.71,
+        "High": 685.29,
+        "Logic": "MIDPOINT_FADE"
+      },
+      "Targets": [
+        {
+          "Level": 683.0,
+          "Type": "MINCP"
+        },
+        {
+          "Level": 680.0,
+          "Type": "WALL_BELOW"
+        }
+      ],
+      "Supports": [
+        {
+          "Level": 685.0,
+          "Type": "MINGEX"
+        },
+        {
+          "Level": 689.5,
+          "Type": "ZERO_OI"
+        },
+        {
+          "Level": 692.0,
+          "Type": "MAXCP"
+        }
+      ],
+      "Invalidation": {
+        "Level": 689.5,
+        "Type": "ZERO_OI"
+      },
+      "Narrative": "QQQ EOD charm decay dominant \u2014 spot drawn toward charm magnet at 685.0.",
+      "Spot": 683.54,
+      "Regime": "CHARM_DOMINATED",
+      "LongScore": 52.7,
+      "ShortScore": 40.2
     }
   },
   "OpportunityRank": {
     "BestLongs": [],
     "BestShorts": [
-      "NQ",
-      "ES",
+      "NDX",
       "SPX",
       "QQQ",
-      "NDX",
+      "NQ",
+      "ES",
       "SPY"
     ],
     "RankingTable": [
       {
-        "Activo": "NQ",
+        "Activo": "NDX",
         "Bias": "BEARISH",
-        "Confidence": 40.7,
-        "Score": 29.5,
+        "Confidence": 51.8,
+        "Score": 31.8,
         "Strategy": "SCALP_RANGE",
         "State": "PINNING",
-        "LongScore": 35.5,
-        "ShortScore": 48.2
-      },
-      {
-        "Activo": "ES",
-        "Bias": "BEARISH",
-        "Confidence": 31.1,
-        "Score": 24.9,
-        "Strategy": "SCALP_RANGE",
-        "State": "PINNING",
-        "LongScore": 35.1,
-        "ShortScore": 50.8
+        "LongScore": 29.6,
+        "ShortScore": 31.5
       },
       {
         "Activo": "SPX",
         "Bias": "BEARISH",
-        "Confidence": 33.6,
-        "Score": 24.3,
+        "Confidence": 41.7,
+        "Score": 31.2,
         "Strategy": "SCALP_RANGE",
         "State": "PINNING",
-        "LongScore": 37.3,
-        "ShortScore": 47.7
+        "LongScore": 39.3,
+        "ShortScore": 54.7
       },
       {
         "Activo": "QQQ",
         "Bias": "BEARISH",
-        "Confidence": 36.1,
-        "Score": 22.1,
+        "Confidence": 43.6,
+        "Score": 31.2,
         "Strategy": "SCALP_RANGE",
         "State": "PINNING",
-        "LongScore": 39.6,
-        "ShortScore": 40.8
+        "LongScore": 52.7,
+        "ShortScore": 40.2
       },
       {
-        "Activo": "NDX",
+        "Activo": "NQ",
         "Bias": "BEARISH",
-        "Confidence": 28.1,
-        "Score": 21.9,
+        "Confidence": 47.3,
+        "Score": 29.8,
         "Strategy": "SCALP_RANGE",
         "State": "PINNING",
-        "LongScore": 34.6,
-        "ShortScore": 47.1
+        "LongScore": 29.4,
+        "ShortScore": 25.8
+      },
+      {
+        "Activo": "ES",
+        "Bias": "BEARISH",
+        "Confidence": 37.5,
+        "Score": 29.1,
+        "Strategy": "SCALP_RANGE",
+        "State": "PINNING",
+        "LongScore": 55.2,
+        "ShortScore": 38.8
       },
       {
         "Activo": "SPY",
         "Bias": "BEARISH",
-        "Confidence": 19.6,
-        "Score": 12.2,
+        "Confidence": 39.3,
+        "Score": 27.7,
         "Strategy": "SCALP_RANGE",
         "State": "PINNING",
         "LongScore": 39.6,
-        "ShortScore": 40.7
+        "ShortScore": 49.8
       }
     ]
   },
   "per_asset": {
-    "ES": {
+    "SPY": {
       "bias": "BEARISH",
-      "confidence": 31.1,
+      "confidence": 39.3,
       "regime": "CHARM_DOMINATED",
-      "regime_conf": 39.4,
-      "regime_dur": 26,
+      "regime_conf": 74.8,
+      "regime_dur": 66,
       "positioning": "NEUTRAL_POSITIONING",
-      "long_score": 35.1,
-      "short_score": 50.8,
-      "ts_conf": 31.4,
+      "long_score": 39.6,
+      "short_score": 49.8,
+      "ts_conf": 20.4,
       "oi_score": 50.0,
-      "struct_score": 40.0,
-      "gex_profile": 74.7,
-      "vgex_score": 59.4,
-      "vgex_bias": "BULLISH",
+      "struct_score": 30.0,
+      "gex_profile": 93.7,
+      "vgex_score": 0.0,
+      "vgex_bias": "BEARISH",
       "dex_score": 10.0,
       "inv_score": 50.0,
       "inv_dir": "NEUTRAL",
-      "charm_gravity": 10.0,
-      "eod_accel": 1.0,
-      "vanna_score": 63.2,
-      "flow_score": 34.1,
-      "surface_score": 67.0,
-      "surf_instab": 50.0,
-      "pin_prob": 0.15,
+      "charm_gravity": 30.0,
+      "eod_accel": 4.59,
+      "vanna_score": 56.8,
+      "flow_score": 57.7,
+      "surface_score": 81.0,
+      "surf_instab": 80.0,
+      "pin_prob": 0.8,
       "void_score": 0.0,
       "trap_score": 0.0,
-      "dealer_stress": 35.0,
+      "dealer_stress": 59.6,
       "absorb_score": 0.0,
       "exhaust_score": 0.0,
-      "squeeze_score": 20.5,
-      "panic_score": 29.8,
-      "vol_score": 39.6,
+      "squeeze_score": 19.1,
+      "panic_score": 15.1,
+      "vol_score": 79.5,
+      "signal_boost": 0.0,
+      "charm_cascade": false,
+      "magnet": 738.0,
+      "wall_above": 740.0,
+      "wall_below": 730.0,
+      "inv_walls": {},
+      "zero": 743.07,
+      "zero_oi": 738.85,
+      "spot": 738.01,
+      "gamma_zero_state": "ALIGNED_BEAR"
+    },
+    "NQ": {
+      "bias": "BEARISH",
+      "confidence": 47.3,
+      "regime": "CHARM_DOMINATED",
+      "regime_conf": 45.0,
+      "regime_dur": 0,
+      "positioning": "NEUTRAL_POSITIONING",
+      "long_score": 29.4,
+      "short_score": 25.8,
+      "ts_conf": 7.2,
+      "oi_score": 50.0,
+      "struct_score": 45.0,
+      "gex_profile": 99.7,
+      "vgex_score": 4.0,
+      "vgex_bias": "BEARISH",
+      "dex_score": 10.0,
+      "inv_score": 50.0,
+      "inv_dir": "NEUTRAL",
+      "charm_gravity": 30.0,
+      "eod_accel": 4.59,
+      "vanna_score": 80.0,
+      "flow_score": 58.2,
+      "surface_score": 58.0,
+      "surf_instab": 40.0,
+      "pin_prob": 0.4,
+      "void_score": 0.0,
+      "trap_score": 100.0,
+      "dealer_stress": 40.2,
+      "absorb_score": 0.0,
+      "exhaust_score": 15.0,
+      "squeeze_score": 10.0,
+      "panic_score": 30.0,
+      "vol_score": 50.0,
+      "signal_boost": 0.0,
+      "charm_cascade": false,
+      "magnet": 28250.0,
+      "wall_above": 28500.0,
+      "wall_below": 27040.0,
+      "inv_walls": {},
+      "zero": 28289.98,
+      "zero_oi": 28319.98,
+      "spot": 28255.25,
+      "gamma_zero_state": "ALIGNED_BEAR"
+    },
+    "SPX": {
+      "bias": "BEARISH",
+      "confidence": 41.7,
+      "regime": "CHARM_DOMINATED",
+      "regime_conf": 70.5,
+      "regime_dur": 131,
+      "positioning": "NEUTRAL_POSITIONING",
+      "long_score": 39.3,
+      "short_score": 54.7,
+      "ts_conf": 30.8,
+      "oi_score": 50.0,
+      "struct_score": 45.0,
+      "gex_profile": 94.9,
+      "vgex_score": 0.0,
+      "vgex_bias": "BEARISH",
+      "dex_score": 10.0,
+      "inv_score": 50.0,
+      "inv_dir": "NEUTRAL",
+      "charm_gravity": 30.0,
+      "eod_accel": 4.59,
+      "vanna_score": 60.5,
+      "flow_score": 40.3,
+      "surface_score": 48.0,
+      "surf_instab": 40.0,
+      "pin_prob": 0.4,
+      "void_score": 0.0,
+      "trap_score": 0.0,
+      "dealer_stress": 28.0,
+      "absorb_score": 20.0,
+      "exhaust_score": 0.0,
+      "squeeze_score": 20.2,
+      "panic_score": 14.9,
+      "vol_score": 50.5,
+      "signal_boost": 0.5,
+      "charm_cascade": false,
+      "magnet": 7400.0,
+      "wall_above": 7500.0,
+      "wall_below": 7300.0,
+      "inv_walls": {},
+      "zero": 7412.21,
+      "zero_oi": 7413.02,
+      "spot": 7402.66,
+      "gamma_zero_state": "ALIGNED_BEAR"
+    },
+    "ES": {
+      "bias": "BEARISH",
+      "confidence": 37.5,
+      "regime": "CHARM_DOMINATED",
+      "regime_conf": 77.6,
+      "regime_dur": 185,
+      "positioning": "NEUTRAL_POSITIONING",
+      "long_score": 55.2,
+      "short_score": 38.8,
+      "ts_conf": 32.8,
+      "oi_score": 50.0,
+      "struct_score": 55.0,
+      "gex_profile": 97.9,
+      "vgex_score": 16.4,
+      "vgex_bias": "BEARISH",
+      "dex_score": 10.0,
+      "inv_score": 50.0,
+      "inv_dir": "NEUTRAL",
+      "charm_gravity": 100.0,
+      "eod_accel": 4.59,
+      "vanna_score": 53.2,
+      "flow_score": 52.7,
+      "surface_score": 81.0,
+      "surf_instab": 80.0,
+      "pin_prob": 0.25,
+      "void_score": 0.0,
+      "trap_score": 67.5,
+      "dealer_stress": 37.6,
+      "absorb_score": 20.0,
+      "exhaust_score": 35.0,
+      "squeeze_score": 15.0,
+      "panic_score": 50.0,
+      "vol_score": 50.0,
       "signal_boost": 0.0,
       "charm_cascade": false,
       "magnet": 7440.0,
       "wall_above": 7475.0,
       "wall_below": 7275.0,
       "inv_walls": {},
-      "zero": 7452.64,
-      "zero_oi": 7444.97,
-      "spot": 7437.75,
-      "gamma_zero_state": "ALIGNED_BEAR"
+      "zero": 7425.0,
+      "zero_oi": 7441.97,
+      "spot": 7439.25,
+      "gamma_zero_state": "VOL_BULL_OI_BEAR"
     },
-    "SPY": {
+    "NDX": {
       "bias": "BEARISH",
-      "confidence": 19.6,
-      "regime": "LONG_GAMMA_PINNING",
-      "regime_conf": 40.6,
-      "regime_dur": 74,
+      "confidence": 51.8,
+      "regime": "CHARM_DOMINATED",
+      "regime_conf": 58.6,
+      "regime_dur": 337,
       "positioning": "NEUTRAL_POSITIONING",
-      "long_score": 39.6,
-      "short_score": 40.7,
-      "ts_conf": 2.2,
+      "long_score": 29.6,
+      "short_score": 31.5,
+      "ts_conf": 3.8,
       "oi_score": 50.0,
       "struct_score": 30.0,
-      "gex_profile": 75.5,
+      "gex_profile": 86.2,
       "vgex_score": 0.0,
       "vgex_bias": "BEARISH",
       "dex_score": 10.0,
       "inv_score": 50.0,
       "inv_dir": "NEUTRAL",
-      "charm_gravity": 10.0,
-      "eod_accel": 1.0,
-      "vanna_score": 82.5,
-      "flow_score": 50.0,
-      "surface_score": 81.0,
-      "surf_instab": 40.0,
-      "pin_prob": 0.35,
+      "charm_gravity": 30.0,
+      "eod_accel": 4.59,
+      "vanna_score": 72.5,
+      "flow_score": 56.5,
+      "surface_score": 58.0,
+      "surf_instab": 21.9,
+      "pin_prob": 0.4,
       "void_score": 0.0,
-      "trap_score": 0.0,
-      "dealer_stress": 20.9,
+      "trap_score": 59.2,
+      "dealer_stress": 37.1,
       "absorb_score": 0.0,
       "exhaust_score": 0.0,
-      "squeeze_score": 0.0,
-      "panic_score": 15.0,
-      "vol_score": 30.0,
-      "signal_boost": 0.0,
+      "squeeze_score": 10.0,
+      "panic_score": 30.0,
+      "vol_score": 50.0,
+      "signal_boost": 0.22,
       "charm_cascade": false,
-      "magnet": 738.0,
-      "wall_above": 740.0,
-      "wall_below": 735.0,
+      "magnet": 28100.0,
+      "wall_above": 28680.0,
+      "wall_below": 26790.0,
       "inv_walls": {},
-      "zero": 740.08,
-      "zero_oi": 741.62,
-      "spot": 737.98,
+      "zero": 28146.97,
+      "zero_oi": 28210.0,
+      "spot": 28093.12,
       "gamma_zero_state": "ALIGNED_BEAR"
     },
     "QQQ": {
       "bias": "BEARISH",
-      "confidence": 36.1,
-      "regime": "LONG_GAMMA_PINNING",
-      "regime_conf": 40.7,
-      "regime_dur": 17,
-      "positioning": "NEUTRAL_POSITIONING",
-      "long_score": 39.6,
-      "short_score": 40.8,
-      "ts_conf": 2.4,
-      "oi_score": 50.0,
-      "struct_score": 40.0,
-      "gex_profile": 82.5,
-      "vgex_score": 0.0,
-      "vgex_bias": "BEARISH",
-      "dex_score": 10.0,
-      "inv_score": 50.0,
-      "inv_dir": "NEUTRAL",
-      "charm_gravity": 10.0,
-      "eod_accel": 1.0,
-      "vanna_score": 82.5,
-      "flow_score": 50.0,
-      "surface_score": 81.0,
-      "surf_instab": 40.0,
-      "pin_prob": 0.35,
-      "void_score": 0.0,
-      "trap_score": 0.0,
-      "dealer_stress": 20.7,
-      "absorb_score": 0.0,
-      "exhaust_score": 0.0,
-      "squeeze_score": 0.0,
-      "panic_score": 15.0,
-      "vol_score": 30.0,
-      "signal_boost": 0.0,
-      "charm_cascade": false,
-      "magnet": 690.0,
-      "wall_above": 700.0,
-      "wall_below": 685.0,
-      "inv_walls": {},
-      "zero": 692.82,
-      "zero_oi": 692.92,
-      "spot": 689.77,
-      "gamma_zero_state": "ALIGNED_BEAR"
-    },
-    "SPX": {
-      "bias": "BEARISH",
-      "confidence": 33.6,
+      "confidence": 43.6,
       "regime": "CHARM_DOMINATED",
-      "regime_conf": 40.1,
-      "regime_dur": 33,
+      "regime_conf": 77.8,
+      "regime_dur": 159,
       "positioning": "NEUTRAL_POSITIONING",
-      "long_score": 37.3,
-      "short_score": 47.7,
-      "ts_conf": 20.8,
-      "oi_score": 50.0,
-      "struct_score": 35.0,
-      "gex_profile": 61.7,
-      "vgex_score": 28.7,
-      "vgex_bias": "BEARISH",
-      "dex_score": 10.0,
-      "inv_score": 50.0,
-      "inv_dir": "NEUTRAL",
-      "charm_gravity": 10.0,
-      "eod_accel": 1.0,
-      "vanna_score": 62.2,
-      "flow_score": 48.6,
-      "surface_score": 58.0,
-      "surf_instab": 0.0,
-      "pin_prob": 0.0,
-      "void_score": 0.0,
-      "trap_score": 0.0,
-      "dealer_stress": 36.1,
-      "absorb_score": 40.0,
-      "exhaust_score": 35.0,
-      "squeeze_score": 12.4,
-      "panic_score": 37.1,
-      "vol_score": 42.4,
-      "signal_boost": 0.0,
-      "charm_cascade": false,
-      "magnet": 7400.0,
-      "wall_above": 7500.0,
-      "wall_below": 7300.0,
-      "inv_walls": {},
-      "zero": 7411.78,
-      "zero_oi": 7464.16,
-      "spot": 7408.3,
-      "gamma_zero_state": "ALIGNED_BEAR"
-    },
-    "NQ": {
-      "bias": "BEARISH",
-      "confidence": 40.7,
-      "regime": "CHARM_DOMINATED",
-      "regime_conf": 40.0,
-      "regime_dur": 3,
-      "positioning": "NEUTRAL_POSITIONING",
-      "long_score": 35.5,
-      "short_score": 48.2,
-      "ts_conf": 25.4,
-      "oi_score": 50.0,
-      "struct_score": 45.0,
-      "gex_profile": 70.1,
-      "vgex_score": 0.0,
-      "vgex_bias": "BEARISH",
-      "dex_score": 10.0,
-      "inv_score": 50.0,
-      "inv_dir": "NEUTRAL",
-      "charm_gravity": 10.0,
-      "eod_accel": 1.0,
-      "vanna_score": 61.9,
-      "flow_score": 31.3,
-      "surface_score": 50.0,
-      "surf_instab": 0.0,
-      "pin_prob": 0.15,
-      "void_score": 0.0,
-      "trap_score": 100.0,
-      "dealer_stress": 28.4,
-      "absorb_score": 20.0,
-      "exhaust_score": 35.0,
-      "squeeze_score": 6.5,
-      "panic_score": 30.0,
-      "vol_score": 25.4,
-      "signal_boost": 0.0,
-      "charm_cascade": false,
-      "magnet": 28510.0,
-      "wall_above": 28800.0,
-      "wall_below": 27500.0,
-      "inv_walls": {},
-      "zero": 28527.0,
-      "zero_oi": 28519.26,
-      "spot": 28510.0,
-      "gamma_zero_state": "ALIGNED_BEAR"
-    },
-    "NDX": {
-      "bias": "BEARISH",
-      "confidence": 28.1,
-      "regime": "CHARM_DOMINATED",
-      "regime_conf": 40.0,
-      "regime_dur": 72,
-      "positioning": "NEUTRAL_POSITIONING",
-      "long_score": 34.6,
-      "short_score": 47.1,
+      "long_score": 52.7,
+      "short_score": 40.2,
       "ts_conf": 25.0,
       "oi_score": 50.0,
-      "struct_score": 45.0,
-      "gex_profile": 64.1,
-      "vgex_score": 47.6,
-      "vgex_bias": "NEUTRAL",
+      "struct_score": 40.0,
+      "gex_profile": 96.5,
+      "vgex_score": 0.0,
+      "vgex_bias": "BEARISH",
       "dex_score": 10.0,
       "inv_score": 50.0,
       "inv_dir": "NEUTRAL",
-      "charm_gravity": 10.0,
-      "eod_accel": 1.0,
-      "vanna_score": 59.9,
-      "flow_score": 50.0,
-      "surface_score": 54.0,
-      "surf_instab": 17.0,
-      "pin_prob": 0.15,
+      "charm_gravity": 100.0,
+      "eod_accel": 4.59,
+      "vanna_score": 62.0,
+      "flow_score": 56.1,
+      "surface_score": 58.0,
+      "surf_instab": 36.9,
+      "pin_prob": 0.6,
       "void_score": 0.0,
       "trap_score": 0.0,
-      "dealer_stress": 20.0,
-      "absorb_score": 0.0,
+      "dealer_stress": 37.0,
+      "absorb_score": 20.0,
       "exhaust_score": 0.0,
-      "squeeze_score": 0.0,
-      "panic_score": 15.0,
-      "vol_score": 30.0,
+      "squeeze_score": 19.6,
+      "panic_score": 15.1,
+      "vol_score": 49.9,
       "signal_boost": 0.0,
       "charm_cascade": false,
-      "magnet": 28450.0,
-      "wall_above": 28800.0,
-      "wall_below": 28300.0,
+      "magnet": 685.0,
+      "wall_above": 700.0,
+      "wall_below": 680.0,
       "inv_walls": {},
-      "zero": 28493.56,
-      "zero_oi": 28460.0,
-      "spot": 28454.81,
+      "zero": 689.19,
+      "zero_oi": 689.36,
+      "spot": 683.54,
       "gamma_zero_state": "ALIGNED_BEAR"
     }
   },
-  "Timestamp": "01:13:30"
+  "Timestamp": "14:41:29"
 }
