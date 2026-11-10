@@ -1,89 +1,86 @@
 {
   "Bias": "NEUTRAL",
-  "Confidence": 55.0,
-  "MarketState": "RANGE",
-  "Strategy": "FADE_BREAKOUTS",
+  "Confidence": 50.0,
+  "MarketState": "PINNING",
+  "Strategy": "STAY_FLAT",
   "Risk": "LOW",
   "EntryZone": null,
   "Targets": [
     {
-      "Level": 7413.39,
-      "Type": "ZERO_VOL"
-    },
-    {
-      "Level": 7500.0,
-      "Type": "MAXGEX"
-    },
-    {
       "Level": 7550.0,
-      "Type": "WALL_ABOVE"
+      "Type": "MAGNET"
+    },
+    {
+      "Level": 7600.0,
+      "Type": "MAXCP"
+    },
+    {
+      "Level": 7640.0,
+      "Type": "MAXGEX"
     }
   ],
   "Invalidation": {
     "Level": 0,
     "Type": ""
   },
-  "Narrative": "No directional bias. Range defined by 7413\u20137413. Fade extremes.",
-  "Warnings": [
-    "SHORT_GAMMA_SQUEEZE activo \u2014 gaps y aceleraci\u00f3n posibles"
-  ],
+  "Narrative": "No directional bias. Range defined by 7580\u20137550. Fade extremes.",
   "Drivers": {
     "GammaState": "ALIGNED_BULL",
-    "DealerRegime": "SHORT_GAMMA_SQUEEZE",
+    "DealerRegime": "LONG_GAMMA_PINNING",
     "Positioning": "NEUTRAL_POSITIONING",
-    "VIXConf": "CAUTIOUS",
-    "Confluence": 2.4,
+    "VIXConf": "NEUTRAL",
+    "Confluence": 4.1,
     "SqueezeImm": false,
     "PanicImm": false,
-    "BestSignal": ""
+    "BestSignal": "VIX_REGIME_CONFIRM"
   },
   "Diagnostics": {
-    "DirectionalScore": 52.4,
-    "RegimeScore": 97.1,
-    "MomentumScore": 56.6,
-    "RiskScore": 29.8,
+    "DirectionalScore": 62.7,
+    "RegimeScore": 50.1,
+    "MomentumScore": 57.0,
+    "RiskScore": 13.9,
     "TimingScore": "FAVORABLE",
-    "GammaAlign": 71.2,
+    "GammaAlign": 69.6,
     "TradeBias": "LONG",
-    "TradeConf": 54.5,
-    "ExpectedMove": "ACCELERATION",
+    "TradeConf": 45.3,
+    "ExpectedMove": "PIN",
     "CoreBias": "BULLISH",
-    "TechBias": "NEUTRAL",
+    "TechBias": "BULLISH",
     "GlobalBias": "BULLISH",
-    "Consensus": 0.48,
+    "Consensus": 0.37,
     "Conflict": false,
     "NarrativeDetail": {
-      "Regime": "Dealers are net short gamma \u2014 they must buy into rallies and sell into drops, amplifying directional moves.",
+      "Regime": "Dealers are long gamma \u2014 they absorb volatility and rebalance against the trend, creating a mean-reverting environment.",
       "Structure": "Spot is above both GEX flip levels (ZERO vol and ZERO_OI). Gamma structure is fully aligned bullish \u2014 dealers are long gamma and provide a floor on both measures.",
-      "Levels": "Resistance at 7413 (Zero Vol). next level 7500 (Maxgex). support at 7413 (Min Vgex).",
-      "Plan": "No directional bias. Range defined by 7413\u20137413. Fade extremes.",
-      "Risk": "Risk is LOW \u2014 dealer stress contained and structure stable. VIX at 23.9 \u2014 elevated, size down.",
-      "Full": "Market is NEUTRAL. Regime: SHORT GAMMA SQUEEZE. Range 7413\u20137413. Fade extremes, buy support, sell resistance."
+      "Levels": "Resistance at 7550 (Magnet). next level 7600 (Maxcp). support at 7580 (Zero Oi).",
+      "Plan": "No directional bias. Range defined by 7580\u20137550. Fade extremes.",
+      "Risk": "Risk is LOW \u2014 dealer stress contained and structure stable. VIX at 19.9 \u2014 watch for expansion. Top signal: VIX REGIME CONFIRM.",
+      "Full": "Market is NEUTRAL. Regime: LONG GAMMA PINNING. Range 7580\u20137550. Fade extremes, buy support, sell resistance."
     },
     "SessionPlaybook": {
       "Bias": "FLAT",
-      "Execution": "FADE_BREAKOUTS",
-      "MarketStructure": "EXPANSION_DAY",
+      "Execution": "STAY_FLAT",
+      "MarketStructure": "RANGE_DAY",
       "Confidence": "MEDIUM",
       "BestEntryZone": "NO_TRADE",
-      "TargetZone1": 7413.39,
-      "TargetZone1_label": "ZERO_VOL",
-      "TargetZone2": 7500.0,
-      "TargetZone2_label": "MAXGEX",
-      "TargetZone3": 7550.0,
-      "TargetZone3_label": "WALL_ABOVE",
+      "TargetZone1": 7550.0,
+      "TargetZone1_label": "MAGNET",
+      "TargetZone2": 7600.0,
+      "TargetZone2_label": "MAXCP",
+      "TargetZone3": 7640.0,
+      "TargetZone3_label": "MAXGEX",
       "Invalidation": 0,
       "Invalidation_label": "Gamma Zero flip level",
       "RiskReward": "\u2014",
-      "ExpectedBehavior": "Short call inventory above spot. Break higher may accelerate toward MAXGEX.",
-      "RiskWarning": "VIX=23.9 \u2014 elevated vol regime, reduce size."
+      "ExpectedBehavior": "Dealers long gamma. Spot likely to revert to pin/ZERO level.",
+      "RiskWarning": "Range-bound day \u2014 fade breakouts, target the mean."
     }
   },
   "AssetPlaybooks": {
-    "ES": {
-      "Ticker": "ES",
+    "SPX": {
+      "Ticker": "SPX",
       "Bias": "BULLISH",
-      "Confidence": 31.1,
+      "Confidence": 28.1,
       "State": "PINNING",
       "Strategy": "SCALP_RANGE",
       "GammaState": "ALIGNED_BULL",
@@ -91,85 +88,93 @@
       "EntryZone": null,
       "Targets": [
         {
-          "Level": 7500.0,
-          "Type": "MAXGEX"
-        },
-        {
           "Level": 7550.0,
-          "Type": "WALL_ABOVE"
+          "Type": "MAGNET"
         },
         {
-          "Level": 7575.0,
+          "Level": 7600.0,
+          "Type": "MAXCP"
+        },
+        {
+          "Level": 7640.0,
+          "Type": "MAXGEX"
+        }
+      ],
+      "Supports": [
+        {
+          "Level": 7547.18,
+          "Type": "ZERO_OI"
+        },
+        {
+          "Level": 7500.0,
+          "Type": "MIN_vGEX"
+        },
+        {
+          "Level": 7400.0,
+          "Type": "MINCP"
+        }
+      ],
+      "Invalidation": {
+        "Level": 7547.18,
+        "Type": "ZERO_OI"
+      },
+      "Narrative": "SPX EOD charm decay dominant \u2014 spot drawn toward charm magnet at 7550.0.",
+      "Spot": 7549.94,
+      "Regime": "CHARM_DOMINATED",
+      "LongScore": 39.5,
+      "ShortScore": 52.5
+    },
+    "NDX": {
+      "Ticker": "NDX",
+      "Bias": "BULLISH",
+      "Confidence": 28.8,
+      "State": "PINNING",
+      "Strategy": "SCALP_RANGE",
+      "GammaState": "ALIGNED_BULL",
+      "SqueezeImm": false,
+      "EntryZone": null,
+      "Targets": [
+        {
+          "Level": 27910.0,
+          "Type": "MAGNET"
+        },
+        {
+          "Level": 28000.0,
+          "Type": "MINGEX"
+        },
+        {
+          "Level": 28140.0,
           "Type": "MAXCP"
         }
       ],
       "Supports": [
         {
-          "Level": 7413.33,
+          "Level": 27899.63,
+          "Type": "ZERO_OI"
+        },
+        {
+          "Level": 27750.0,
           "Type": "MIN_vGEX"
         },
         {
-          "Level": 7300.0,
+          "Level": 27000.0,
           "Type": "MINCP"
-        },
-        {
-          "Level": 7200.0,
-          "Type": "WALL_BELOW"
         }
       ],
       "Invalidation": {
-        "Level": 7200.0,
-        "Type": "WALL_BELOW"
+        "Level": 27899.63,
+        "Type": "ZERO_OI"
       },
-      "Narrative": "ES EOD charm decay dominant \u2014 spot drawn toward charm magnet at 7425.0.",
-      "Spot": 7426.75,
+      "Narrative": "NDX EOD charm decay dominant \u2014 spot drawn toward charm magnet at 27910.0.",
+      "Spot": 27907.62,
       "Regime": "CHARM_DOMINATED",
-      "LongScore": 40.4,
-      "ShortScore": 46.5
+      "LongScore": 39.0,
+      "ShortScore": 51.7
     },
     "SPY": {
       "Ticker": "SPY",
       "Bias": "BULLISH",
-      "Confidence": 93.2,
-      "State": "SQUEEZE_UP",
-      "Strategy": "BUY_PULLBACKS",
-      "GammaState": "ALIGNED_BULL",
-      "SqueezeImm": false,
-      "EntryZone": {
-        "Low": 736.95,
-        "High": 740.48,
-        "Logic": "PULLBACK_BUY"
-      },
-      "Targets": [
-        {
-          "Level": 755.0,
-          "Type": "WALL_ABOVE"
-        }
-      ],
-      "Supports": [
-        {
-          "Level": 736.95,
-          "Type": "ZERO_OI"
-        },
-        {
-          "Level": 725.0,
-          "Type": "MINGEX"
-        }
-      ],
-      "Invalidation": {
-        "Level": 725.0,
-        "Type": "MINGEX"
-      },
-      "Narrative": "SPY dealers net short gamma \u2014 rallies may accelerate as they chase delta.",
-      "Spot": 738.06,
-      "Regime": "SHORT_GAMMA_SQUEEZE",
-      "LongScore": 62.4,
-      "ShortScore": 27.8
-    },
-    "NDX": {
-      "Ticker": "NDX",
-      "Bias": "NEUTRAL",
-      "Confidence": 14.2,
+      "Confidence": 26.2,
       "State": "PINNING",
       "Strategy": "SCALP_RANGE",
       "GammaState": "VOL_BULL_OI_BEAR",
@@ -177,242 +182,271 @@
       "EntryZone": null,
       "Targets": [
         {
-          "Level": 26992.86,
+          "Level": 757.19,
           "Type": "ZERO_OI"
         },
         {
-          "Level": 27150.0,
-          "Type": "WALL_ABOVE"
+          "Level": 760.0,
+          "Type": "MAXCP"
         },
         {
-          "Level": 26984.84,
-          "Type": "ZERO_VOL"
+          "Level": 770.0,
+          "Type": "WALL_ABOVE"
         }
       ],
       "Supports": [
         {
-          "Level": 26984.84,
-          "Type": "ZERO_VOL"
+          "Level": 751.37,
+          "Type": "MAXGEX"
         },
         {
-          "Level": 26000.0,
-          "Type": "MINGEX"
+          "Level": 745.0,
+          "Type": "MIN_vGEX"
         },
         {
-          "Level": 26992.86,
-          "Type": "ZERO_OI"
+          "Level": 740.0,
+          "Type": "WALL_BELOW"
         }
       ],
       "Invalidation": {
-        "Level": 26000.0,
-        "Type": "MINGEX"
+        "Level": 735.0,
+        "Type": "MINCP"
       },
-      "Narrative": "NDX EOD charm decay dominant \u2014 spot drawn toward charm magnet at 27000.0.",
-      "Spot": 26989.99,
-      "Regime": "CHARM_DOMINATED",
-      "LongScore": 34.7,
-      "ShortScore": 47.1
+      "Narrative": "SPY dealers long gamma absorbing vol \u2014 spot pinned near 752.12.",
+      "Spot": 753.14,
+      "Regime": "LONG_GAMMA_PINNING",
+      "LongScore": 51.8,
+      "ShortScore": 37.5
     },
-    "NQ": {
-      "Ticker": "NQ",
-      "Bias": "NEUTRAL",
-      "Confidence": 13.5,
-      "State": "VOL_EXPANSION",
-      "Strategy": "BREAKOUT_SHORT",
+    "QQQ": {
+      "Ticker": "QQQ",
+      "Bias": "BULLISH",
+      "Confidence": 26.8,
+      "State": "PINNING",
+      "Strategy": "SCALP_RANGE",
       "GammaState": "VOL_BULL_OI_BEAR",
       "SqueezeImm": false,
       "EntryZone": null,
       "Targets": [
         {
-          "Level": 27152.0,
+          "Level": 680.0,
+          "Type": "MAX_vGEX"
+        },
+        {
+          "Level": 685.61,
           "Type": "ZERO_OI"
         },
         {
-          "Level": 27500.0,
+          "Level": 690.0,
           "Type": "MAXCP"
-        },
-        {
-          "Level": 27107.56,
-          "Type": "ZERO_VOL"
         }
       ],
       "Supports": [
         {
-          "Level": 27107.56,
-          "Type": "ZERO_VOL"
+          "Level": 677.84,
+          "Type": "MAXGEX"
         },
         {
-          "Level": 27000.0,
-          "Type": "MINGEX"
+          "Level": 675.0,
+          "Type": "MINCP"
         },
         {
-          "Level": 27152.0,
-          "Type": "ZERO_OI"
+          "Level": 660.0,
+          "Type": "WALL_BELOW"
         }
       ],
       "Invalidation": {
-        "Level": 25880.0,
+        "Level": 660.0,
         "Type": "WALL_BELOW"
       },
-      "Narrative": "NQ short gamma in panic mode \u2014 cascading dealer selling amplifies downside.",
-      "Spot": 27109.75,
-      "Regime": "SHORT_GAMMA_PANIC",
-      "LongScore": 19.3,
-      "ShortScore": 34.0
+      "Narrative": "QQQ dealers long gamma absorbing vol \u2014 spot pinned near 677.62.",
+      "Spot": 679.95,
+      "Regime": "LONG_GAMMA_PINNING",
+      "LongScore": 49.8,
+      "ShortScore": 38.2
     },
-    "SPX": {
-      "Ticker": "SPX",
+    "ES": {
+      "Ticker": "ES",
       "Bias": "BULLISH",
-      "Confidence": 60.2,
-      "State": "SQUEEZE_UP",
-      "Strategy": "BUY_PULLBACKS",
-      "GammaState": "ALIGNED_BEAR",
+      "Confidence": 59.4,
+      "State": "PINNING",
+      "Strategy": "SCALP_RANGE",
+      "GammaState": "ALIGNED_BULL",
       "SqueezeImm": false,
       "EntryZone": {
-        "Low": 7375.0,
-        "High": 7410.33,
-        "Logic": "PULLBACK_BUY"
+        "Low": 7568.9,
+        "High": 7599.12,
+        "Logic": "MIDPOINT_FADE"
       },
       "Targets": [
         {
-          "Level": 7416.36,
-          "Type": "ZERO_OI"
+          "Level": 7600.0,
+          "Type": "MAXGEX"
         },
         {
-          "Level": 7500.0,
+          "Level": 7670.0,
           "Type": "MAXCP"
         },
         {
-          "Level": 7700.0,
+          "Level": 7775.0,
           "Type": "WALL_ABOVE"
         }
       ],
       "Supports": [
         {
-          "Level": 7375.0,
-          "Type": "MAGNET"
+          "Level": 7568.02,
+          "Type": "MIN_vGEX"
         },
         {
-          "Level": 7350.0,
-          "Type": "MINGEX"
-        },
-        {
-          "Level": 7300.0,
+          "Level": 7400.0,
           "Type": "MINCP"
         }
       ],
       "Invalidation": {
-        "Level": 7350.0,
-        "Type": "MINGEX"
+        "Level": 7400.0,
+        "Type": "MINCP"
       },
-      "Narrative": "SPX dealers net short gamma \u2014 rallies may accelerate as they chase delta.",
-      "Spot": 7376.86,
-      "Regime": "SHORT_GAMMA_SQUEEZE",
-      "LongScore": 56.3,
-      "ShortScore": 35.7
+      "Narrative": "ES dealers long gamma absorbing vol \u2014 spot pinned near 7560.11.",
+      "Spot": 7580.25,
+      "Regime": "LONG_GAMMA_PINNING",
+      "LongScore": 53.8,
+      "ShortScore": 29.8
     },
-    "QQQ": {
-      "Ticker": "QQQ",
-      "Bias": "NEUTRAL",
-      "Confidence": 23.1,
+    "NQ": {
+      "Ticker": "NQ",
+      "Bias": "BULLISH",
+      "Confidence": 51.3,
       "State": "PINNING",
       "Strategy": "SCALP_RANGE",
-      "GammaState": "ALIGNED_BULL",
+      "GammaState": "ALIGNED_BEAR",
       "SqueezeImm": false,
-      "EntryZone": null,
+      "EntryZone": {
+        "Low": 27990.28,
+        "High": 28102.01,
+        "Logic": "MIDPOINT_FADE"
+      },
       "Targets": [
         {
-          "Level": 657.0,
-          "Type": "MAGNET"
-        },
-        {
-          "Level": 660.0,
-          "Type": "MAXGEX"
-        },
-        {
-          "Level": 655.98,
+          "Level": 28092.29,
           "Type": "ZERO_OI"
+        },
+        {
+          "Level": 29000.0,
+          "Type": "WALL_ABOVE"
         }
       ],
       "Supports": [
         {
-          "Level": 655.98,
-          "Type": "ZERO_OI"
+          "Level": 28000.0,
+          "Type": "MAXGEX"
         },
         {
-          "Level": 653.0,
-          "Type": "ZERO_VOL"
+          "Level": 27840.0,
+          "Type": "MINCP"
         },
         {
-          "Level": 657.0,
-          "Type": "MAGNET"
+          "Level": 27500.0,
+          "Type": "WALL_BELOW"
         }
       ],
       "Invalidation": {
-        "Level": 630.0,
+        "Level": 27500.0,
         "Type": "WALL_BELOW"
       },
-      "Narrative": "QQQ dealers long gamma absorbing vol \u2014 spot pinned near 653.0.",
-      "Spot": 656.96,
+      "Narrative": "NQ dealers long gamma absorbing vol \u2014 spot pinned near 28077.82.",
+      "Spot": 28073.25,
       "Regime": "LONG_GAMMA_PINNING",
-      "LongScore": 41.1,
-      "ShortScore": 45.2
+      "LongScore": 52.3,
+      "ShortScore": 31.0
     }
   },
   "OpportunityRank": {
     "BestLongs": [
-      "SPY",
+      "ES",
+      "NQ",
+      "NDX",
       "SPX",
-      "ES"
+      "SPY",
+      "QQQ"
     ],
     "BestShorts": [],
     "RankingTable": [
       {
-        "Activo": "SPY",
+        "Activo": "ES",
         "Bias": "BULLISH",
-        "Confidence": 93.2,
-        "Score": 69.8,
-        "Strategy": "BUY_PULLBACKS",
-        "State": "SQUEEZE_UP",
-        "LongScore": 62.4,
-        "ShortScore": 27.8
+        "Confidence": 59.4,
+        "Score": 45.2,
+        "Strategy": "SCALP_RANGE",
+        "State": "PINNING",
+        "LongScore": 53.8,
+        "ShortScore": 29.8
+      },
+      {
+        "Activo": "NQ",
+        "Bias": "BULLISH",
+        "Confidence": 51.3,
+        "Score": 39.3,
+        "Strategy": "SCALP_RANGE",
+        "State": "PINNING",
+        "LongScore": 52.3,
+        "ShortScore": 31.0
+      },
+      {
+        "Activo": "NDX",
+        "Bias": "BULLISH",
+        "Confidence": 28.8,
+        "Score": 22.4,
+        "Strategy": "SCALP_RANGE",
+        "State": "PINNING",
+        "LongScore": 39.0,
+        "ShortScore": 51.7
       },
       {
         "Activo": "SPX",
         "Bias": "BULLISH",
-        "Confidence": 60.2,
-        "Score": 44.4,
-        "Strategy": "BUY_PULLBACKS",
-        "State": "SQUEEZE_UP",
-        "LongScore": 56.3,
-        "ShortScore": 35.7
-      },
-      {
-        "Activo": "ES",
-        "Bias": "BULLISH",
-        "Confidence": 31.1,
-        "Score": 21.1,
+        "Confidence": 28.1,
+        "Score": 22.1,
         "Strategy": "SCALP_RANGE",
         "State": "PINNING",
-        "LongScore": 40.4,
-        "ShortScore": 46.5
+        "LongScore": 39.5,
+        "ShortScore": 52.5
+      },
+      {
+        "Activo": "SPY",
+        "Bias": "BULLISH",
+        "Confidence": 26.2,
+        "Score": 21.4,
+        "Strategy": "SCALP_RANGE",
+        "State": "PINNING",
+        "LongScore": 51.8,
+        "ShortScore": 37.5
+      },
+      {
+        "Activo": "QQQ",
+        "Bias": "BULLISH",
+        "Confidence": 26.8,
+        "Score": 20.7,
+        "Strategy": "SCALP_RANGE",
+        "State": "PINNING",
+        "LongScore": 49.8,
+        "ShortScore": 38.2
       }
     ]
   },
   "per_asset": {
-    "ES": {
+    "SPX": {
       "bias": "BULLISH",
-      "confidence": 31.1,
+      "confidence": 28.1,
       "regime": "CHARM_DOMINATED",
-      "regime_conf": 40.1,
-      "regime_dur": 273,
+      "regime_conf": 69.2,
+      "regime_dur": 102,
       "positioning": "NEUTRAL_POSITIONING",
-      "long_score": 40.4,
-      "short_score": 46.5,
-      "ts_conf": 12.2,
+      "long_score": 39.5,
+      "short_score": 52.5,
+      "ts_conf": 26.0,
       "oi_score": 50.0,
-      "struct_score": 75.0,
-      "gex_profile": 65.6,
+      "struct_score": 85.0,
+      "gex_profile": 56.2,
       "vgex_score": 100.0,
       "vgex_bias": "BULLISH",
       "dex_score": 10.0,
@@ -420,250 +454,250 @@
       "inv_dir": "NEUTRAL",
       "charm_gravity": 10.0,
       "eod_accel": 1.0,
-      "vanna_score": 61.8,
-      "flow_score": 48.8,
-      "surface_score": 58.0,
-      "surf_instab": 13.7,
-      "pin_prob": 0.0,
-      "void_score": 0.0,
-      "trap_score": 0.0,
-      "dealer_stress": 42.9,
-      "absorb_score": 20.0,
-      "exhaust_score": 0.0,
-      "squeeze_score": 59.4,
-      "panic_score": 26.2,
-      "vol_score": 31.3,
-      "signal_boost": 0.0,
-      "charm_cascade": false,
-      "magnet": 7425.0,
-      "wall_above": 7550.0,
-      "wall_below": 7200.0,
-      "inv_walls": {},
-      "zero": 7407.75,
-      "zero_oi": 7423.78,
-      "spot": 7426.75,
-      "gamma_zero_state": "ALIGNED_BULL"
-    },
-    "SPY": {
-      "bias": "BULLISH",
-      "confidence": 93.2,
-      "regime": "SHORT_GAMMA_SQUEEZE",
-      "regime_conf": 67.0,
-      "regime_dur": 132,
-      "positioning": "SHORT_GAMMA_SQUEEZE",
-      "long_score": 62.4,
-      "short_score": 27.8,
-      "ts_conf": 69.2,
-      "oi_score": 50.0,
-      "struct_score": 85.0,
-      "gex_profile": 79.2,
-      "vgex_score": 50.0,
-      "vgex_bias": "NEUTRAL",
-      "dex_score": 10.0,
-      "inv_score": 50.0,
-      "inv_dir": "NEUTRAL",
-      "charm_gravity": 10.0,
-      "eod_accel": 1.0,
-      "vanna_score": 84.8,
-      "flow_score": 60.0,
-      "surface_score": 58.0,
+      "vanna_score": 61.5,
+      "flow_score": 64.5,
+      "surface_score": 54.0,
       "surf_instab": 0.0,
       "pin_prob": 0.0,
       "void_score": 0.0,
       "trap_score": 0.0,
-      "dealer_stress": 25.2,
-      "absorb_score": 30.0,
+      "dealer_stress": 12.6,
+      "absorb_score": 0.0,
       "exhaust_score": 0.0,
-      "squeeze_score": 39.9,
+      "squeeze_score": 50.1,
       "panic_score": 15.1,
-      "vol_score": 50.1,
+      "vol_score": 30.1,
       "signal_boost": 0.0,
       "charm_cascade": false,
-      "magnet": 738.0,
-      "wall_above": 755.0,
-      "wall_below": 725.0,
+      "magnet": 7550.0,
+      "wall_above": 7805.0,
+      "wall_below": 7400.0,
       "inv_walls": {},
-      "zero": 736.0,
-      "zero_oi": 737.28,
-      "spot": 738.06,
+      "zero": 7546.77,
+      "zero_oi": 7547.51,
+      "spot": 7549.94,
       "gamma_zero_state": "ALIGNED_BULL"
     },
     "NDX": {
-      "bias": "NEUTRAL",
-      "confidence": 14.2,
+      "bias": "BULLISH",
+      "confidence": 28.8,
       "regime": "CHARM_DOMINATED",
-      "regime_conf": 40.1,
-      "regime_dur": 304,
+      "regime_conf": 68.9,
+      "regime_dur": 137,
       "positioning": "NEUTRAL_POSITIONING",
-      "long_score": 34.7,
-      "short_score": 47.1,
-      "ts_conf": 24.8,
+      "long_score": 39.0,
+      "short_score": 51.7,
+      "ts_conf": 25.4,
       "oi_score": 50.0,
-      "struct_score": 70.0,
-      "gex_profile": 71.6,
-      "vgex_score": 50.0,
-      "vgex_bias": "NEUTRAL",
+      "struct_score": 80.0,
+      "gex_profile": 66.0,
+      "vgex_score": 100.0,
+      "vgex_bias": "BULLISH",
       "dex_score": 10.0,
       "inv_score": 50.0,
       "inv_dir": "NEUTRAL",
       "charm_gravity": 10.0,
       "eod_accel": 1.0,
-      "vanna_score": 59.5,
-      "flow_score": 50.0,
+      "vanna_score": 59.0,
+      "flow_score": 65.0,
       "surface_score": 54.0,
-      "surf_instab": 18.8,
-      "pin_prob": 0.15,
+      "surf_instab": 0.0,
+      "pin_prob": 0.0,
       "void_score": 0.0,
       "trap_score": 0.0,
       "dealer_stress": 1.0,
       "absorb_score": 0.0,
       "exhaust_score": 0.0,
-      "squeeze_score": 15.0,
-      "panic_score": 0.0,
-      "vol_score": 30.0,
+      "squeeze_score": 50.1,
+      "panic_score": 15.1,
+      "vol_score": 30.1,
       "signal_boost": 0.0,
       "charm_cascade": false,
-      "magnet": 27000.0,
-      "wall_above": 27150.0,
-      "wall_below": 26000.0,
-      "inv_walls": {},
-      "zero": 26984.84,
-      "zero_oi": 26990.0,
-      "spot": 26989.99,
-      "gamma_zero_state": "VOL_BULL_OI_BEAR"
-    },
-    "NQ": {
-      "bias": "NEUTRAL",
-      "confidence": 13.5,
-      "regime": "SHORT_GAMMA_PANIC",
-      "regime_conf": 37.3,
-      "regime_dur": 0,
-      "positioning": "SHORT_GAMMA_PANIC",
-      "long_score": 19.3,
-      "short_score": 34.0,
-      "ts_conf": 29.4,
-      "oi_score": 50.0,
-      "struct_score": 70.0,
-      "gex_profile": 63.9,
-      "vgex_score": 35.3,
-      "vgex_bias": "BEARISH",
-      "dex_score": 10.0,
-      "inv_score": 50.0,
-      "inv_dir": "NEUTRAL",
-      "charm_gravity": 10.0,
-      "eod_accel": 1.0,
-      "vanna_score": 65.0,
-      "flow_score": 57.2,
-      "surface_score": 58.0,
-      "surf_instab": 0.0,
-      "pin_prob": 0.0,
-      "void_score": 0.0,
-      "trap_score": 37.2,
-      "dealer_stress": 37.8,
-      "absorb_score": 0.0,
-      "exhaust_score": 35.0,
-      "squeeze_score": 27.1,
-      "panic_score": 52.1,
-      "vol_score": 20.9,
-      "signal_boost": 0.0,
-      "charm_cascade": false,
-      "magnet": 27110.0,
+      "magnet": 27910.0,
       "wall_above": 28000.0,
-      "wall_below": 25880.0,
+      "wall_below": 27000.0,
       "inv_walls": {},
-      "zero": 27107.56,
-      "zero_oi": 27130.4,
-      "spot": 27109.75,
-      "gamma_zero_state": "VOL_BULL_OI_BEAR"
+      "zero": 27896.71,
+      "zero_oi": 27901.96,
+      "spot": 27907.62,
+      "gamma_zero_state": "ALIGNED_BULL"
     },
-    "SPX": {
+    "SPY": {
       "bias": "BULLISH",
-      "confidence": 60.2,
-      "regime": "SHORT_GAMMA_SQUEEZE",
-      "regime_conf": 66.7,
-      "regime_dur": 291,
-      "positioning": "SHORT_GAMMA_SQUEEZE",
-      "long_score": 56.3,
-      "short_score": 35.7,
-      "ts_conf": 41.2,
-      "oi_score": 50.0,
-      "struct_score": 45.0,
-      "gex_profile": 72.7,
-      "vgex_score": 0.0,
-      "vgex_bias": "BEARISH",
-      "dex_score": 15.0,
-      "inv_score": 50.0,
-      "inv_dir": "NEUTRAL",
-      "charm_gravity": 10.0,
-      "eod_accel": 1.0,
-      "vanna_score": 61.4,
-      "flow_score": 69.4,
-      "surface_score": 58.0,
-      "surf_instab": 12.7,
-      "pin_prob": 0.2,
-      "void_score": 0.0,
-      "trap_score": 0.0,
-      "dealer_stress": 51.9,
-      "absorb_score": 70.0,
-      "exhaust_score": 0.0,
-      "squeeze_score": 37.0,
-      "panic_score": 37.1,
-      "vol_score": 92.0,
-      "signal_boost": 0.0,
-      "charm_cascade": false,
-      "magnet": 7375.0,
-      "wall_above": 7700.0,
-      "wall_below": 7350.0,
-      "inv_walls": {},
-      "zero": 7413.04,
-      "zero_oi": 7419.02,
-      "spot": 7376.86,
-      "gamma_zero_state": "ALIGNED_BEAR"
-    },
-    "QQQ": {
-      "bias": "NEUTRAL",
-      "confidence": 23.1,
+      "confidence": 26.2,
       "regime": "LONG_GAMMA_PINNING",
-      "regime_conf": 68.8,
-      "regime_dur": 22,
-      "positioning": "NEUTRAL_POSITIONING",
-      "long_score": 41.1,
-      "short_score": 45.2,
-      "ts_conf": 8.2,
+      "regime_conf": 64.6,
+      "regime_dur": 76,
+      "positioning": "LONG_GAMMA_DISTRIBUTION",
+      "long_score": 51.8,
+      "short_score": 37.5,
+      "ts_conf": 28.6,
       "oi_score": 50.0,
-      "struct_score": 85.0,
-      "gex_profile": 76.8,
-      "vgex_score": 50.0,
-      "vgex_bias": "NEUTRAL",
-      "dex_score": 15.0,
+      "struct_score": 65.0,
+      "gex_profile": 74.2,
+      "vgex_score": 100.0,
+      "vgex_bias": "BULLISH",
+      "dex_score": 90.0,
       "inv_score": 50.0,
       "inv_dir": "NEUTRAL",
-      "charm_gravity": 10.0,
+      "charm_gravity": 90.0,
       "eod_accel": 1.0,
-      "vanna_score": 66.6,
-      "flow_score": 50.0,
-      "surface_score": 77.0,
-      "surf_instab": 40.0,
+      "vanna_score": 66.0,
+      "flow_score": 41.7,
+      "surface_score": 58.0,
+      "surf_instab": 13.5,
       "pin_prob": 0.15,
       "void_score": 0.0,
       "trap_score": 0.0,
-      "dealer_stress": 25.9,
+      "dealer_stress": 25.5,
+      "absorb_score": 0.0,
+      "exhaust_score": 0.0,
+      "squeeze_score": 24.9,
+      "panic_score": 34.9,
+      "vol_score": 30.1,
+      "signal_boost": 0.0,
+      "charm_cascade": false,
+      "magnet": 753.0,
+      "wall_above": 770.0,
+      "wall_below": 740.0,
+      "inv_walls": {},
+      "zero": 752.12,
+      "zero_oi": 757.19,
+      "spot": 753.14,
+      "gamma_zero_state": "VOL_BULL_OI_BEAR"
+    },
+    "QQQ": {
+      "bias": "BULLISH",
+      "confidence": 26.8,
+      "regime": "LONG_GAMMA_PINNING",
+      "regime_conf": 59.9,
+      "regime_dur": 76,
+      "positioning": "LONG_GAMMA_DISTRIBUTION",
+      "long_score": 49.8,
+      "short_score": 38.2,
+      "ts_conf": 23.2,
+      "oi_score": 50.0,
+      "struct_score": 50.0,
+      "gex_profile": 73.5,
+      "vgex_score": 100.0,
+      "vgex_bias": "BULLISH",
+      "dex_score": 90.0,
+      "inv_score": 50.0,
+      "inv_dir": "NEUTRAL",
+      "charm_gravity": 90.0,
+      "eod_accel": 1.0,
+      "vanna_score": 70.6,
+      "flow_score": 41.3,
+      "surface_score": 54.0,
+      "surf_instab": 0.0,
+      "pin_prob": 0.15,
+      "void_score": 0.0,
+      "trap_score": 0.0,
+      "dealer_stress": 25.1,
       "absorb_score": 0.0,
       "exhaust_score": 0.0,
       "squeeze_score": 14.9,
-      "panic_score": 0.1,
-      "vol_score": 30.0,
-      "signal_boost": 0.41,
+      "panic_score": 15.1,
+      "vol_score": 30.1,
+      "signal_boost": 0.0,
       "charm_cascade": false,
-      "magnet": 657.0,
-      "wall_above": 680.0,
-      "wall_below": 630.0,
+      "magnet": 680.0,
+      "wall_above": 710.0,
+      "wall_below": 660.0,
       "inv_walls": {},
-      "zero": 653.0,
-      "zero_oi": 655.98,
-      "spot": 656.96,
+      "zero": 677.62,
+      "zero_oi": 685.61,
+      "spot": 679.95,
+      "gamma_zero_state": "VOL_BULL_OI_BEAR"
+    },
+    "ES": {
+      "bias": "BULLISH",
+      "confidence": 59.4,
+      "regime": "LONG_GAMMA_PINNING",
+      "regime_conf": 40.7,
+      "regime_dur": 16,
+      "positioning": "LONG_GAMMA_ACCUMULATION",
+      "long_score": 53.8,
+      "short_score": 29.8,
+      "ts_conf": 48.0,
+      "oi_score": 50.0,
+      "struct_score": 85.0,
+      "gex_profile": 63.8,
+      "vgex_score": 100.0,
+      "vgex_bias": "BULLISH",
+      "dex_score": 90.0,
+      "inv_score": 50.0,
+      "inv_dir": "NEUTRAL",
+      "charm_gravity": 90.0,
+      "eod_accel": 1.0,
+      "vanna_score": 60.8,
+      "flow_score": 67.0,
+      "surface_score": 54.0,
+      "surf_instab": 0.0,
+      "pin_prob": 0.0,
+      "void_score": 0.0,
+      "trap_score": 0.0,
+      "dealer_stress": 4.1,
+      "absorb_score": 0.0,
+      "exhaust_score": 0.0,
+      "squeeze_score": 55.1,
+      "panic_score": 0.1,
+      "vol_score": 30.1,
+      "signal_boost": 0.5,
+      "charm_cascade": false,
+      "magnet": 7580.0,
+      "wall_above": 7775.0,
+      "wall_below": 7400.0,
+      "inv_walls": {},
+      "zero": 7560.11,
+      "zero_oi": 7579.97,
+      "spot": 7580.25,
       "gamma_zero_state": "ALIGNED_BULL"
+    },
+    "NQ": {
+      "bias": "BULLISH",
+      "confidence": 51.3,
+      "regime": "LONG_GAMMA_PINNING",
+      "regime_conf": 41.9,
+      "regime_dur": 15,
+      "positioning": "LONG_GAMMA_ACCUMULATION",
+      "long_score": 52.3,
+      "short_score": 31.0,
+      "ts_conf": 42.6,
+      "oi_score": 50.0,
+      "struct_score": 50.0,
+      "gex_profile": 68.7,
+      "vgex_score": 68.7,
+      "vgex_bias": "BULLISH",
+      "dex_score": 90.0,
+      "inv_score": 50.0,
+      "inv_dir": "NEUTRAL",
+      "charm_gravity": 90.0,
+      "eod_accel": 1.0,
+      "vanna_score": 59.5,
+      "flow_score": 65.5,
+      "surface_score": 54.0,
+      "surf_instab": 0.0,
+      "pin_prob": 0.0,
+      "void_score": 0.0,
+      "trap_score": 0.0,
+      "dealer_stress": 21.5,
+      "absorb_score": 0.0,
+      "exhaust_score": 0.0,
+      "squeeze_score": 35.1,
+      "panic_score": 49.9,
+      "vol_score": 30.1,
+      "signal_boost": 0.0,
+      "charm_cascade": false,
+      "magnet": 28000.0,
+      "wall_above": 29000.0,
+      "wall_below": 27500.0,
+      "inv_walls": {},
+      "zero": 28077.82,
+      "zero_oi": 28090.0,
+      "spot": 28073.25,
+      "gamma_zero_state": "ALIGNED_BEAR"
     }
   },
-  "Timestamp": "05:05:27"
+  "Timestamp": "17:17:48"
 }
